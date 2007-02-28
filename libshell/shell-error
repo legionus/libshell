@@ -14,17 +14,11 @@ fatal() {
 	exit 1
 }
 
-quiet=
-verbose=
+quiet="${quiet:-}"
+verbose="${verbose:-}"
 verbose() {
 	[ -n "$verbose" ] || return 0
 	info "$@"
-}
-
-show_usage() {
-	[ -z "$*" ] || info "$*"
-	echo "Try \`$PROG --help' for more information." >&2
-	exit 1
 }
 
 fi

@@ -1,7 +1,7 @@
 #!/bin/sh -efu
 
-if [ -z "${__included_shell_string:-}" ]; then
-__included_shell_string=1
+if [ -z "${__included_shell_regexp:-}" ]; then
+__included_shell_regexp=1
 
 # quote argument for sed regexp.
 quote_sed_regexp() {

@@ -1,0 +1,62 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_args:-}" ]; then
+__included_shell_args=1
+
+. shell-error
+
+opt_check_read() {
+	local value
+	value="$(readlink -ev "$2")" &&
+		[ -r "$value" ] ||
+		fatal "$1: $2: file not available."
+	printf %s "$value"
+}
+
+opt_check_dir() {
+	local value
+	value="$(readlink -ev "$2")" &&
+		[ -d "$value" -a -x "$value" ] ||
+		fatal "$1: $2: directory not available."
+	printf %s "$value"
+}
+
+opt_check_number() {
+	printf '%d' "$2" >/dev/null 2>&1 ||
+		[ "$2" -gt 0 ] 2>/dev/null ||
+		fatal "$1: $2: invalid number."
+	printf %s "$2"
+}
+
+show_usage() {
+	[ -z "$*" ] || info "$*"
+	echo "Try \`$PROG --help' for more information." >&2
+	exit 1
+}
+
+show_help() {
+	fatal "show_help(): Undefined function"
+}
+
+print_version() {
+	fatal "print_version() Undefined function"
+}
+
+readonly getopt_common_opts="q,v,V,h"
+readonly getopt_common_longopts="quiet,verbose,version,help"
+parse_common_option() {
+	case "$1" in
+		-h|--help) show_help
+			;;
+		-q|--quiet) quiet=-q
+			;;
+		-v|--verbose) verbose=-v; quiet=
+			;;
+		-V|--version) print_version "$PROG"
+			;;
+		*) fatal "Unrecognized option: $1"
+			;;
+	esac
+}
+
+fi
