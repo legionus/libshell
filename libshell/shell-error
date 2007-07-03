@@ -5,7 +5,7 @@ __included_shell_error=1
 
 PROG="${PROG:-${0##*/}}"
 
-info() {
+message() {
 	printf %s\\n "$PROG: $*" >&2
 }
 
@@ -18,7 +18,7 @@ quiet="${quiet:-}"
 verbose="${verbose:-}"
 verbose() {
 	[ -n "$verbose" ] || return 0
-	info "$@"
+	message "$@"
 }
 
 fi
