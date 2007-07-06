@@ -1,6 +1,6 @@
 Name: libshell
 Version: 0.0.1
-Release: alt1
+Release: alt2
 
 Summary:  A library of shell functions
 License: GPL
@@ -24,6 +24,9 @@ install -p -m755 -t %buildroot/bin *
 /bin/*
 
 %changelog
+* Fri Jul 06 2007 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt2
+- shell-error: Rename info() to message().
+
 * Thu Feb 22 2007 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt1
 - Initial revision.
 
