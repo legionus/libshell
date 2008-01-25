@@ -1,0 +1,45 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_config:-}" ]; then
+__included_shell_config=1
+
+. shell-error
+. shell-regexp
+
+shell_config_get() {
+	[ "$#" -ge 2 -a "$#" -le 3 ] ||
+		fatal "Usage: shell_config_get file name [delim]"
+	local n d
+	n="$(quote_sed_regexp "$2")"
+	d="$(printf '\7')"
+
+	[ ! -f "$1" ] ||
+		sed -n -e "s${d}^[[:space:]]*$n${3:-=}${d}${d}p" -- "$1"
+}
+
+shell_config_set() {
+	[ "$#" -ge 3 -a "$#" -le 5 ] ||
+		fatal "Usage: shell_config_get file name value [read delim] [write delim]"
+
+	local n d created=
+	n="$(quote_sed_regexp "$2")"
+
+	if [ ! -f "$1" ]; then
+		if [ ! -w "${1%/*}" ]; then
+			message "${1%/*}: not writable."
+			return 1
+		fi
+		touch -- "$1" ||
+			return 1
+		created=1
+	fi
+
+	if [ -z "$created" ] && grep -qs "^[[:space:]]*$n${4:-=}" -- "$1"; then
+		d="$(printf '\7')"
+		sed -i -e "s$d^[[:space:]]*$n${4:-=}.*$d$2${5:-=}$3$d" -- "$1"
+	else
+		printf '%s%s%s\n' "$2" "$5" "$3" >> "$1"
+	fi
+}
+
+fi
