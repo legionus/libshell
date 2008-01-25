@@ -9,12 +9,10 @@ __included_shell_config=1
 shell_config_get() {
 	[ "$#" -ge 2 -a "$#" -le 3 ] ||
 		fatal "Usage: shell_config_get file name [delim]"
-	local n d
+	local n
 	n="$(quote_sed_regexp "$2")"
-	d="$(printf '\7')"
-
 	[ ! -f "$1" ] ||
-		sed -n -e "s${d}^[[:space:]]*$n${3:-=}${d}${d}p" -- "$1"
+		sed -n -e "s/^[[:space:]]*$n${3:-=}//p" -- "$1"
 }
 
 shell_config_set() {
