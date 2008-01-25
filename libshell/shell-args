@@ -7,16 +7,16 @@ __included_shell_args=1
 
 opt_check_read() {
 	local value
-	value="$(readlink -ev "$2")" &&
-		[ -r "$value" ] ||
+	[ -r "$2" ] &&
+	value="$(readlink -ev "$2")" ||
 		fatal "$1: $2: file not available."
 	printf %s "$value"
 }
 
 opt_check_dir() {
 	local value
-	value="$(readlink -ev "$2")" &&
-		[ -d "$value" -a -x "$value" ] ||
+	[ -d "$2" -a -x "$2" ] &&
+	value="$(readlink -ev "$2")" ||
 		fatal "$1: $2: directory not available."
 	printf %s "$value"
 }
