@@ -32,6 +32,7 @@ unquote_shell() {
 	printf %s "$out"
 }
 
+if [ -n "${__libshell_experimental:-}" ]; then
 string_quote_remove() {
 	local out="$1"
 	if [ -z "${1##*'}${1%%'*}" ]; then
@@ -43,5 +44,6 @@ string_quote_remove() {
 	fi
 	printf %s "$out"
 }
+fi
 
 fi
