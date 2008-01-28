@@ -1,11 +1,12 @@
 Name: libshell
 Version: 0.0.1
-Release: alt3
+Release: alt4
 
 Summary:  A library of shell functions
 License: GPL
 Group: Development/Other
 BuildArch: noarch
+Packager: Alexey Gladkov <legion@altlinux.ru>
 
 Source: %name-%version.tar
 
@@ -24,6 +25,16 @@ install -p -m755 -t %buildroot/bin *
 /bin/*
 
 %changelog
+* Mon Jan 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt4
+- Add shell-config to read and write shell-like config files:
+  + shell-config: shell_config_get() read value from config file;
+  + shell-config: shell_config_set() change or write value
+    to config file;
+- shell-args:
+  + opt_check_read(), opt_check_dir() Fix error message.
+- shell-regexp:
+  + Add new functions: unquote_sed_regexp(), unquote_shell().
+
 * Thu Sep 20 2007 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt3
 - Workaround quoting for ash.
 
