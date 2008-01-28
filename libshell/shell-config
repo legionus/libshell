@@ -19,7 +19,7 @@ shell_config_set() {
 	[ "$#" -ge 3 -a "$#" -le 5 ] ||
 		fatal "Usage: shell_config_get file name value [read delim] [write delim]"
 
-	local n d created=
+	local n v d created=
 	n="$(quote_sed_regexp "$2")"
 
 	if [ ! -f "$1" ]; then
@@ -32,11 +32,13 @@ shell_config_set() {
 		created=1
 	fi
 
-	if [ -z "$created" ] && grep -qs "^[[:space:]]*$n${4:-=}" -- "$1"; then
-		d="$(printf '\7')"
-		sed -i -e "s$d^[[:space:]]*$n${4:-=}.*$d$2${5:-=}$3$d" -- "$1"
+	if [ -z "$created" ] && v="$(grep "^[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
+		if [ "${v#*$n${4-=}}" != "$3" ]; then
+			d="$(printf '\7')"
+			sed -i -e "s$d^[[:space:]]*$n${4-=}.*$d$2${5-=}$3$d" -- "$1"
+		fi
 	else
-		printf '%s%s%s\n' "$2" "$5" "$3" >> "$1"
+		printf '%s\n' "$2${5-=}$3" >> "$1"
 	fi
 }
 
