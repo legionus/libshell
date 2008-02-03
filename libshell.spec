@@ -19,13 +19,16 @@ This package contains common functions for shell projects to increase code reuse
 
 %install
 install -d %buildroot/bin
-install -p -m755 -t %buildroot/bin *
+install -p -m644 -t %buildroot/bin shell-*
 
 %files
 /bin/*
+%doc COPYING SYMS
 
 %changelog
 * Mon Jan 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt4
+- Add shell-version to trac API changes.
+- Add shell-getopt. This is getopts(1) shell implementation.
 - Add shell-config to read and write shell-like config files:
   + shell-config: shell_config_get() read value from config file;
   + shell-config: shell_config_set() change or write value

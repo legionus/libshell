@@ -1,0 +1,9 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_version:-}" ]; then
+__included_shell_version=1
+
+libshell_version=1
+libshell_ABI_version=0
+
+fi

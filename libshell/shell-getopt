@@ -1,0 +1,278 @@
+#! /bin/sh -efu
+#
+# getopt.sh:
+# functions like getopts but do long-named options parsing
+# and support optional arguments
+#
+# Version 1.2 2008 by Alexey Gladkov <legion@altlinux.org>
+# Version 1.1 2004 by Raphael <raphael at oninet dot pt>
+# Date modified: April 6, 2004
+# Version 1.0 1997 by Grigoriy Strokin (grg@philol.msu.ru), Public Domain
+# Date created: December 21, 1997
+# Date modified: December 21, 1997
+#
+# UPDATE (by legion)
+#
+# 1) Rewrite code to avoid bash-specific builtins;
+# 2) Allow use uniq prefix of option instead full option name
+#    if GETOPT_ALLOW_UNIQUE_PREFIX specified;
+# 3) Unknown options store into OPTUKN variable if GETOPT_ALLOW_UNKNOWN specified;
+#
+# UPDATE (by raphael)
+#
+# I found the routine wouldn't report option that need arguments right
+# if they where between or before other options. Rather it would take
+# the following option as the argument. The routine now checks if
+# the required argument starts with a dash '-' indicating that it is an
+# option. See source below.
+#
+# IMPORTANT FEATURES
+#
+# 1) Parses both short and long-named options
+# 2) Supports optional arguments
+# 3) Only uses bash builtins, thus no calls to external
+# utilities such as expr or sed is done. Therefore,
+# parsing speed is high enough
+#
+#
+# DESCRIPTION
+#
+# FUNCTION getopt
+# Usage: getopt OPTLIST {"$@"|ALTERNATIVE_PARAMETERS}
+# Usage: getopt -o OPTLIST {"$@"|ALTERNATIVE_PARAMETERS}
+#
+# like getopts, but parse options with both required and optional arguments,
+# Options with optional arguments must have "." instead of ":" after them.
+# Furthemore, a variable name to place option name cannot be specified
+# and is always placed in OPTOPT variable
+#
+# This function is provided for compatibility with getopts()
+# OPTLIST style, and it actually calls getoptex (see bellow)
+#
+# NOTE that a list of parameters is required and must be either "$@",
+# if processing command line arguments, or some alternative parameters.
+#
+# FUNCTION getoptex
+# Usage: getoptex OPTION_LIST {"$@"|ALTERNATIVE_PARAMETERS}
+#
+# like getopts, but parse long-named options.
+#
+# Both getopt and getoptex return 0 if an option has been parsed,
+# and 1 if all options are already parsed and 2 an error occured.
+#
+# Both getopt and getoptex set or test the following variables:
+#
+# OPTERR -- tested for whether error messages must be given for invalid options
+#
+# OPTOPT -- set to the name of an option parsed,
+# or to "?" if no more options or error
+# OPTARG -- set to the option argument, if any;
+# unset if ther is no argument;
+# on error, set to the erroneous option name
+#
+# OPTIND -- Initialized to 1.
+# Then set to the number of the next parameter to be parsed
+# when getopt or getoptex will be called next time.
+# When all options are parsed, contains a number of
+# the first non-option argument.
+#
+#
+# OPTOFS -- If a parameter number $OPTIND containg an option parsed
+# does not contain any more options, OPTOFS is unset;
+# otherwise, OPTOFS is set to such a number of "?" signs
+# which is equal to the number of options parsed
+#
+# You might not set variables OPTIND and OPTOFS yourself
+# unless you want to parse a list of parameters more than once.
+# Otherwise, you whould unset OPTIND (or set it to 1)
+# and unset OPTOFS each time you want to parse a new parameters list
+#
+# DESCRIPTION of option list used with getoptex:
+# Option names are separated by whitespace. Options consiting of
+# more than one character are treated as long-named (--option)
+#
+# Special characters can appear at the and of option names specifying
+# whether an argument is required (default is ";"):
+# ";" (default) -- no argument
+# ":" -- required argument
+# "," -- optional argument
+#
+# For example, an option list "a b c help version f: file: separator."
+# defines the following options:
+# -a, -b, -c, --help, --version -- no argument
+# -f, --file -- argument required
+# --separator -- optional argument
+#
+# Please send your comments to grg@philol.msu.ru
+
+if [ -z "${__included_shell_getopt:-}" ]; then
+__included_shell_getopt=1
+
+. shell-error
+. shell-regexp
+
+GETOPT_ALLOW_UNKNOWN=
+GETOPT_ALLOW_UNIQUE_PREFIX=1
+OPTERR=1
+OPTUKN=
+OPTOPT=
+OPTARG=
+OPTIND=1
+OPTOFS=
+
+getoptex() {
+	[ "$#" -gt 0 ] ||
+		return 1
+
+	printf '%d' "${OPTIND:- }" >/dev/null 2>&1 ||
+		OPTIND=1
+
+	[ "$OPTIND" -lt "$#" ] ||
+		return 1
+
+	getoptex_make_optpttr() {
+		if [ -z "${GETOPT_ALLOW_UNIQUE_PREFIX-}" -o "${#OPTOPT}" -eq 1 ]; then
+			optpttr="$OPTOPT"
+			return
+		fi
+		local c o p=
+		while :; do
+			c=0
+			p="$p?"
+
+			for o in $optlist; do
+				o="${o%[:.;]}"
+				[ "$o" = "${o#${OPTOPT%$p}}" ] ||
+					c=$(($c+1))
+				[ $c -lt 2 ] ||
+					break 2
+			done
+
+			[ ${#OPTOPT} -gt ${#p} ] ||
+				break
+		done
+		p="${p#?}"
+		optpttr="${OPTOPT%$p}${p:+*}"
+	}
+	getoptex_badarg() {
+		[ -z "${OPTERR-}" ] ||
+			message "$OPTOPT must have an argument"
+		OPTARG="$OPTOPT"
+		OPTOPT='?'
+	}
+	getoptex_argument() {
+		[ "$1" = ':' ] ||
+			return 0
+
+		OPTARG="$2"
+		# Added test on following argument being an option identified by '-' this way #
+		# the routine no longer takes options as an argument thus breaking error #
+		# detection. 2004-04-04 by raphael at oninet dot pt #
+
+		[ -n "$OPTARG" -a -n "${OPTARG%%-*}" ] ||
+			{ getoptex_badarg; return 1; }
+
+		OPTIND=$(($OPTIND+1)) # skip option's argument
+	}
+	getoptex_option_long() {
+		case "$2" in
+			--$optpttr=*)
+				[ "$1" != ';' ] ||
+					{ getoptex_badarg; return 3; }
+
+				OPTARG="${2#--$optpttr=}"
+				return 1
+				;;
+			--$optpttr)
+				getoptex_argument "$1" "$3" ||
+					return 3
+				return 1
+				;;
+		esac
+	}
+	getoptex_option_short() {
+		case "$2" in
+			-$optpttr)
+				OPTOFS=
+				getoptex_argument "$1" "$3" ||
+					return 3
+				return 1
+				;;
+			-$optpttr*)
+				if [ "$1" = ';' ]; then # an option with no argument is in a chain of options
+					OPTOFS="${OPTOFS-}?" # move to the next option in the chain
+					OPTIND=$(($OPTIND-1)) # the chain still has other options
+				else
+					OPTOFS=
+					OPTARG="${2#-$OPTOPT}"
+				fi
+				return 1
+				;;
+		esac
+	}
+
+    	local optlist="${1#;}"
+	shift $OPTIND
+
+	if [ "$1" != '-' -a "$1" != "${1#-}" ]; then
+		OPTIND=$(($OPTIND+1))
+
+		if [ "$1" != '--' ]; then
+			local cmd opttype o optpttr
+			o="-${1#-${OPTOFS-}}"
+
+			for opt in $optlist; do
+				OPTOPT="${opt%[;.:]}"
+				OPTARG=
+
+				opttype="${opt#$OPTOPT}"
+				getoptex_make_optpttr
+
+				cmd=long
+				[ "${#OPTOPT}" -gt 1 ] ||
+					cmd=short
+
+				getoptex_option_$cmd "${opttype:-;}" "$o" "${2-}" ||
+					return $(($?-1))
+			done
+
+			OPTOPT='?'
+			OPTARG=
+
+			if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
+				OPTUKN="${OPTUKN:+$OPTUKN } \"`quote_shell "$o"`\""
+				return 0
+			fi
+			message "invalid option: $o"
+			return 2
+		fi
+	fi
+	OPTOPT='?'
+	OPTARG=
+	return 1
+}
+
+getopt() {
+	local l="$1"
+	local m= # mask
+	local r= # to store result
+	while [ ${#m} -lt $((${#l}-1)) ]; do
+		m="$m?"
+	done # create a "???..." mask
+
+	while [ -n "$l" ]; do
+		r="${r:+"$r "}${l%$m}" # append the first character of $l to $r
+		l="${l#?}" # cut the first charecter from $l
+		m="${m#?}" # cut one "?" sign from m
+		if [ "${l#[:.;]}" != "$l" ]; then # a special character (";", ".", or ":") was found
+			r="$r${l%$m}" # append it to $r
+			l="${l#?}" # cut the special character from l
+			m="${m#?}" # cut one more "?" sign
+		fi
+	done
+	shift
+	getoptex "$r" "$@" ||
+		return $?
+}
+
+fi
