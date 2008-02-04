@@ -120,6 +120,20 @@ OPTARG=
 OPTIND=1
 OPTOFS=
 
+#*** Example ***
+### Usage: getopt2 -ab -d 10 -e20 --opt1 --opt4=100 text1 text2
+###
+# . shell-getopt
+# echo Using getoptex to parse arguments:
+# while getoptex "a; b; c; d: e. opt1 opt2 opt3 opt4: opt5." "$@"; do
+#	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
+# done
+# shift $(($OPTIND-1))
+# set -- $@ ${OPTUKN-}
+# for arg in "$@"; do
+#	echo "Non option argument <$arg>"
+# done
+
 getoptex() {
 	[ "$#" -gt 0 ] ||
 		return 1
@@ -251,6 +265,20 @@ getoptex() {
 	OPTARG=
 	return 1
 }
+
+#*** Example ***
+### Usage: getopt1 -ab -d 10 -e20 text1 text2
+###
+# . shell-getopt
+# echo "Using getopt to parse arguments:"
+# while getopt "abcd:e." "$@"; do
+#	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
+# done
+# shift $(($OPTIND-1))
+# set -- $@ ${OPTUKN-}
+# for arg in "$@"; do
+#	echo "Non option argument <$arg>"
+# done
 
 getopt() {
 	local l="$1"

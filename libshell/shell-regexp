@@ -13,6 +13,7 @@ quote_sed_regexp() {
 	printf %s "$out"
 }
 
+# unquote argument
 unquote_sed_regexp() {
 	local out="$*"
 	if [ -z "${out##*\\[\[\].^\$\\/]*}" ]; then
