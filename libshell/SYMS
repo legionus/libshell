@@ -15,5 +15,3 @@ shell-getopt	getoptex
 shell-regexp	quote_sed_regexp
 shell-regexp	quote_shell
 shell-regexp	string_quote_remove
-shell-regexp	unquote_sed_regexp
-shell-regexp	unquote_shell

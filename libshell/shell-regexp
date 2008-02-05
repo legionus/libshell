@@ -13,30 +13,11 @@ quote_sed_regexp() {
 	printf %s "$out"
 }
 
-# unquote argument
-unquote_sed_regexp() {
-	local out="$*"
-	if [ -z "${out##*\\[\[\].^\$\\/]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/\\\([].^$[\/]\)/\1/g')" ||
-			return 1
-	fi
-	printf %s "$out"
-}
-
 # quote argument for shell.
 quote_shell() {
 	local out="$*"
 	if [ -z "${out##*[\"\$\`\\\\]*}" ]; then
 		out="$(printf %s "$out" |sed -e 's/["$`\\]/\\&/g')" ||
-			return 1
-	fi
-	printf %s "$out"
-}
-
-unquote_shell() {
-	local out="$*"
-	if [ -z "${out##*\\[\"\$\`\\\\]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/\\\(["$`\\]\)/\1/g')" ||
 			return 1
 	fi
 	printf %s "$out"
