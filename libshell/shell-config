@@ -9,10 +9,12 @@ __included_shell_config=1
 shell_config_get() {
 	[ "$#" -ge 2 -a "$#" -le 3 ] ||
 		fatal "Usage: shell_config_get file name [delim]"
+
+	[ -s "$1" ] ||
+		return 0
 	local n
 	n="$(quote_sed_regexp "$2")"
-	[ ! -f "$1" ] ||
-		sed -n -e "s/^[[:space:]]*$n${3:-=}//p" -- "$1"
+	sed -n -e "s/^[[:space:]]*$n${3:-=}//p" -- "$1"
 }
 
 shell_config_set() {
@@ -20,7 +22,6 @@ shell_config_set() {
 		fatal "Usage: shell_config_get file name value [read delim] [write delim]"
 
 	local n v d created=
-	n="$(quote_sed_regexp "$2")"
 
 	if [ ! -f "$1" ]; then
 		if [ ! -w "${1%/*}" ]; then
@@ -31,6 +32,7 @@ shell_config_set() {
 			return 1
 		created=1
 	fi
+	n="$(quote_sed_regexp "$2")"
 
 	if [ -z "$created" ] && v="$(grep "^[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
 		if [ "${v#*$n${4-=}}" != "$3" ]; then
