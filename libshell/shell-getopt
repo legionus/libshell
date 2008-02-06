@@ -303,4 +303,41 @@ getopt() {
 		return $?
 }
 
+if [ -n "${__libshell_experimental:-}" ]; then
+#*** Example ***
+# . shell-getopt
+# while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz'; do
+#	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
+# done
+
+__getsubopt_arguments=
+getsubopt() {
+	local l="$2"
+
+	if [ -z "$__getsubopt_arguments" ]; then
+		local m=
+		while [ ${#m} -lt $((${#l}-1)) ]; do
+			m="$m?"
+		done
+
+		local ch __getsubopt_string='--'
+		while [ -n "$l" ]; do
+			ch="${l%$m}"
+			l="${l#?}"
+			m="${m#?}"
+
+			case "$ch" in
+				,) ch=' --' ;;
+				[\\\\\`\$\"\ ]) ch="\\$ch" ;;
+			esac
+
+			__getsubopt_arguments="$__getsubopt_arguments$ch"
+		done
+	fi
+
+	local GETOPT_ALLOW_UNIQUE_PREFIX=
+	eval getoptex "\"$1\"" "$__getsubopt_arguments"
+}
+fi
+
 fi
