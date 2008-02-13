@@ -18,8 +18,9 @@ This package contains common functions for shell projects to increase code reuse
 %setup -q
 
 %install
-install -d %buildroot/bin
-install -p -m644 -t %buildroot/bin shell-*
+mkdir -p %buildroot/bin
+cp -a shell-* %buildroot/bin/
+chmod 644 %buildroot/bin/*
 
 %files
 /bin/*
