@@ -105,7 +105,7 @@
 #
 # Please send your comments to grg@philol.msu.ru
 
-if [ -z "${__included_shell_getopt:-}" ]; then
+if [ -z "${__included_shell_getopt-}" ]; then
 __included_shell_getopt=1
 
 . shell-error
@@ -303,7 +303,7 @@ getopt() {
 		return $?
 }
 
-if [ -n "${__libshell_experimental:-}" ]; then
+if [ -n "${__libshell_experimental-}" ]; then
 #*** Example ***
 # . shell-getopt
 # while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz'; do

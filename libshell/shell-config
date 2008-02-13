@@ -1,6 +1,6 @@
 #!/bin/sh -efu
 
-if [ -z "${__included_shell_config:-}" ]; then
+if [ -z "${__included_shell_config-}" ]; then
 __included_shell_config=1
 
 . shell-error

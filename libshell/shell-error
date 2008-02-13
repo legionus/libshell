@@ -1,6 +1,6 @@
 #!/bin/sh -efu
 
-if [ -z "${__included_shell_error:-}" ]; then
+if [ -z "${__included_shell_error-}" ]; then
 __included_shell_error=1
 
 PROG="${PROG:-${0##*/}}"
@@ -14,8 +14,8 @@ fatal() {
 	exit 1
 }
 
-quiet="${quiet:-}"
-verbose="${verbose:-}"
+quiet="${quiet-}"
+verbose="${verbose-}"
 verbose() {
 	[ -n "$verbose" ] || return 0
 	message "$@"
