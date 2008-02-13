@@ -3,7 +3,8 @@
 if [ -z "${__included_shell_regexp:-}" ]; then
 __included_shell_regexp=1
 
-# quote given arguments for sed basic regular expression.
+# Quote given arguments for sed basic regular expression.
+# Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
 quote_sed_regexp() {
 	local out="$*"
 	if [ -z "${out##*[\[\].^\$\\\\/]*}" ]; then
@@ -13,7 +14,8 @@ quote_sed_regexp() {
 	printf %s "$out"
 }
 
-# quote argument for shell.
+# Quote argument for shell.
+# Usage example: eval "$var_name=\"$(quote_shell "$var_value")\""
 quote_shell() {
 	local out="$*"
 	if [ -z "${out##*[\"\$\`\\\\]*}" ]; then
