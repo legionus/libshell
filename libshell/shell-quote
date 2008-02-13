@@ -1,0 +1,42 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_quote-}" ]; then
+__included_shell_quote=1
+
+# Quote given arguments for sed basic regular expression.
+# Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
+quote_sed_regexp() {
+	local out="$*"
+	if [ -z "${out##*[\[\].^\$\\\\/]*}" ]; then
+		out="$(printf %s "$out" |sed -e 's/[].^$[\/]/\\&/g')" ||
+			return 1
+	fi
+	printf %s "$out"
+}
+
+# Quote argument for shell.
+# Usage example: eval "$var_name=\"$(quote_shell "$var_value")\""
+quote_shell() {
+	local out="$*"
+	if [ -z "${out##*[\"\$\`\\\\]*}" ]; then
+		out="$(printf %s "$out" |sed -e 's/["$`\\]/\\&/g')" ||
+			return 1
+	fi
+	printf %s "$out"
+}
+
+if [ -n "${__libshell_experimental-}" ]; then
+string_quote_remove() {
+	local out="$1"
+	if [ -z "${1##*'}${1%%'*}" ]; then
+		out="${1#'}"
+		out="${out%'}"
+	elif [ -z "${1##*\"}${1%%\"*}" ]; then
+		out="${1#\"}"
+		out="${out%\"}"
+	fi
+	printf %s "$out"
+}
+fi
+
+fi #__included_shell_quote
