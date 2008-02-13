@@ -14,9 +14,10 @@
 # UPDATE (by legion)
 #
 # 1) Rewrite code to avoid bash-specific builtins;
-# 2) Allow use uniq prefix of option instead full option name
-#    if GETOPT_ALLOW_UNIQUE_PREFIX specified;
-# 3) Unknown options store into OPTUKN variable if GETOPT_ALLOW_UNKNOWN specified;
+# 2) If GETOPT_ALLOW_UNIQUE_PREFIX is non-empty,
+#    then allow non-ambiguous abbreviations for long options;
+# 3) If GETOPT_ALLOW_UNKNOWN is non-empty,
+#    then allow unknown options and store them into OPTUKN variable.
 #
 # UPDATE (by raphael)
 #
