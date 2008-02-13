@@ -26,6 +26,11 @@ quote_shell() {
 }
 
 if [ -n "${__libshell_experimental-}" ]; then
+# Remove quote symbol from string
+# Usage example: for i in "\"str1\"" "'str2'" "\"str3'"; do echo "$(string_quote_remove "$i")"; done
+# str1
+# str2
+# "str3'
 string_quote_remove() {
 	local out="$1"
 	if [ -z "${1##*'}${1%%'*}" ]; then
