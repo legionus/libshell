@@ -55,4 +55,4 @@ shell_config_set() {
 	printf '%s\n' "$2${5-=}$3" >> "$1"
 }
 
-fi
+fi #__included_shell_config

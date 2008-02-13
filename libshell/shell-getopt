@@ -340,4 +340,4 @@ getsubopt() {
 }
 fi
 
-fi
+fi #__included_shell_getopt

@@ -39,4 +39,4 @@ string_quote_remove() {
 }
 fi
 
-fi
+fi #__included_shell_regexp

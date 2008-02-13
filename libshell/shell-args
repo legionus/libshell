@@ -71,4 +71,4 @@ parse_common_option() {
 	esac
 }
 
-fi
+fi #__included_shell_args

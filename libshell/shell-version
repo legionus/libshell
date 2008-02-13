@@ -5,4 +5,4 @@ __included_shell_version=1
 
 libshell_version=2
 
-fi
+fi #__included_shell_version

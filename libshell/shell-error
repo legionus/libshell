@@ -21,4 +21,4 @@ verbose() {
 	message "$@"
 }
 
-fi
+fi #__included_shell_error
