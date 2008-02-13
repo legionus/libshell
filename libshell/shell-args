@@ -5,6 +5,10 @@ __included_shell_args=1
 
 . shell-error
 
+# Checks that given option value is a readable file.
+# Arguments: $1 is option name, $2 is option value.
+# If $2 is a readable file, outputs canonicalized file name,
+# otherwise fails.
 opt_check_read() {
 	local value
 	[ -r "$2" ] &&
@@ -13,6 +17,10 @@ opt_check_read() {
 	printf %s "$value"
 }
 
+# Checks that given option value is a traversable directory.
+# Arguments: $1 is option name, $2 is option value.
+# If $2 is a readable file, outputs canonicalized directory name,
+# otherwise fails.
 opt_check_dir() {
 	local value
 	[ -d "$2" -a -x "$2" ] &&
