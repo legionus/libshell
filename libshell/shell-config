@@ -4,7 +4,7 @@ if [ -z "${__included_shell_config-}" ]; then
 __included_shell_config=1
 
 . shell-error
-. shell-regexp
+. shell-quote
 
 __shell_config_comment='#'
 

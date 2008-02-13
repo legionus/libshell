@@ -109,7 +109,7 @@ if [ -z "${__included_shell_getopt-}" ]; then
 __included_shell_getopt=1
 
 . shell-error
-. shell-regexp
+. shell-quote
 
 GETOPT_ALLOW_UNKNOWN=
 GETOPT_ALLOW_UNIQUE_PREFIX=1
