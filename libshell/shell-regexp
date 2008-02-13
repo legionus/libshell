@@ -3,10 +3,10 @@
 if [ -z "${__included_shell_regexp:-}" ]; then
 __included_shell_regexp=1
 
-# quote argument for sed regexp.
+# quote given arguments for sed basic regular expression.
 quote_sed_regexp() {
 	local out="$*"
-	if [ -z "${out##*[\[\].^\$\\/]*}" ]; then
+	if [ -z "${out##*[\[\].^\$\\\\/]*}" ]; then
 		out="$(printf %s "$out" |sed -e 's/[].^$[\/]/\\&/g')" ||
 			return 1
 	fi
