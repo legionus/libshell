@@ -10,7 +10,7 @@ message() {
 }
 
 fatal() {
-	printf %s\\n "$PROG: $*" >&2
+	message "$@"
 	exit 1
 }
 
