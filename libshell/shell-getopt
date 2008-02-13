@@ -336,7 +336,8 @@ getsubopt() {
 	fi
 
 	local GETOPT_ALLOW_UNIQUE_PREFIX=
-	eval getoptex "\"$1\"" "$__getsubopt_arguments"
+	eval getoptex "\"$1\"" "$__getsubopt_arguments" ||
+		return $?
 }
 fi
 
