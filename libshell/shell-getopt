@@ -139,7 +139,7 @@ getoptex() {
 	[ "$#" -gt 0 ] ||
 		return 1
 
-	printf '%d' "${OPTIND:- }" >/dev/null 2>&1 ||
+	[ "${OPTIND-}" -gt 0 ] 2>/dev/null ||
 		OPTIND=1
 
 	[ "$OPTIND" -lt "$#" ] ||
