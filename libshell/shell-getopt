@@ -229,38 +229,39 @@ getoptex() {
     	local optlist="${1#;}"
 	shift $OPTIND
 
-	if [ "$1" != '-' -a "$1" != "${1#-}" ]; then
+	# test whether $1 is an option.
+	if [ "$1" = '--' ]; then
+		OPTIND=$(($OPTIND+1))
+	elif [ "$1" != '-' -a "$1" != "${1#-}" ]; then
 		OPTIND=$(($OPTIND+1))
 
-		if [ "$1" != '--' ]; then
-			local cmd opttype o optpttr
-			o="-${1#-${OPTOFS-}}"
+		local cmd opttype o optpttr
+		o="-${1#-${OPTOFS-}}"
 
-			for opt in $optlist; do
-				OPTOPT="${opt%[;.:]}"
-				OPTARG=
-
-				opttype="${opt#$OPTOPT}"
-				getoptex_make_optpttr
-
-				cmd=long
-				[ "${#OPTOPT}" -gt 1 ] ||
-					cmd=short
-
-				getoptex_option_$cmd "${opttype:-;}" "$o" "${2-}" ||
-					return $(($?-1))
-			done
-
-			OPTOPT='?'
+		for opt in $optlist; do
+			OPTOPT="${opt%[;.:]}"
 			OPTARG=
 
-			if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
-				OPTUKN="${OPTUKN:+$OPTUKN } \"`quote_shell "$o"`\""
-				return 0
-			fi
-			message "invalid option: $o"
-			return 2
+			opttype="${opt#$OPTOPT}"
+			getoptex_make_optpttr
+
+			cmd=long
+			[ "${#OPTOPT}" -gt 1 ] ||
+				cmd=short
+
+			getoptex_option_$cmd "${opttype:-;}" "$o" "${2-}" ||
+				return $(($?-1))
+		done
+
+		OPTOPT='?'
+		OPTARG=
+
+		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
+			OPTUKN="${OPTUKN:+$OPTUKN } \"`quote_shell "$o"`\""
+			return 0
 		fi
+		message "invalid option: $o"
+		return 2
 	fi
 	OPTOPT='?'
 	OPTARG=
