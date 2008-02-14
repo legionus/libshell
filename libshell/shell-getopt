@@ -257,7 +257,7 @@ getoptex() {
 		OPTARG=
 
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
-			OPTUKN="${OPTUKN:+$OPTUKN } \"`quote_shell "$o"`\""
+			OPTUKN="${OPTUKN:+$OPTUKN } \"$(quote_shell "$o")\""
 			return 0
 		fi
 		message "invalid option: $o"
