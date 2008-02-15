@@ -273,7 +273,7 @@ getoptex() {
 ###
 # . shell-getopt
 # echo "Using getopt to parse arguments:"
-# while getopt "abcd:e." "$@"; do
+# while getopts "abcd:e." "$@"; do
 #	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 # done
 # shift $(($OPTIND-1))
@@ -282,7 +282,7 @@ getoptex() {
 #	echo "Non option argument <$arg>"
 # done
 
-getopt() {
+getopts() {
 	local l="$1"
 	local m= # mask
 	local r= # to store result
