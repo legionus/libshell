@@ -1,6 +1,6 @@
 Name: libshell
-Version: 0.0.1
-Release: alt4
+Version: 0.0.2
+Release: alt1
 
 Summary:  A library of shell functions
 License: GPL
@@ -27,9 +27,17 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
-* Mon Jan 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt4
+* Fri Feb 22 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt1
 - Add shell-version to trac API changes.
-- Add shell-getopt. This is getopts(1) shell implementation.
+- Add shell-getopt. This is getopts(1), getopt(1) and getsubopt(3)
+  shell implementation (if __libshell_experimental is set).
+- Rename shell-regexp to shell-quote.
+- shell-quote:
+  + Add string_quote_remove() to remove ' or " symbols from start
+  and end of string (if __libshell_experimental is set).
+  + Remove unquote_sed_regexp(), unquote_shell() functions.
+
+* Mon Jan 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt4
 - Add shell-config to read and write shell-like config files:
   + shell-config: shell_config_get() read value from config file;
   + shell-config: shell_config_set() change or write value
@@ -47,4 +55,3 @@ chmod 644 %buildroot/bin/*
 
 * Thu Feb 22 2007 Alexey Gladkov <legion@altlinux.ru> 0.0.1-alt1
 - Initial revision.
-
