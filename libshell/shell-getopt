@@ -109,12 +109,14 @@
 if [ -z "${__included_shell_getopt-}" ]; then
 __included_shell_getopt=1
 
+if [ -n "${__libshell_experimental-}" ]; then
 . shell-error
 . shell-quote
 
 GETOPT_ALLOW_UNKNOWN=
 GETOPT_ALLOW_ABBREV=1
 OPTERR=1
+OPTTYP=
 OPTUKN=
 OPTOPT=
 OPTARG=
@@ -179,6 +181,7 @@ getoptex() {
 		[ "$1" = ':' ] ||
 			return 0
 
+		OPTTYP="$1"
 		OPTARG="$2"
 		# Added test on following argument being an option identified by '-' this way #
 		# the routine no longer takes options as an argument thus breaking error #
@@ -192,7 +195,8 @@ getoptex() {
 	getoptex_option_long() {
 		case "$2" in
 			--$optpttr=*)
-				[ "$1" != ';' ] ||
+				[ "$1" != ';' ] &&
+					OPTTYP="$1" ||
 					{ getoptex_badarg; return 3; }
 
 				OPTARG="${2#--$optpttr=}"
@@ -219,6 +223,7 @@ getoptex() {
 					OPTIND=$(($OPTIND-1)) # the chain still has other options
 				else
 					OPTOFS=
+					OPTTYP="$1"
 					OPTARG="${2#-$OPTOPT}"
 				fi
 				return 1
@@ -241,6 +246,7 @@ getoptex() {
 		for opt in $optlist; do
 			OPTOPT="${opt%[;.:]}"
 			OPTARG=
+			OPTTYP=
 
 			opttype="${opt#$OPTOPT}"
 			getoptex_make_optpttr
@@ -305,7 +311,7 @@ getopts() {
 		return $?
 }
 
-if [ -n "${__libshell_experimental-}" ]; then
+
 #*** Example ***
 # . shell-getopt
 # while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz'; do
@@ -341,6 +347,148 @@ getsubopt() {
 	eval getoptex "\"$1\"" "$__getsubopt_arguments" ||
 		return $?
 }
-fi
+
+. shell-version
+
+__getopt_version() {
+	cat <<-EOF
+	$PROG version $libshell_version
+	Written by Alexey Gladkov <gladkov.alexey@gmail.com>
+
+	Copyright (C) 2008  Alexey Gladkov <gladkov.alexey@gmail.com>
+	This is free software; see the source for copying conditions.  There is NO
+	warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+	EOF
+}
+
+__getopt_usage() {
+	cat <<-EOF
+	Try \`$PROG --help' for more information.
+	EOF
+}
+
+__getopt_help() {
+	cat <<-EOF
+	Usage: $PROG optstring parameters
+	   or: $PROG [options] [--] optstring parameters
+	   or: $PROG [options] -o|--options optstring [options] [--] parameters
+
+	Options ignored:
+	  -a, --alternative            Allow long options starting with single -;
+	  -s, --shell=shell            Set shell quoting conventions;
+	  -u, --unqote                 Do not quote the output;
+
+	Options:
+	  -l, --longoptions=longopts   Long options to be recognized;
+	  -n, --name=progname          The name under which errors are reported;
+	  -o, --options=optstring      Short options to be recognized;
+	  -q, --quiet                  Disable error reporting;
+	  -Q, --quiet-output           No normal output;
+	  -T, --test                   Test for getopt version;
+	  -V, --version                Output version information;
+	  -h, --help                   This small usage guide.
+
+	Report bugs to http://bugzilla.altlinux.org/
+
+	EOF
+}
+
+getopt() {
+	local PROG='getopt' OPTERR=1 rc=0 prg= opts= lopts= quiet_output=
+
+	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" || rc=$?; do
+		case "$rc" in
+			2) __getopt_usage; return 1 ;;
+			1) break ;;
+		esac
+
+		case "$OPTOPT" in
+			n|name) prg="$OPTARG" ;;
+			o|options) opts="$OPTARG" ;;
+			l|longoptions) lopts="$OPTARG" ;;
+			q|quiet) OPTERR= ;;
+			Q|quiet-output) quiet_output=1 ;;
+			T|test) return 4 ;;
+			V|version)
+				__getopt_version
+				return 0
+				;;
+			h|help)
+				__getopt_help
+				return 0
+				;;
+		esac
+	done
+
+	shift $(($OPTIND-1))
+	set -- "$@"
+
+	if [ -z "$opts" ]; then
+		if [ "$#" -gt 1 -a "${1#-}" = "$1" -a "$1" != '--' ]; then
+			opts="$1"
+			shift
+		else
+			message "$PROG: missing optstring argument"
+			__getopt_usage
+			return 1
+		fi
+	fi
+
+	local OPTIND=1 OPTOFS=
+	local l="$opts${lopts:+,$lopts}" m= out=' -- '
+	while [ ${#m} -lt $((${#l}-1)) ]; do
+		m="$m?"
+	done
+
+	opts=
+	while [ -n "$l" ]; do
+		case "$l" in
+			::*)	opts="$opts."
+				l="${l#?}"
+				m="${m#?}"
+				;;
+			,*)	opts="$opts "
+				;;
+			*)	opts="$opts${l%$m}"
+				;;
+		esac
+		l="${l#?}"
+		m="${m#?}"
+	done
+
+	out_arg() {
+		shift $(($OPTIND-1))
+		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
+	}
+
+	rc=0
+	PROG="$prg"
+	while getoptex "$opts" "$@" || rc=$?; do
+		case "$rc" in
+			1)
+				[ $# -ge $OPTIND ] ||
+					break
+				rc=0
+				out_arg "$@"
+				OPTIND=$(($OPTIND+1))
+				continue
+				;;
+			2)	break
+				;;
+		esac
+		pfx='-'
+		[ "${#OPTOPT}" -eq 1 ] ||
+			pfx='--'
+		out="${out%% -- *} $pfx$OPTOPT ${OPTTYP:+'$OPTARG'} -- ${out#* -- }"
+	done
+
+	[ $rc -ne 2 ] ||
+		return 1
+
+	[ -n "$quiet_output" ] ||
+		printf '%s\n' "$out${OPTUKN:+$OPTUKN}"
+}
+
+fi #__libshell_experimental
 
 fi #__included_shell_getopt
