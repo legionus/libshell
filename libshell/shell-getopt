@@ -236,6 +236,7 @@ getoptex() {
 
 	# test whether $1 is an option.
 	if [ "$1" = '--' ]; then
+		OPTTYP='--'
 		OPTIND=$(($OPTIND+1))
 	elif [ "$1" != '-' -a "$1" != "${1#-}" ]; then
 		OPTIND=$(($OPTIND+1))
@@ -471,6 +472,8 @@ getopt() {
 				rc=0
 				out_arg "$@"
 				OPTIND=$(($OPTIND+1))
+				[ "$OPTTYP" != '--' ] ||
+					break
 				continue
 				;;
 			2)	break
@@ -484,6 +487,13 @@ getopt() {
 
 	[ $rc -ne 2 ] ||
 		return 1
+
+	shift $(($OPTIND-1))
+	set -- "$@"
+	while [ "$#" -gt 0 ]; do
+		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
+		shift
+	done
 
 	[ -n "$quiet_output" ] ||
 		printf '%s\n' "$out${OPTUKN:+$OPTUKN}"
