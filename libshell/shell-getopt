@@ -399,7 +399,7 @@ getopt() {
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" || rc=$?; do
 		case "$rc" in
-			2) __getopt_usage; return 1 ;;
+			2) __getopt_usage; return 2 ;;
 			1) break ;;
 		esac
 
@@ -416,7 +416,7 @@ getopt() {
 				;;
 			h|help)
 				__getopt_help
-				return 0
+				return 2
 				;;
 		esac
 	done
@@ -431,7 +431,7 @@ getopt() {
 		else
 			message "$PROG: missing optstring argument"
 			__getopt_usage
-			return 1
+			return 2
 		fi
 	fi
 
