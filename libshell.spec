@@ -1,6 +1,6 @@
 Name: libshell
 Version: 0.0.2
-Release: alt1
+Release: alt2
 
 Summary:  A library of shell functions
 License: GPL
@@ -27,6 +27,14 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Wed Feb 27 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt2
+- shell-config: shell_config_set():
+  + Fix value quoting.
+- shell-getopt: getopt():
+  + Fix GETOPT_ALLOW_UNKNOWN=1;
+  + Fix return codes;
+  + Fix params handling.
+
 * Fri Feb 22 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt1
 - Add shell-version to trac API changes.
 - Add shell-getopt. This is getopts(1), getopt(1) and getsubopt(3)
