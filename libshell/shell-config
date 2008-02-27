@@ -20,51 +20,52 @@ __shell_config_quote_value() {
 shell_config_get() {
 	[ "$#" -ge 2 -a "$#" -le 3 ] ||
 		fatal "Usage: shell_config_get file name [delim]"
+	local file="$1" name="$2" delim="${3-=}"
 
-	[ -s "$1" ] ||
+	[ -s "$file" ] ||
 		return 0
-	local n
-	n="$(quote_sed_regexp "$2")"
-	sed -n -e "s/^[[:space:]]*$n${3:-=}//p" -- "$1"
+	name="$(quote_sed_regexp "$name")"
+	sed -n -e "s/^[[:space:]]*$name$delim//p" -- "$file"
 }
 
 shell_config_set() {
 	[ "$#" -ge 3 -a "$#" -le 5 ] ||
 		fatal "Usage: shell_config_get file name value [read-delim [write-delim]]"
 
+	local file="$1" name="$2" value="$3" r_delim="${4-=}" w_delim="${5-=}"
 	local n v nv= created=
 
-	if [ ! -f "$1" ]; then
-		if [ ! -w "${1%/*}" ]; then
-			message "${1%/*}: not writable."
+	if [ ! -f "$file" ]; then
+		if [ ! -w "${file%/*}" ]; then
+			message "${file%/*}: not writable."
 			return 1
 		fi
-		touch -- "$1" ||
+		touch -- "$file" ||
 			return 1
 		created=1
 	fi
 
 	if [ -z "$created" ]; then
-		n="$(quote_sed_regexp "$2")"
+		n="$(quote_sed_regexp "$name")"
 
-		if v="$(grep --mmap -m1 "^[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
-			if [ "${v#*$2${4-=}}" != "$3" ]; then
-				nv="$(__shell_config_quote_value "$2${5-=}$3")"
-				sed -i -e "s/^[[:space:]]*$n${4-=}.*/$nv/" -- "$1"
+		if v="$(grep --mmap -m1 "^[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
+			if [ "${v#*$name$r_delim}" != "$value" ]; then
+				nv="$(__shell_config_quote_value "$w_delim$value")"
+				sed -i -e "s/^[[:space:]]*$n$r_delim.*/$n$nv/" -- "$file"
 			fi
 			return
 		fi
 
 		if [ -n "${__shell_config_comment-}" ] &&
-		   v="$(grep --mmap -m1 "^[[:space:]]*${__shell_config_comment:-#}[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
+		   v="$(grep --mmap -m1 "^[[:space:]]*${__shell_config_comment:-#}[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
 			v="$(quote_sed_regexp "$v")"
-			nv="$(__shell_config_quote_value "$2${5-=}$3")"
-			sed -i -e "s/^$v\$/$nv/" -- "$1"
+			nv="(__shell_config_quote_value "$w_delim$value")"
+			sed -i -e "s/^$v\$/$n$nv/" -- "$file"
 			return
 		fi
 	fi
 
-	printf '%s\n' "$2${5-=}$3" >> "$1"
+	printf '%s\n' "$name$w_delim$value" >> "$file"
 }
 
 fi #__included_shell_config
