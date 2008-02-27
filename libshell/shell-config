@@ -8,6 +8,15 @@ __included_shell_config=1
 
 __shell_config_comment='#'
 
+__shell_config_quote_value() {
+	local out="$*"
+	if [ -z "${out##*[\\\\/]*}" ]; then
+		out="$(printf %s "$out" |sed -e 's/[\\\/]/\\&/g')" ||
+			return 1
+	fi
+	printf %s "$out"
+}
+
 shell_config_get() {
 	[ "$#" -ge 2 -a "$#" -le 3 ] ||
 		fatal "Usage: shell_config_get file name [delim]"
@@ -23,7 +32,7 @@ shell_config_set() {
 	[ "$#" -ge 3 -a "$#" -le 5 ] ||
 		fatal "Usage: shell_config_get file name value [read-delim [write-delim]]"
 
-	local n v created=
+	local n v nv= created=
 
 	if [ ! -f "$1" ]; then
 		if [ ! -w "${1%/*}" ]; then
@@ -39,15 +48,18 @@ shell_config_set() {
 		n="$(quote_sed_regexp "$2")"
 
 		if v="$(grep --mmap -m1 "^[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
-			[ "${v#*$2${4-=}}" = "$3" ] ||
-				sed -i -e "s/^[[:space:]]*$n${4-=}.*/$2${5-=}$3/" -- "$1"
+			if [ "${v#*$2${4-=}}" != "$3" ]; then
+				nv="$(__shell_config_quote_value "$2${5-=}$3")"
+				sed -i -e "s/^[[:space:]]*$n${4-=}.*/$nv/" -- "$1"
+			fi
 			return
 		fi
 
 		if [ -n "${__shell_config_comment-}" ] &&
 		   v="$(grep --mmap -m1 "^[[:space:]]*${__shell_config_comment:-#}[[:space:]]*$n${4-=}" -- "$1" 2>/dev/null)"; then
 			v="$(quote_sed_regexp "$v")"
-			sed -i -e "s/^$v\$/$2${5-=}$3/" -- "$1"
+			nv="$(__shell_config_quote_value "$2${5-=}$3")"
+			sed -i -e "s/^$v\$/$nv/" -- "$1"
 			return
 		fi
 	fi
