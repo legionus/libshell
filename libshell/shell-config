@@ -8,15 +8,6 @@ __included_shell_config=1
 
 __shell_config_comment='#'
 
-__shell_config_quote_value() {
-	local out="$*"
-	if [ -z "${out##*[\\\\/]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/[\\\/]/\\&/g')" ||
-			return 1
-	fi
-	printf %s "$out"
-}
-
 shell_config_get() {
 	[ "$#" -ge 2 -a "$#" -le 3 ] ||
 		fatal "Usage: shell_config_get file name [delim]"
@@ -50,7 +41,7 @@ shell_config_set() {
 
 		if v="$(grep --mmap -m1 "^[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
 			if [ "${v#*$name$r_delim}" != "$value" ]; then
-				nv="$(__shell_config_quote_value "$w_delim$value")"
+				nv="$(quote_sed_regexp "$w_delim$value")"
 				sed -i -e "s/^[[:space:]]*$n$r_delim.*/$n$nv/" -- "$file"
 			fi
 			return
@@ -59,7 +50,7 @@ shell_config_set() {
 		if [ -n "${__shell_config_comment-}" ] &&
 		   v="$(grep --mmap -m1 "^[[:space:]]*${__shell_config_comment:-#}[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
 			v="$(quote_sed_regexp "$v")"
-			nv="(__shell_config_quote_value "$w_delim$value")"
+			nv="$(quote_sed_regexp "$w_delim$value")"
 			sed -i -e "s/^$v\$/$n$nv/" -- "$file"
 			return
 		fi
