@@ -130,7 +130,7 @@ shell_args_test8() {
 	. ../shell-args
 
 	string="0001"
-	expect="0001"
+	expect="$(message "NUM: $string: invalid number." 2>&1)"
 	result="$(opt_check_number "NUM" "$string" 2>&1)" ||:
 
 	if [ "$result" != "$expect" ]; then
@@ -141,20 +141,6 @@ shell_args_test8() {
 
 appendTests shell_args_test9
 shell_args_test9() {
-	. ../shell-args
-
-	string="00100"
-	expect="00100"
-	result="$(opt_check_number "NUM" "$string" 2>&1)" ||:
-
-	if [ "$result" != "$expect" ]; then
-		printf 'opt_check_number(): %s' "$result"
-		return 1
-	fi
-}
-
-appendTests shell_args_test10
-shell_args_test10() {
 	. ../shell-args
 
 	string="1 2"
