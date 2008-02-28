@@ -7,8 +7,8 @@ __included_shell_quote=1
 # Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
 quote_sed_regexp() {
 	local out="$*"
-	if [ -z "${out##*[\[\].^\$\\\\/]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/[].^$[\/]/\\&/g')" ||
+	if [ -z "${out##*[\[\].*&^\$\\\\/]*}" ]; then
+		out="$(printf %s "$out" |sed -e 's/[].*&^$[\/]/\\&/g')" ||
 			return 1
 	fi
 	printf %s "$out"
