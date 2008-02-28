@@ -1,0 +1,19 @@
+#!/bin/ash -efu
+
+. shell-error
+. ./shell-unittest
+
+WORKDIR=
+beginTests() {
+	WORKDIR="$(mktemp -d "$PROG.XXXXXXXXX")"
+}
+
+finishTests() {
+	rm -rf -- "$WORKDIR"
+}
+
+for s in shell-quote shell-args; do
+	. ./"test-$s"
+done
+
+runUnitTests

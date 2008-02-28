@@ -1,0 +1,66 @@
+#!/bin/ash -efu
+
+. shell-error
+
+beginTests() { :; }
+finishTests() { :; }
+
+startTest() { :; }
+endTest() { :; }
+
+run_or_exit() {
+	"$@" || fatal "$1() fail rc=$?"
+}
+
+__shell_unit_tests=
+appendTests() {
+	__shell_unit_tests="$__shell_unit_tests $*"
+}
+
+messageTest() {
+	case "$3" in
+		0) printf '[done]' ;;
+		1) printf '[FAIL]' ;;
+		2) printf '[skip]' ;;
+	esac
+	printf ' (%s) %s\n' "$1" "$2"
+}
+
+showSummary() {
+	if [ "$total" -eq 0 ]; then
+		message "Nothing to do"
+		return
+	fi
+	printf '\n'
+	printf 'tests passed:  %6d %3d%%\n' "$passed" "$((($passed*100)/$total))"
+	printf 'tests failed:  %6d %3d%%\n' "$failed" "$((($failed*100)/$total))"
+	printf 'tests skipped: %6d %3d%%\n' "$skipped" "$((($skipped*100)/$total))"
+	printf 'tests total:   %6d\n\n' "$total"
+}
+
+runUnitTests() {
+	run_or_exit beginTests
+
+	set -- ${__shell_unit_tests-}
+
+	local rc passed=0 failed=0 skipped=0 total="$#"
+
+	while [ "$#" -gt 0 ]; do
+		run_or_exit startTest
+
+		rc=0		
+		msg="$("$1")" || rc=$?
+		
+		case "$rc" in
+			0) passed=$(($passed+1)) ;;
+			1) failed=$(($failed+1)) ;;
+			2) skipped=$(($skipped+1)) ;;
+		esac
+		run_or_exit messageTest "$1" "$msg" "$rc"
+
+		run_or_exit endTest
+		shift
+	done
+	run_or_exit showSummary
+	run_or_exit finishTests
+}
