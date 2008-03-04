@@ -324,12 +324,12 @@ getsubopt() {
 	local l="$2"
 
 	if [ -z "$__getsubopt_arguments" ]; then
-		local m=
+		local ch m=
 		while [ ${#m} -lt $((${#l}-1)) ]; do
 			m="$m?"
 		done
 
-		local ch __getsubopt_string='--'
+		__getsubopt_arguments='--'
 		while [ -n "$l" ]; do
 			ch="${l%$m}"
 			l="${l#?}"
