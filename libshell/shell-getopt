@@ -434,28 +434,17 @@ getopt() {
 			return 2
 		fi
 	fi
+	opts="$opts${lopts:+,$lopts}"
+	while :; do
+		case "$opts" in
+			*,*)  opts="${opts%%,*} ${opts#*,}"   ;;
+			*::*) opts="${opts%%::*}.${opts#*::}" ;;
+			*) break ;;
+		esac
+	done
 
 	local OPTIND=1 OPTOFS=
-	local l="$opts${lopts:+,$lopts}" m= out=' -- '
-	while [ ${#m} -lt $((${#l}-1)) ]; do
-		m="$m?"
-	done
-
-	opts=
-	while [ -n "$l" ]; do
-		case "$l" in
-			::*)	opts="$opts."
-				l="${l#?}"
-				m="${m#?}"
-				;;
-			,*)	opts="$opts "
-				;;
-			*)	opts="$opts${l%$m}"
-				;;
-		esac
-		l="${l#?}"
-		m="${m#?}"
-	done
+	local out=' -- '
 
 	out_arg() {
 		shift $(($OPTIND-1))
