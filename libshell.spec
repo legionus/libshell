@@ -1,6 +1,6 @@
 Name: libshell
 Version: 0.0.2
-Release: alt2
+Release: alt4
 
 Summary:  A library of shell functions
 License: GPL
@@ -27,6 +27,11 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Sun Mar 09 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt4
+- shell-getopt: Move getopt(), getsubopt(), getopts() and getoptex()
+  from experimental state.
+- shell-quote: Move string_quote_remove() from experimental state.
+
 * Wed Feb 27 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt2
 - shell-config: shell_config_set():
   + Fix value quoting.
