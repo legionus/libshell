@@ -109,7 +109,6 @@
 if [ -z "${__included_shell_getopt-}" ]; then
 __included_shell_getopt=1
 
-if [ -n "${__libshell_experimental-}" ]; then
 . shell-error
 . shell-quote
 
@@ -489,7 +488,5 @@ getopt() {
 	[ -n "$quiet_output" ] ||
 		printf '%s\n' "$out${OPTUKN:+$OPTUKN}"
 }
-
-fi #__libshell_experimental
 
 fi #__included_shell_getopt

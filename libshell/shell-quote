@@ -25,7 +25,6 @@ quote_shell() {
 	printf %s "$out"
 }
 
-if [ -n "${__libshell_experimental-}" ]; then
 # Remove quote symbol from string
 # Usage example: for i in "\"str1\"" "'str2'" "\"str3'"; do echo "$(string_quote_remove "$i")"; done
 # str1
@@ -42,6 +41,5 @@ string_quote_remove() {
 	fi
 	printf %s "$out"
 }
-fi
 
 fi #__included_shell_quote
