@@ -12,8 +12,12 @@ finishTests() {
 	rm -rf -- "$WORKDIR"
 }
 
-for s in shell-quote shell-args; do
-	. ./"test-$s"
+for s in \
+	quote_sed_regexp quote_shell string_quote_remove \
+	opt_check_dir opt_check_number opt_check_read \
+	;
+do
+	. "./$s"
 done
 
 runUnitTests

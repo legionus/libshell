@@ -1,0 +1,75 @@
+#!/bin/ash -efu
+
+appendTests opt_check_read_test1
+opt_check_read_test1() {
+	. ../shell-args
+
+	if [ ! -f "$WORKDIR/file-000" ]; then
+		> "$WORKDIR/file-000"
+		chmod 000 "$WORKDIR/file-000"
+	fi
+	cd "$WORKDIR"
+
+	expect="$(message "FILE: ./file-000: file not available." 2>&1)"
+	result="$(opt_check_read "FILE" "./file-000" 2>&1)" ||:
+	
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+appendTests opt_check_read_test2
+opt_check_read_test2() {
+	. ../shell-args
+
+	if [ ! -f "$WORKDIR/file-200" ]; then
+		> "$WORKDIR/file-200"
+		chmod 200 "$WORKDIR/file-200"
+	fi
+	cd "$WORKDIR"
+
+	expect="$(message "FILE: ./file-200: file not available." 2>&1)"
+	result="$(opt_check_read "FILE" "./file-200" 2>&1)" ||:
+	
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests opt_check_read_test3
+opt_check_read_test3() {
+	. ../shell-args
+
+	if [ ! -f "$WORKDIR/file-644" ]; then
+		> "$WORKDIR/file-644"
+		chmod 644 "$WORKDIR/file-644"
+	fi
+	cd "$WORKDIR"
+
+	expect="$(readlink -ev ./file-644)"
+	result="$(opt_check_read "FILE" "./file-644" 2>&1)" ||:
+	
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests opt_check_read_test4
+opt_check_read_test4() {
+	. ../shell-args
+
+	if [ ! -e "$WORKDIR/broken-symlink" ]; then
+		ln -s "$WORKDIR/broken-symlink" "$WORKDIR/broken-symlink"
+	fi
+	cd "$WORKDIR"
+
+	expect="$(message "FILE: ./broken-symlink: file not available." 2>&1)"
+	result="$(opt_check_read "FILE" "./broken-symlink" 2>&1)" ||:
+	
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}

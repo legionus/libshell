@@ -1,0 +1,37 @@
+#!/bin/ash -efu
+
+appendTests opt_check_dir_test1
+opt_check_dir_test1() {
+	. ../shell-args
+
+	[ -d "$WORKDIR/dir-644" ] ||
+		mkdir -m644 "$WORKDIR/dir-644"
+	cd "$WORKDIR"
+
+	expect="$(message "DIR: ./dir-644: directory not available." 2>&1)"
+	result="$(opt_check_dir "DIR" "./dir-644" 2>&1)" ||:
+	rmdir "dir-644"
+
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests opt_check_dir_test2
+opt_check_dir_test2() {
+	. ../shell-args
+
+	[ -d "$WORKDIR/dir-755" ] ||
+		mkdir -m755 "$WORKDIR/dir-755"
+	cd "$WORKDIR"
+
+	expect="$(readlink -ev ./dir-755 2>&1)" ||:
+	result="$(opt_check_dir "DIR" "./dir-755" 2>&1)" ||:
+	rmdir "dir-755"
+
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}

@@ -1,0 +1,49 @@
+#!/bin/ash -efu
+
+appendTests quote_sed_regexp_test1
+quote_sed_regexp_test1() {
+	. ../shell-quote
+	local string='.*'
+	local regexp="$(quote_sed_regexp "$string")"
+	local result="$(printf '%s\n' "$string passed" |sed -e "s/^$regexp/test/")"
+	if [ "$result" != 'test passed' ]; then
+		printf '%s' "$string"
+		return 1
+	fi
+}
+
+appendTests quote_sed_regexp_test2
+quote_sed_regexp_test2() {
+	. ../shell-quote
+	local string='[[:space:]]'
+	local regexp="$(quote_sed_regexp "$string")"
+	local result="$(printf '%s\n' "test $string" |sed -e "s/$regexp/passed/")"
+	if [ "$result" != 'test passed' ]; then
+		printf '%s' "$string"
+		return 1
+	fi
+}
+
+appendTests quote_sed_regexp_test3
+quote_sed_regexp_test3() {
+	. ../shell-quote
+	local string='t{1,3}'
+	local regexp="$(quote_sed_regexp "$string")"
+	local result="$(printf '%s\n' "test$string passed" |sed -e "s/$regexp//")"
+	if [ "$result" != 'test passed' ]; then
+		printf '%s' "$string"
+		return 1
+	fi
+}
+
+appendTests quote_sed_regexp_test4
+quote_sed_regexp_test4() {
+	. ../shell-quote
+	local string='&\1'
+	local regexp="$(quote_sed_regexp "$string")"
+	local result="$(printf '%s\n' "test not passed" |sed -e "s/\(not\)/$regexp/")" #"
+	if [ "$result" != 'test &\1 passed' ]; then
+		printf '%s' "$string"
+		return 1
+	fi
+}
