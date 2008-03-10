@@ -114,6 +114,7 @@ __included_shell_getopt=1
 
 GETOPT_ALLOW_UNKNOWN=
 GETOPT_ALLOW_ABBREV=1
+GETOPT_ALLOW_ALTERNATIVE=
 OPTERR=1
 OPTTYP=
 OPTUKN=
@@ -191,17 +192,24 @@ getoptex() {
 
 		OPTIND=$(($OPTIND+1)) # skip option's argument
 	}
+	local allow_alt="${GETOPT_ALLOW_ALTERNATIVE-}"
 	getoptex_option_long() {
 		case "$2" in
-			--$optpttr=*)
+			--$optpttr=*|-$optpttr=*)
+				[ -n "$allow_alt${2#-$optpttr=*}" ] ||
+					return 0
 				[ "$1" != ';' ] &&
 					OPTTYP="$1" ||
 					{ getoptex_badarg; return 3; }
 
-				OPTARG="${2#--$optpttr=}"
+				[ -z "$allow_alt" ] &&
+					OPTARG="${2#--$optpttr=}" ||
+					OPTARG="${2#-$optpttr=}"
 				return 1
 				;;
-			--$optpttr)
+			--$optpttr|-$optpttr)
+				[ -n "$allow_alt${2#-$optpttr}" ] ||
+					return 0
 				getoptex_argument "$1" "$3" ||
 					return 3
 				return 1
@@ -374,11 +382,11 @@ __getopt_help() {
 	   or: $PROG [options] -o|--options optstring [options] [--] parameters
 
 	Options ignored:
-	  -a, --alternative            Allow long options starting with single -;
 	  -s, --shell=shell            Set shell quoting conventions;
 	  -u, --unqote                 Do not quote the output;
 
 	Options:
+	  -a, --alternative            Allow long options starting with single -;
 	  -l, --longoptions=longopts   Long options to be recognized;
 	  -n, --name=progname          The name under which errors are reported;
 	  -o, --options=optstring      Short options to be recognized;
@@ -394,7 +402,7 @@ __getopt_help() {
 }
 
 getopt() {
-	local PROG='getopt' OPTERR=1 rc=0 prg= opts= lopts= quiet_output=
+	local PROG='getopt' OPTERR=1 rc=0 prg= opts= lopts= quiet_output= alt=
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" || rc=$?; do
 		case "$rc" in
@@ -403,6 +411,7 @@ getopt() {
 		esac
 
 		case "$OPTOPT" in
+			a|alternative) alt=1 ;;
 			n|name) prg="$OPTARG" ;;
 			o|options) opts="$OPTARG" ;;
 			l|longoptions) lopts="$OPTARG" ;;
@@ -442,7 +451,7 @@ getopt() {
 		esac
 	done
 
-	local OPTIND=1 OPTOFS=
+	local OPTIND=1 OPTOFS= GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
 	local out=' -- '
 
 	out_arg() {
