@@ -15,6 +15,7 @@ finishTests() {
 for s in \
 	quote_sed_regexp quote_shell string_quote_remove \
 	opt_check_dir opt_check_number opt_check_read \
+	getopt \
 	;
 do
 	. "./$s"
