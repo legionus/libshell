@@ -154,11 +154,9 @@ getoptex() {
 		OPTOPT='?'
 	}
 	getoptex_argument() {
-		[ "$1" = ':' ] ||
+		[ "$OPTTYP" = ':' ] ||
 			return 0
-
-		OPTTYP="$1"
-		OPTARG="$2"
+		OPTARG="$1"
 		# Added test on following argument being an option identified by '-' this way #
 		# the routine no longer takes options as an argument thus breaking error #
 		# detection. 2004-04-04 by raphael at oninet dot pt #
@@ -169,10 +167,10 @@ getoptex() {
 		OPTIND=$(($OPTIND+1)) # skip option's argument
 	}
 	getoptex_option_long() {
-		local arg="$2" v p
+		local arg="$1" v p
 		for p in '--' ${GETOPT_ALLOW_ALTERNATIVE:+'-'}; do
 			if [ -n "${GETOPT_ALLOW_ABBREV-}" ]; then
-				arg="${2%%=*}" v="${2#*=}" o="$p$OPTOPT"
+				arg="${1%%=*}" v="${1#*=}" o="$p$OPTOPT"
 				if [ -z "${o##$arg*}" ]; then
 					[ "$arg" != "$v" ] &&
 						arg="$o=$v" ||
@@ -182,14 +180,13 @@ getoptex() {
 			fi
 			case "$arg" in
 				$p$OPTOPT=*)
-					[ "$1" != ';' ] &&
-						OPTTYP="$1" ||
+					[ -n "$OPTTYP" ] ||
 						{ getoptex_badarg; return 3; }
 					OPTARG="${arg#$p$OPTOPT=}"
 					return 1
 					;;
 				$p$OPTOPT)
-					getoptex_argument "$1" "$3" ||
+					getoptex_argument "$2" ||
 						return 3
 					return 1
 					;;
@@ -197,21 +194,20 @@ getoptex() {
 		done
 	}
 	getoptex_option_short() {
-		local o="-${2#-${OPTOFS-}}"
+		local o="-${1#-${OPTOFS-}}"
 		case "$o" in
 			-$OPTOPT)
 				OPTOFS=
-				getoptex_argument "$1" "$3" ||
+				getoptex_argument "$2" ||
 					return 3
 				return 1
 				;;
 			-$OPTOPT*)
-				if [ "$1" = ';' ]; then # an option with no argument is in a chain of options
+				if [ -z "$OPTTYP" ]; then # an option with no argument is in a chain of options
 					OPTOFS="${OPTOFS-}?" # move to the next option in the chain
 					OPTIND=$(($OPTIND-1)) # the chain still has other options
 				else
 					OPTOFS=
-					OPTTYP="$1"
 					OPTARG="${o#-$OPTOPT}"
 				fi
 				return 1
@@ -234,16 +230,16 @@ getoptex() {
 			OPTOPT="${opt%[;.:]}"
 			OPTARG=
 			OPTTYP=
-			argtype="${opt#$OPTOPT}"
+			[ "$OPTTYP" = ';' ] ||
+				OPTTYP="${opt#$OPTOPT}"
 
 			cmd=long
 			[ "${#OPTOPT}" -gt 1 ] ||
 				cmd=short
 
-			getoptex_option_$cmd "${argtype:-;}" "$1" "${2-}" ||
+			getoptex_option_$cmd "$1" "${2-}" ||
 				return $(($?-1))
 		done
-
 		OPTOPT='?'
 		OPTARG=
 
