@@ -247,7 +247,7 @@ getoptex() {
 			OPTUKN="${OPTUKN:+$OPTUKN } \"$(quote_shell "$1")\""
 			return 0
 		fi
-		message "invalid option: $1"
+		message "unrecognized option \`$1'"
 		return 2
 	fi
 	OPTOPT='?'
@@ -375,7 +375,7 @@ __getopt_help() {
 }
 
 getopt() {
-	local PROG='getopt' OPTERR=1 rc=0 prg= opts= lopts= quiet_output= alt=
+	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt=
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" || rc=$?; do
 		case "$rc" in
@@ -429,14 +429,13 @@ getopt() {
 	done
 
 	local OPTIND=1 OPTOFS= GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
-	local out=' -- '
+	local rc=0 ret=0 out=' -- '
 
 	out_arg() {
 		shift $(($OPTIND-1))
 		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
 	}
 
-	rc=0
 	PROG="$prg"
 	while getoptex "$opts" "$@" || rc=$?; do
 		case "$rc" in
@@ -450,7 +449,7 @@ getopt() {
 					break
 				continue
 				;;
-			2)	break
+			2)	ret=1
 				;;
 		esac
 		[ "$OPTOPT" != '?' ] ||
@@ -461,9 +460,6 @@ getopt() {
 		out="${out%% -- *} $pfx$OPTOPT ${OPTTYP:+'$OPTARG'} -- ${out#* -- }"
 	done
 
-	[ $rc -ne 2 ] ||
-		return 1
-
 	shift $(($OPTIND-1))
 	set -- "$@"
 	while [ "$#" -gt 0 ]; do
@@ -473,6 +469,7 @@ getopt() {
 
 	[ -n "$quiet_output" ] ||
 		printf '%s\n' "$out${OPTUKN:+$OPTUKN}"
+	return $ret
 }
 
 fi #__included_shell_getopt
