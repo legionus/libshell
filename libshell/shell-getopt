@@ -147,30 +147,6 @@ getoptex() {
 	[ "$OPTIND" -lt "$#" ] ||
 		return 1
 
-	getoptex_make_optpttr() {
-		if [ -z "${GETOPT_ALLOW_ABBREV-}" -o "${#OPTOPT}" -eq 1 ]; then
-			optpttr="$OPTOPT"
-			return
-		fi
-		local c o p=
-		while :; do
-			c=0
-			p="$p?"
-
-			for o in $optlist; do
-				o="${o%[:.;]}"
-				[ "$o" = "${o#${OPTOPT%$p}}" ] ||
-					c=$(($c+1))
-				[ $c -lt 2 ] ||
-					break 2
-			done
-
-			[ ${#OPTOPT} -gt ${#p} ] ||
-				break
-		done
-		p="${p#?}"
-		optpttr="${OPTOPT%$p}${p:+*}"
-	}
 	getoptex_badarg() {
 		[ -z "${OPTERR-}" ] ||
 			message "$OPTOPT must have an argument"
@@ -192,53 +168,58 @@ getoptex() {
 
 		OPTIND=$(($OPTIND+1)) # skip option's argument
 	}
-	local allow_alt="${GETOPT_ALLOW_ALTERNATIVE-}"
 	getoptex_option_long() {
-		case "$2" in
-			--$optpttr=*|-$optpttr=*)
-				[ -n "$allow_alt${2#-$optpttr=*}" ] ||
-					return 0
-				[ "$1" != ';' ] &&
-					OPTTYP="$1" ||
-					{ getoptex_badarg; return 3; }
-
-				[ -z "$allow_alt" ] &&
-					OPTARG="${2#--$optpttr=}" ||
-					OPTARG="${2#-$optpttr=}"
-				return 1
-				;;
-			--$optpttr|-$optpttr)
-				[ -n "$allow_alt${2#-$optpttr}" ] ||
-					return 0
-				getoptex_argument "$1" "$3" ||
-					return 3
-				return 1
-				;;
-		esac
+		local arg="$2" v p
+		for p in '--' ${GETOPT_ALLOW_ALTERNATIVE:+'-'}; do
+			if [ -n "${GETOPT_ALLOW_ABBREV-}" ]; then
+				arg="${2%%=*}" v="${2#*=}" o="$p$OPTOPT"
+				if [ -z "${o##$arg*}" ]; then
+					[ "$arg" != "$v" ] &&
+						arg="$o=$v" ||
+						arg="$o"
+					unset o v
+				fi
+			fi
+			case "$arg" in
+				$p$OPTOPT=*)
+					[ "$1" != ';' ] &&
+						OPTTYP="$1" ||
+						{ getoptex_badarg; return 3; }
+					OPTARG="${arg#$p$OPTOPT=}"
+					return 1
+					;;
+				$p$OPTOPT)
+					getoptex_argument "$1" "$3" ||
+						return 3
+					return 1
+					;;
+			esac
+		done
 	}
 	getoptex_option_short() {
-		case "$2" in
-			-$optpttr)
+		local o="-${2#-${OPTOFS-}}"
+		case "$o" in
+			-$OPTOPT)
 				OPTOFS=
 				getoptex_argument "$1" "$3" ||
 					return 3
 				return 1
 				;;
-			-$optpttr*)
+			-$OPTOPT*)
 				if [ "$1" = ';' ]; then # an option with no argument is in a chain of options
 					OPTOFS="${OPTOFS-}?" # move to the next option in the chain
 					OPTIND=$(($OPTIND-1)) # the chain still has other options
 				else
 					OPTOFS=
 					OPTTYP="$1"
-					OPTARG="${2#-$OPTOPT}"
+					OPTARG="${o#-$OPTOPT}"
 				fi
 				return 1
 				;;
 		esac
 	}
 
-    	local optlist="${1#;}"
+	local optlist="${1#;}"
 	shift $OPTIND
 
 	# test whether $1 is an option.
@@ -248,22 +229,18 @@ getoptex() {
 	elif [ "$1" != '-' -a "$1" != "${1#-}" ]; then
 		OPTIND=$(($OPTIND+1))
 
-		local cmd opttype o optpttr
-		o="-${1#-${OPTOFS-}}"
-
+		local cmd argtype
 		for opt in $optlist; do
 			OPTOPT="${opt%[;.:]}"
 			OPTARG=
 			OPTTYP=
-
-			opttype="${opt#$OPTOPT}"
-			getoptex_make_optpttr
+			argtype="${opt#$OPTOPT}"
 
 			cmd=long
 			[ "${#OPTOPT}" -gt 1 ] ||
 				cmd=short
 
-			getoptex_option_$cmd "${opttype:-;}" "$o" "${2-}" ||
+			getoptex_option_$cmd "${argtype:-;}" "$1" "${2-}" ||
 				return $(($?-1))
 		done
 
@@ -271,10 +248,10 @@ getoptex() {
 		OPTARG=
 
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
-			OPTUKN="${OPTUKN:+$OPTUKN } \"$(quote_shell "$o")\""
+			OPTUKN="${OPTUKN:+$OPTUKN } \"$(quote_shell "$1")\""
 			return 0
 		fi
-		message "invalid option: $o"
+		message "invalid option: $1"
 		return 2
 	fi
 	OPTOPT='?'
@@ -432,6 +409,10 @@ getopt() {
 	shift $(($OPTIND-1))
 	set -- "$@"
 
+	if [ -z "${opts##+*}" ]; then
+		opts="${opts#+}"
+		local GETOPT_ALLOW_UNKNOWN=1
+	fi
 	if [ -z "$opts" ]; then
 		if [ "$#" -gt 1 -a "${1#-}" = "$1" -a "$1" != '--' ]; then
 			opts="$1"
@@ -442,7 +423,7 @@ getopt() {
 			return 2
 		fi
 	fi
-	opts="$opts${lopts:+,$lopts}"
+	opts="${lopts:+$lopts,}$opts"
 	while :; do
 		case "$opts" in
 			*,*)  opts="${opts%%,*} ${opts#*,}"   ;;
