@@ -149,7 +149,7 @@ getoptex() {
 
 	getoptex_badarg() {
 		[ -z "${OPTERR-}" ] ||
-			message "$OPTOPT must have an argument"
+			message "option requires an argument -- $OPTOPT"
 		OPTARG="$OPTOPT"
 		OPTOPT='?'
 	}
