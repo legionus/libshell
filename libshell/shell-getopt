@@ -412,6 +412,8 @@ getopt() {
 	if [ -z "${opts##+*}" ]; then
 		opts="${opts#+}"
 		local GETOPT_ALLOW_UNKNOWN=1
+	elif [ -z "${opts##-*}" ]; then
+		opts="${opts#-}"
 	fi
 	if [ -z "$opts" ]; then
 		if [ "$#" -gt 1 -a "${1#-}" = "$1" -a "$1" != '--' ]; then
