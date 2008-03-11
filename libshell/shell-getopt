@@ -164,6 +164,7 @@ getoptex() {
 		[ -n "$OPTARG" -a -n "${OPTARG%%-*}" ] ||
 			{ getoptex_badarg; return 1; }
 
+		OPTARG="${1#\#}"
 		OPTIND=$(($OPTIND+1)) # skip option's argument
 	}
 	getoptex_option_long() {
@@ -215,8 +216,11 @@ getoptex() {
 		esac
 	}
 
-	local optlist="${1#;}"
+	local optlist="${1#;}" value=
 	shift $OPTIND
+
+	[ "$#" -lt 2 ] ||
+		value="#$2"
 
 	# test whether $1 is an option.
 	if [ "$1" = '--' ]; then
@@ -237,7 +241,7 @@ getoptex() {
 			[ "${#OPTOPT}" -gt 1 ] ||
 				cmd=short
 
-			getoptex_option_$cmd "$1" "${2-}" ||
+			getoptex_option_$cmd "$1" "$value" ||
 				return $(($?-1))
 		done
 		OPTOPT='?'
@@ -386,7 +390,7 @@ getopt() {
 		case "$OPTOPT" in
 			a|alternative) alt=1 ;;
 			n|name) prg="$OPTARG" ;;
-			o|options) opts="$OPTARG" ;;
+			o|options) opts="$OPTARG " ;;
 			l|longoptions) lopts="$OPTARG" ;;
 			q|quiet) OPTERR= ;;
 			Q|quiet-output) quiet_output=1 ;;
