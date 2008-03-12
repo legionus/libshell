@@ -379,9 +379,9 @@ __getopt_help() {
 }
 
 getopt() {
-	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt=
+	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= rc
 
-	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" || rc=$?; do
+	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
 		case "$rc" in
 			2) __getopt_usage; return 2 ;;
 			1) break ;;
@@ -435,7 +435,7 @@ getopt() {
 	done
 
 	local OPTIND=1 OPTOFS= GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
-	local rc=0 ret=0 out=' -- '
+	local ret=0 out=' -- '
 
 	out_arg() {
 		shift $(($OPTIND-1))
@@ -443,7 +443,7 @@ getopt() {
 	}
 
 	PROG="$prg"
-	while getoptex "$opts" "$@" || rc=$?; do
+	while getoptex "$opts" "$@" && rc=0 || rc=$?; do
 		case "$rc" in
 			1)
 				[ $# -ge $OPTIND ] ||
