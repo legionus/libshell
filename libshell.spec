@@ -1,6 +1,6 @@
 Name: libshell
-Version: 0.0.2
-Release: alt4
+Version: 0.0.3
+Release: alt1
 
 Summary:  A library of shell functions
 License: GPL
@@ -27,6 +27,15 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Thu Mar 13 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.3-alt1
+- shell-getopt: getopt():
+  + Add --alternative handle;
+  + Allow empty arguments;
+  + Improve getopt(1) compatibility;
+  + Ignore first '-' in options.
+- shell-config:
+  + Add shell_config_del() and shell_config_comment() functions.
+
 * Sun Mar 09 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.2-alt4
 - shell-getopt: Move getopt(), getsubopt(), getopts() and getoptex()
   from experimental state.
