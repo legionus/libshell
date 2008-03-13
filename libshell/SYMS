@@ -7,6 +7,8 @@ shell-args	show_help
 shell-args	show_usage
 shell-config	shell_config_get
 shell-config	shell_config_set
+shell-config	shell_config_del
+shell-config	shell_config_comment
 shell-error	fatal
 shell-error	message
 shell-error	verbose

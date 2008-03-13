@@ -21,7 +21,7 @@ shell_config_get() {
 
 shell_config_set() {
 	[ "$#" -ge 3 -a "$#" -le 5 ] ||
-		fatal "Usage: shell_config_get file name value [read-delim [write-delim]]"
+		fatal "Usage: shell_config_set file name value [read-delim [write-delim]]"
 
 	local file="$1" name="$2" value="$3" r_delim="${4-=}" w_delim="${5-=}"
 	local n v nv= created=
@@ -57,6 +57,28 @@ shell_config_set() {
 	fi
 
 	printf '%s\n' "$name$w_delim$value" >> "$file"
+}
+
+shell_config_del() {
+	[ "$#" -ge 2 -a "$#" -le 3 ] ||
+		fatal "Usage: shell_config_del file name [delim]"
+	local file="$1" name="$2" delim="${3-=}"
+
+	[ -s "$file" ] ||
+		return 0
+	name="$(quote_sed_regexp "$name")"
+	sed -i -e "/^[[:space:]]*$name$delim/d" -- "$file"
+}
+
+shell_config_comment() {
+	[ "$#" -ge 2 -a "$#" -le 3 ] ||
+		fatal "Usage: shell_config_comment file name [delim]"
+	local file="$1" name="$2" delim="${3-=}"
+
+	[ -s "$file" ] ||
+		return 0
+	name="$(quote_sed_regexp "$name")"
+	sed -i -e "s/^[[:space:]]*$name$delim.*/${__shell_config_comment:-#}&/" -- "$file"
 }
 
 fi #__included_shell_config
