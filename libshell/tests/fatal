@@ -1,0 +1,49 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+appendTests fatal_test1
+fatal_test1() {
+	. ../shell-error
+	expect="$PROG: message message;"
+	result=`fatal "message message" 2>&1 |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests fatal_test2
+fatal_test2() {
+	. ../shell-error
+	expect="$PROG: message;message;"
+	result=`fatal "message
+message" 2>&1 |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests fatal_test3
+fatal_test3() {
+	. ../shell-error
+	zzz=ZZZ
+	expect="$PROG: message ZZZ message;"
+	result=`fatal "message $zzz message" 2>&1 |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests fatal_test4
+fatal_test4() {
+	. ../shell-error
+	expect="$PROG: message message;"
+	result=`{ fatal "message message" 2>&1; echo "another message"; } |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}

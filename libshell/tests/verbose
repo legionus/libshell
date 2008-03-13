@@ -1,0 +1,27 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+appendTests verbose_test1
+verbose_test1() {
+	. ../shell-error
+	verbose=1
+	expect="$PROG: message message;"
+	result=`verbose "message message" 2>&1 |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
+
+appendTests verbose_test2
+verbose_test2() {
+	. ../shell-error
+	verbose=
+	expect=
+	result=`verbose "message message" 2>&1 |tr '\n' ';'`
+	if [ "$result" != "$expect" ]; then
+		printf '%s' "$result"
+		return 1
+	fi
+}
