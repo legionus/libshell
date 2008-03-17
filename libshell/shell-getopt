@@ -230,52 +230,50 @@ getsubopt() {
 
 . shell-version
 
-__getopt_version() {
-	cat <<-EOF
-	$PROG version $libshell_version
-	Written by Alexey Gladkov <gladkov.alexey@gmail.com>
-
-	Copyright (C) 2008  Alexey Gladkov <gladkov.alexey@gmail.com>
-	This is free software; see the source for copying conditions.  There is NO
-	warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-	EOF
-}
-
-__getopt_usage() {
-	cat <<-EOF
-	Try \`$PROG --help' for more information.
-	EOF
-}
-
-__getopt_help() {
-	cat <<-EOF
-	Usage: $PROG optstring parameters
-	   or: $PROG [options] [--] optstring parameters
-	   or: $PROG [options] -o|--options optstring [options] [--] parameters
-
-	Options ignored:
-	  -s, --shell=shell            Set shell quoting conventions;
-	  -u, --unqote                 Do not quote the output;
-
-	Options:
-	  -a, --alternative            Allow long options starting with single -;
-	  -l, --longoptions=longopts   Long options to be recognized;
-	  -n, --name=progname          The name under which errors are reported;
-	  -o, --options=optstring      Short options to be recognized;
-	  -q, --quiet                  Disable error reporting;
-	  -Q, --quiet-output           No normal output;
-	  -T, --test                   Test for getopt version;
-	  -V, --version                Output version information;
-	  -h, --help                   This small usage guide.
-
-	Report bugs to http://bugzilla.altlinux.org/
-
-	EOF
-}
-
 GETOPT_POSIXLY_CORRECT=
 
 getopt() {
+	__getopt_version() {
+		cat <<-EOF
+		$PROG version $libshell_version
+		Written by Alexey Gladkov <gladkov.alexey@gmail.com>
+
+		Copyright (C) 2008  Alexey Gladkov <gladkov.alexey@gmail.com>
+		This is free software; see the source for copying conditions.  There is NO
+		warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+		EOF
+	}
+	__getopt_usage() {
+		cat <<-EOF
+		Try \`$PROG --help' for more information.
+		EOF
+	}
+	__getopt_help() {
+		cat <<-EOF
+		Usage: $PROG optstring parameters
+		   or: $PROG [options] [--] optstring parameters
+		   or: $PROG [options] -o|--options optstring [options] [--] parameters
+
+		Options ignored:
+		  -s, --shell=shell            Set shell quoting conventions;
+		  -u, --unqote                 Do not quote the output;
+
+		Options:
+		  -a, --alternative            Allow long options starting with single -;
+		  -l, --longoptions=longopts   Long options to be recognized;
+		  -n, --name=progname          The name under which errors are reported;
+		  -o, --options=optstring      Short options to be recognized;
+		  -q, --quiet                  Disable error reporting;
+		  -Q, --quiet-output           No normal output;
+		  -T, --test                   Test for getopt version;
+		  -V, --version                Output version information;
+		  -h, --help                   This small usage guide.
+
+		Report bugs to http://bugzilla.altlinux.org/
+
+		EOF
+	}
+
 	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= order= rc
 	local GETOPT_POSIXLY_CORRECT
 
@@ -339,7 +337,7 @@ getopt() {
 	! printenv POSIXLY_CORRECT >/dev/null 2>&1 ||
 		GETOPT_POSIXLY_CORRECT=1
 
-	out_arg() {
+	__getopt_out_arg() {
 		shift $(($OPTIND-1))
 		[ -z "$order" ] &&
 			out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\"" ||
@@ -352,7 +350,7 @@ getopt() {
 			1)
 				[ $# -ge $OPTIND -a -z "${GETOPT_POSIXLY_CORRECT-}" ] ||
 					break
-				out_arg "$@"
+				__getopt_out_arg "$@"
 				OPTIND=$(($OPTIND+1))
 				[ "$OPTTYP" != '--' ] ||
 					break
