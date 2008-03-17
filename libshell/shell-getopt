@@ -116,6 +116,7 @@ getoptex() {
 	[ "$#" -lt 2 ] ||
 		value="#$2"
 
+	OPTTYP=
 	# test whether $1 is an option.
 	if [ "$1" = '--' ]; then
 		OPTTYP='--'
@@ -272,8 +273,11 @@ __getopt_help() {
 	EOF
 }
 
+GETOPT_POSIXLY_CORRECT=
+
 getopt() {
 	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= rc
+	local GETOPT_POSIXLY_CORRECT
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
 		case "$rc" in
@@ -305,7 +309,7 @@ getopt() {
 
 	if [ -z "${opts##+*}" ]; then
 		opts="${opts#+}"
-		local GETOPT_ALLOW_UNKNOWN=1
+		GETOPT_POSIXLY_CORRECT=1
 	elif [ -z "${opts##-*}" ]; then
 		opts="${opts#-}"
 	fi
@@ -331,6 +335,9 @@ getopt() {
 	local OPTIND=1 OPTOFS= GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
 	local ret=0 out=' -- '
 
+	! printenv POSIXLY_CORRECT >/dev/null 2>&1 ||
+		GETOPT_POSIXLY_CORRECT=1
+
 	out_arg() {
 		shift $(($OPTIND-1))
 		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
@@ -340,9 +347,8 @@ getopt() {
 	while getoptex "$opts" "$@" && rc=0 || rc=$?; do
 		case "$rc" in
 			1)
-				[ $# -ge $OPTIND ] ||
+				[ $# -ge $OPTIND -a -z "${GETOPT_POSIXLY_CORRECT-}" ] ||
 					break
-				rc=0
 				out_arg "$@"
 				OPTIND=$(($OPTIND+1))
 				[ "$OPTTYP" != '--' ] ||
