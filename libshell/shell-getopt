@@ -276,7 +276,7 @@ __getopt_help() {
 GETOPT_POSIXLY_CORRECT=
 
 getopt() {
-	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= rc
+	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= order= rc
 	local GETOPT_POSIXLY_CORRECT
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
@@ -312,6 +312,7 @@ getopt() {
 		GETOPT_POSIXLY_CORRECT=1
 	elif [ -z "${opts##-*}" ]; then
 		opts="${opts#-}"
+		order=1
 	fi
 	if [ -z "$opts" ]; then
 		if [ "$#" -gt 1 -a "${1#-}" = "$1" -a "$1" != '--' ]; then
@@ -340,7 +341,9 @@ getopt() {
 
 	out_arg() {
 		shift $(($OPTIND-1))
-		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
+		[ -z "$order" ] &&
+			out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\"" ||
+			out="${out%% -- *} \"$(quote_shell "$1")\" -- ${out#* -- }"
 	}
 
 	PROG="$prg"
