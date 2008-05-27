@@ -34,7 +34,7 @@ fi
 # or host.
 #
 readonly regex_domain="([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)\.$regex_tld"
-readonly regex_email="([_a-z0-9-]+(\.[_a-z0-9-]+)*)@($regex_ipv4|$regex_domain)"
+readonly regex_email="([_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*)@($regex_domain)"
 
 valid_email() {
 	local email="$1"
