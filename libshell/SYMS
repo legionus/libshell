@@ -16,8 +16,8 @@ shell-getopt	getopt
 shell-getopt	getoptex
 shell-getopt	getopts
 shell-getopt	getsubopt
+shell-ip-address	valid_ipv4
 shell-mail-address	valid_email
-shell-mail-address	valid_ipv4
 shell-quote	quote_sed_regexp
 shell-quote	quote_shell
 shell-quote	string_quote_remove
