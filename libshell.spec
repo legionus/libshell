@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.3
+Version: 0.0.4
 Release: alt1
 
 Summary:  A library of shell functions
@@ -27,6 +27,13 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Wed May 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.4-alt1
+- Add shell-ip-address to IP address validation;
+- Add shell-mail-address to mail address validation;
+- shell-getopt:
+  + Handle first '-' in short options;
+  + Fix POSIXLY_CORRECT mode.
+
 * Thu Mar 13 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.3-alt1
 - shell-getopt: getopt():
   + Add --alternative handle;
