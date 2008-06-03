@@ -1,20 +1,107 @@
 #!/bin/ash -efu
 
 . shell-error
+. shell-quote
 
-beginTests() { :; }
-finishTests() { :; }
+setUp() { :; }
+tearDown() { :; }
 
-startTest() { :; }
-endTest() { :; }
-
-run_or_exit() {
-	"$@" || fatal "$1() fail rc=$?"
-}
+setUpTest() { :; }
+tearDownTest() { :; }
 
 __shell_unit_tests=
 appendTests() {
 	__shell_unit_tests="$__shell_unit_tests $*"
+}
+
+shouldSkip() {
+	exit 2
+}
+
+# assertTrue([comment], condition)
+assertTrue() {
+	local comment condition
+	[ "$#" -lt 2 ] ||
+		{ comment="$1"; shift; }
+	condition="$1"; shift
+
+	if ! ( eval "$condition" ) >/dev/null; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
+		return 1
+	fi
+}
+
+# assertFalse([comment], condition)
+assertFalse() {
+	local comment condition
+	[ "$#" -lt 2 ] ||
+		{ comment="$1"; shift; }
+	condition="$1"; shift
+
+	if assertTrue "$condition"; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
+		return 1
+	fi
+}
+
+# assertEquals([comment], expected, actual)
+assertEquals() {
+	local comment expected actual
+	[ "$#" -lt 3 ] ||
+		{ comment="$1"; shift; }
+	expected="$(quote_shell "$1")"; shift
+	actual="$(quote_shell "$1")"; shift
+
+	assertTrue "$comment" "[ \"$expected\" = \"$actual\" ]" ||
+		return 1
+}
+
+# assertSame([comment], expected, actual)
+assertSame() {
+	assertEquals "${@-}"
+}
+
+# assertNotEquals([comment], expected, actual)
+assertNotEquals() {
+	local comment expected actual
+	[ "$#" -lt 3 ] ||
+		{ comment="$1"; shift; }
+	expected="$1"; shift
+	actual="$1"; shift
+
+	if assertEquals "$expected" "$actual"; then
+		printf '%s' "$comment"
+		return 1
+	fi
+}
+
+# assertNotSame([comment], expected, actual)
+assertNotSame() {
+	assertNotEquals "${@-}"
+}
+
+# assertNull([comment], value)
+assertNull() {
+	local comment value
+	[ "$#" -lt 2 ] ||
+		{ comment="$1"; shift; }
+	value="$(quote_shell "$1")"; shift
+
+	assertTrue "$comment" "[ -z \"$value\" ]" ||
+		return 1
+}
+
+# assertNotNull([comment], value)
+assertNotNull() {
+	local comment value
+	[ "$#" -lt 2 ] ||
+		{ comment="$1"; shift; }
+	value="$(quote_shell "$1")"; shift
+
+	assertTrue "$comment" "[ -n \"$value\" ]" ||
+		return 1
 }
 
 messageTest() {
@@ -39,16 +126,21 @@ showSummary() {
 }
 
 runUnitTests() {
-	run_or_exit beginTests
+
+	run_or_exit() {
+		"$@" || fatal "$1() fail rc=$?"
+	}
+
+	run_or_exit setUp
 
 	set -- ${__shell_unit_tests-}
 
 	local rc passed=0 failed=0 skipped=0 total="$#"
 
 	while [ "$#" -gt 0 ]; do
-		run_or_exit startTest
+		run_or_exit setUpTest
 
-		rc=0		
+		rc=0
 		msg="$("$1")" || rc=$?
 		
 		case "$rc" in
@@ -58,9 +150,9 @@ runUnitTests() {
 		esac
 		run_or_exit messageTest "$1" "$msg" "$rc"
 
-		run_or_exit endTest
+		run_or_exit tearDownTest
 		shift
 	done
 	run_or_exit showSummary
-	run_or_exit finishTests
+	run_or_exit tearDown
 }

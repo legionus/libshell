@@ -8,10 +8,7 @@ opt_check_number_test1() {
 	expect="1234"
 	result="$(opt_check_number "NUM" "$string" 2>&1)" ||:
 
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests opt_check_number_test2
@@ -22,10 +19,7 @@ opt_check_number_test2() {
 	expect="$(message "NUM: $string: invalid number." 2>&1)"
 	result="$(opt_check_number "NUM" "$string" 2>&1)" ||:
 
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests opt_check_number_test3
@@ -36,8 +30,5 @@ opt_check_number_test3() {
 	expect="$(message "NUM: $string: invalid number." 2>&1)"
 	result="$(opt_check_number "NUM" "$string" 2>&1)" ||:
 
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }

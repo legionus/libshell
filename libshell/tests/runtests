@@ -4,11 +4,11 @@
 . ./shell-unittest
 
 WORKDIR=
-beginTests() {
+setUp() {
 	WORKDIR="$(mktemp -d "$PROG.XXXXXXXXX")"
 }
 
-finishTests() {
+tearDown() {
 	rm -rf -- "$WORKDIR"
 }
 

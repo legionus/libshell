@@ -6,10 +6,7 @@ quote_shell_test1() {
 	local string='`true`'
 	local result
 	eval "result=\"$(quote_shell "$string")\""
-	if [ "$result" != "$string" ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" "$string"
 }
 
 appendTests quote_shell_test2
@@ -18,10 +15,7 @@ quote_shell_test2() {
 	local string='$(true)'
 	local result
 	eval "result=\"$(quote_shell "$string")\""
-	if [ "$result" != "$string" ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" "$string"
 }
 
 appendTests quote_shell_test3
@@ -30,8 +24,5 @@ quote_shell_test3() {
 	local string='\`true\`; echo zzz'
 	local result
 	eval "result=\"$(quote_shell "$string")\""
-	if [ "$result" != "$string" ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" "$string"
 }

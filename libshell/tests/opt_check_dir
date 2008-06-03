@@ -12,10 +12,7 @@ opt_check_dir_test1() {
 	result="$(opt_check_dir "DIR" "./dir-644" 2>&1)" ||:
 	rmdir "dir-644"
 
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests opt_check_dir_test2
@@ -30,8 +27,5 @@ opt_check_dir_test2() {
 	result="$(opt_check_dir "DIR" "./dir-755" 2>&1)" ||:
 	rmdir "dir-755"
 
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }

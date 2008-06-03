@@ -14,10 +14,7 @@ getopt_test1() {
 	expect=`{ getopt -n TEST -o ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test2
@@ -26,10 +23,7 @@ getopt_test2() {
 	expect=`{ getopt -n TEST -o ' ' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o ' ' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test3
@@ -38,10 +32,7 @@ getopt_test3() {
 	expect=`{ getopt -n TEST -o '' -l ' ' -- ZZZ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o '' -l ' ' -- ZZZ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 
@@ -51,10 +42,7 @@ getopt_test4() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -- -abc -a -b -c ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -- -abc -a -b -c ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test5
@@ -63,10 +51,7 @@ getopt_test5() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test6
@@ -75,10 +60,7 @@ getopt_test6() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test7
@@ -87,10 +69,7 @@ getopt_test7() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test8
@@ -99,10 +78,7 @@ getopt_test8() {
 	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test9
@@ -111,10 +87,7 @@ getopt_test9() {
 	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test10
@@ -123,10 +96,7 @@ getopt_test10() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test11
@@ -135,10 +105,7 @@ getopt_test11() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test12
@@ -147,10 +114,7 @@ getopt_test12() {
 	expect=`{ getopt -n TEST -o 'a:,b,c' -- -abc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a:,b,c' -- -abc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test13
@@ -159,10 +123,7 @@ getopt_test13() {
 	expect=`{ getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test14
@@ -171,10 +132,7 @@ getopt_test14() {
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 appendTests getopt_test15
@@ -183,10 +141,7 @@ getopt_test15() {
 	expect=`{ getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }
 
 
@@ -196,8 +151,5 @@ getopt_test16() {
 	expect=`{ getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	if [ "$result" != "$expect" ]; then
-		printf '%s' "$result"
-		return 1
-	fi
+	assertEquals "$result" "$result" "$expect"
 }

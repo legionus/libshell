@@ -6,10 +6,7 @@ string_quote_remove_test1() {
 
 	local string='"test passed"'
 	local result="$(string_quote_remove "$string")"
-	if [ "$result" != 'test passed' ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" 'test passed'
 }
 
 appendTests string_quote_remove_test2
@@ -18,10 +15,7 @@ string_quote_remove_test2() {
 
 	local string="'test passed'"
 	local result="$(string_quote_remove "$string")"
-	if [ "$result" != 'test passed' ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" 'test passed'
 }
 
 appendTests string_quote_remove_test3
@@ -30,10 +24,7 @@ string_quote_remove_test3() {
 
 	local string="'test passed\""
 	local result="$(string_quote_remove "$string")"
-	if [ "$result" != "'test passed\"" ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" "'test passed\""
 }
 
 appendTests string_quote_remove_test4
@@ -42,8 +33,5 @@ string_quote_remove_test4() {
 
 	local string="test ' passed"
 	local result="$(string_quote_remove "$string")"
-	if [ "$result" != "test ' passed" ]; then
-		printf '%s' "$string"
-		return 1
-	fi
+	assertEquals "$string" "$result" "test ' passed"
 }
