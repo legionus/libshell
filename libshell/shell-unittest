@@ -1,22 +1,35 @@
 #!/bin/ash -efu
 
+if [ -z "${__included_shell_unittest-}" ]; then
+__included_shell_unittest=1
+
 . shell-error
 
+# Called before each test is run.
 setUp() { :; }
+
+# Called after each test is run.
 tearDown() { :; }
 
+# Called before any test is run.
 setUpTests() { :; }
+
+# Called after any test is run.
 tearDownTests() { :; }
 
+# Register new testing function.
+# appendTests (TestFunc)
 __shell_unit_tests=
 appendTests() {
 	__shell_unit_tests="$__shell_unit_tests $*"
 }
 
+# Skip test (called in testing function)
 shouldSkip() {
 	exit 2
 }
 
+# Asserts that a given shell test condition (or integer) is true.
 # assertTrue([comment], condition)
 # assertTrue([comment], integer)
 assertTrue() {
@@ -38,6 +51,7 @@ assertTrue() {
 	fi
 }
 
+# Asserts that a given shell test condition (or integer) is false.
 # assertFalse([comment], condition)
 # assertFalse([comment], integer)
 assertFalse() {
@@ -59,6 +73,7 @@ assertFalse() {
 	fi
 }
 
+# Asserts that two arguments are equal to one another.
 # assertEquals([comment], expected, actual)
 assertEquals() {
 	local comment expected actual
@@ -74,11 +89,13 @@ assertEquals() {
 	fi
 }
 
+# Asserts that two arguments are same.
 # assertSame([comment], expected, actual)
 assertSame() {
 	assertEquals "${@-}"
 }
 
+# Asserts that two arguments are not equal to one another.
 # assertNotEquals([comment], expected, actual)
 assertNotEquals() {
 	local comment expected actual
@@ -94,11 +111,13 @@ assertNotEquals() {
 	fi
 }
 
+# Asserts that two arguments are not same.
 # assertNotSame([comment], expected, actual)
 assertNotSame() {
 	assertNotEquals "${@-}"
 }
 
+# Asserts that argument is a zero-length string.
 # assertNull([comment], value)
 assertNull() {
 	local comment value
@@ -113,6 +132,7 @@ assertNull() {
 	fi
 }
 
+# Asserts that argument is not empty string.
 # assertNotNull([comment], value)
 assertNotNull() {
 	local comment value
@@ -127,6 +147,7 @@ assertNotNull() {
 	fi
 }
 
+# Display status message after each test.
 messageTest() {
 	case "$3" in
 		0) printf '[done]' ;;
@@ -136,6 +157,7 @@ messageTest() {
 	printf ' (%s) %s\n' "$1" "$2"
 }
 
+# Display summary statistic.
 showSummary() {
 	if [ "$total" -eq 0 ]; then
 		message "Nothing to do"
@@ -148,6 +170,7 @@ showSummary() {
 	printf 'tests total:   %6d\n\n' "$total"
 }
 
+# Run tests.
 runUnitTests() {
 
 	run_or_exit() {
@@ -165,7 +188,7 @@ runUnitTests() {
 
 		rc=0
 		msg="$("$1")" || rc=$?
-		
+
 		case "$rc" in
 			0) passed=$(($passed+1)) ;;
 			1) failed=$(($failed+1)) ;;
@@ -179,3 +202,5 @@ runUnitTests() {
 	run_or_exit showSummary
 	run_or_exit tearDownTests
 }
+
+fi #__included_shell_unittest

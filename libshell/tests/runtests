@@ -1,7 +1,6 @@
 #!/bin/ash -efu
 
-. shell-error
-. ./shell-unittest
+. ../shell-unittest
 
 WORKDIR=
 setUpTests() {
