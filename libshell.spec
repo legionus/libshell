@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.4
+Version: 0.0.5
 Release: alt1
 
 Summary:  A library of shell functions
@@ -27,6 +27,9 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Thu Jun 05 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.5-alt1
+- Add shell-unittest for writing Unit tests.
+
 * Wed May 28 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.4-alt1
 - Add shell-ip-address to IP address validation;
 - Add shell-mail-address to mail address validation;
