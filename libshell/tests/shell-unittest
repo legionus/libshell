@@ -1,13 +1,12 @@
 #!/bin/ash -efu
 
 . shell-error
-. shell-quote
 
 setUp() { :; }
 tearDown() { :; }
 
-setUpTest() { :; }
-tearDownTest() { :; }
+setUpTests() { :; }
+tearDownTests() { :; }
 
 __shell_unit_tests=
 appendTests() {
@@ -51,11 +50,14 @@ assertEquals() {
 	local comment expected actual
 	[ "$#" -lt 3 ] ||
 		{ comment="$1"; shift; }
-	expected="$(quote_shell "$1")"; shift
-	actual="$(quote_shell "$1")"; shift
+	expected="$1"; shift
+	actual="$1"; shift
 
-	assertTrue "$comment" "[ \"$expected\" = \"$actual\" ]" ||
+	if [ "$expected" != "$actual" ]; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		return 1
+	fi
 }
 
 # assertSame([comment], expected, actual)
@@ -71,8 +73,9 @@ assertNotEquals() {
 	expected="$1"; shift
 	actual="$1"; shift
 
-	if assertEquals "$expected" "$actual"; then
-		printf '%s' "$comment"
+	if [ "$expected" = "$actual" ]; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		return 1
 	fi
 }
@@ -87,10 +90,13 @@ assertNull() {
 	local comment value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
-	value="$(quote_shell "$1")"; shift
+	value="$1"; shift
 
-	assertTrue "$comment" "[ -z \"$value\" ]" ||
+	if [ -n "$value" ]; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		return 1
+	fi
 }
 
 # assertNotNull([comment], value)
@@ -98,10 +104,13 @@ assertNotNull() {
 	local comment value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
-	value="$(quote_shell "$1")"; shift
+	value="$1"; shift
 
-	assertTrue "$comment" "[ -n \"$value\" ]" ||
+	if [ -z "$value" ]; then
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		return 1
+	fi
 }
 
 messageTest() {
@@ -131,14 +140,14 @@ runUnitTests() {
 		"$@" || fatal "$1() fail rc=$?"
 	}
 
-	run_or_exit setUp
+	run_or_exit setUpTests
 
 	set -- ${__shell_unit_tests-}
 
 	local rc passed=0 failed=0 skipped=0 total="$#"
 
 	while [ "$#" -gt 0 ]; do
-		run_or_exit setUpTest
+		run_or_exit setUp
 
 		rc=0
 		msg="$("$1")" || rc=$?
@@ -150,9 +159,9 @@ runUnitTests() {
 		esac
 		run_or_exit messageTest "$1" "$msg" "$rc"
 
-		run_or_exit tearDownTest
+		run_or_exit tearDown
 		shift
 	done
 	run_or_exit showSummary
-	run_or_exit tearDown
+	run_or_exit tearDownTests
 }
