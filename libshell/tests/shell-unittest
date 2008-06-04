@@ -27,7 +27,7 @@ assertTrue() {
 	if ! ( eval "$condition" ) >/dev/null; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
@@ -41,7 +41,7 @@ assertFalse() {
 	if assertTrue "$condition"; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
@@ -56,7 +56,7 @@ assertEquals() {
 	if [ "$expected" != "$actual" ]; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
@@ -76,7 +76,7 @@ assertNotEquals() {
 	if [ "$expected" = "$actual" ]; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
@@ -95,7 +95,7 @@ assertNull() {
 	if [ -n "$value" ]; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
@@ -109,7 +109,7 @@ assertNotNull() {
 	if [ -z "$value" ]; then
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
-		return 1
+		exit 1
 	fi
 }
 
