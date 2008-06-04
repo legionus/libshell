@@ -18,11 +18,18 @@ shouldSkip() {
 }
 
 # assertTrue([comment], condition)
+# assertTrue([comment], integer)
 assertTrue() {
 	local comment condition
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
 	condition="$1"; shift
+
+	if [ -n "${condition##*[!0-9\-]*}" ]; then
+		[ $condition -ne 0 ] ||
+			return 0
+		return 1
+	fi
 
 	if ! ( eval "$condition" ) >/dev/null; then
 		[ -z "$comment" ] ||
