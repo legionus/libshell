@@ -181,7 +181,7 @@ runUnitTests() {
 
 	set -- ${__shell_unit_tests-}
 
-	local rc passed=0 failed=0 skipped=0 total="$#"
+	local retval=0 rc passed=0 failed=0 skipped=0 total="$#"
 
 	while [ "$#" -gt 0 ]; do
 		run_or_exit setUp
@@ -191,7 +191,7 @@ runUnitTests() {
 
 		case "$rc" in
 			0) passed=$(($passed+1)) ;;
-			1) failed=$(($failed+1)) ;;
+			1) failed=$(($failed+1)); retval=1; ;;
 			2) skipped=$(($skipped+1)) ;;
 		esac
 		run_or_exit messageTest "$1" "$msg" "$rc"
@@ -201,6 +201,8 @@ runUnitTests() {
 	done
 	run_or_exit showSummary
 	run_or_exit tearDownTests
+
+	return $retval
 }
 
 fi #__included_shell_unittest
