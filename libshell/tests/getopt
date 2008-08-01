@@ -8,8 +8,7 @@ normalize() {
 		-e 's/[[:space:]]\+$//'
 }
 
-appendTests getopt_test1
-getopt_test1() {
+getopt_test1() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -17,8 +16,7 @@ getopt_test1() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test2
-getopt_test2() {
+getopt_test2() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o ' ' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -26,8 +24,7 @@ getopt_test2() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test3
-getopt_test3() {
+getopt_test3() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o '' -l ' ' -- ZZZ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -36,8 +33,7 @@ getopt_test3() {
 }
 
 
-appendTests getopt_test4
-getopt_test4() {
+getopt_test4() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -- -abc -a -b -c ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -45,8 +41,7 @@ getopt_test4() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test5
-getopt_test5() {
+getopt_test5() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -54,8 +49,7 @@ getopt_test5() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test6
-getopt_test6() {
+getopt_test6() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -63,8 +57,7 @@ getopt_test6() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test7
-getopt_test7() {
+getopt_test7() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -72,8 +65,7 @@ getopt_test7() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test8
-getopt_test8() {
+getopt_test8() { # UnitTest
 	LANG=C
 	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -81,8 +73,7 @@ getopt_test8() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test9
-getopt_test9() {
+getopt_test9() { # UnitTest
 	LANG=C
 	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -90,8 +81,7 @@ getopt_test9() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test10
-getopt_test10() {
+getopt_test10() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -99,8 +89,7 @@ getopt_test10() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test11
-getopt_test11() {
+getopt_test11() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -108,8 +97,7 @@ getopt_test11() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test12
-getopt_test12() {
+getopt_test12() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a:,b,c' -- -abc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -117,8 +105,7 @@ getopt_test12() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test13
-getopt_test13() {
+getopt_test13() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -126,8 +113,7 @@ getopt_test13() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test14
-getopt_test14() {
+getopt_test14() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -135,8 +121,7 @@ getopt_test14() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests getopt_test15
-getopt_test15() {
+getopt_test15() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
@@ -145,8 +130,7 @@ getopt_test15() {
 }
 
 
-appendTests getopt_test16
-getopt_test16() {
+getopt_test16() { # UnitTest
 	LANG=C
 	expect=`{ getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt

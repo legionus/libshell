@@ -2,16 +2,14 @@
 
 PROG='TEST'
 
-appendTests fatal_test1
-fatal_test1() {
+fatal_test1() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message message;"
 	result=`fatal "message message" 2>&1 |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests fatal_test2
-fatal_test2() {
+fatal_test2() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message;message;"
 	result=`fatal "message
@@ -19,8 +17,7 @@ message" 2>&1 |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests fatal_test3
-fatal_test3() {
+fatal_test3() { # UnitTest
 	. ../shell-error
 	zzz=ZZZ
 	expect="$PROG: message ZZZ message;"
@@ -28,8 +25,7 @@ fatal_test3() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests fatal_test4
-fatal_test4() {
+fatal_test4() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message message;"
 	result=`{ fatal "message message" 2>&1; echo "another message"; } |tr '\n' ';'`

@@ -19,6 +19,7 @@ for s in \
 	;
 do
 	. "./$s"
+	registerTests "./$s"
 done
 
 runUnitTests

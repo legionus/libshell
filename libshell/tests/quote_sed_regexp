@@ -1,7 +1,6 @@
 #!/bin/ash -efu
 
-appendTests quote_sed_regexp_test1
-quote_sed_regexp_test1() {
+quote_sed_regexp_test1() { # UnitTest
 	. ../shell-quote
 	local string='.*'
 	local regexp="$(quote_sed_regexp "$string")"
@@ -9,8 +8,7 @@ quote_sed_regexp_test1() {
 	assertEquals "$string" "$result" 'test passed'
 }
 
-appendTests quote_sed_regexp_test2
-quote_sed_regexp_test2() {
+quote_sed_regexp_test2() { # UnitTest
 	. ../shell-quote
 	local string='[[:space:]]'
 	local regexp="$(quote_sed_regexp "$string")"
@@ -18,8 +16,7 @@ quote_sed_regexp_test2() {
 	assertEquals "$string" "$result" 'test passed'
 }
 
-appendTests quote_sed_regexp_test3
-quote_sed_regexp_test3() {
+quote_sed_regexp_test3() { # UnitTest
 	. ../shell-quote
 	local string='t{1,3}'
 	local regexp="$(quote_sed_regexp "$string")"
@@ -27,8 +24,7 @@ quote_sed_regexp_test3() {
 	assertEquals "$string" "$result" 'test passed'
 }
 
-appendTests quote_sed_regexp_test4
-quote_sed_regexp_test4() {
+quote_sed_regexp_test4() { # UnitTest
 	. ../shell-quote
 	local string='&\1'
 	local regexp="$(quote_sed_regexp "$string")"

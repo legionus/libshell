@@ -2,8 +2,7 @@
 
 PROG='TEST'
 
-appendTests verbose_test1
-verbose_test1() {
+verbose_test1() { # UnitTest
 	. ../shell-error
 	verbose=1
 	expect="$PROG: message message;"
@@ -11,8 +10,7 @@ verbose_test1() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests verbose_test2
-verbose_test2() {
+verbose_test2() { # UnitTest
 	. ../shell-error
 	verbose=
 	expect=

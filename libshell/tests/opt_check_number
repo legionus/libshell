@@ -1,7 +1,6 @@
 #!/bin/ash -efu
 
-appendTests opt_check_number_test1
-opt_check_number_test1() {
+opt_check_number_test1() { # UnitTest
 	. ../shell-args
 
 	string="1234"
@@ -11,8 +10,7 @@ opt_check_number_test1() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests opt_check_number_test2
-opt_check_number_test2() {
+opt_check_number_test2() { # UnitTest
 	. ../shell-args
 
 	string="0001"
@@ -22,8 +20,7 @@ opt_check_number_test2() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests opt_check_number_test3
-opt_check_number_test3() {
+opt_check_number_test3() { # UnitTest
 	. ../shell-args
 
 	string="1 2"

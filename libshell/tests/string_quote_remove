@@ -1,7 +1,6 @@
 #!/bin/sh
 
-appendTests string_quote_remove_test1
-string_quote_remove_test1() {
+string_quote_remove_test1() { # UnitTest
 	. ../shell-quote
 
 	local string='"test passed"'
@@ -9,8 +8,7 @@ string_quote_remove_test1() {
 	assertEquals "$string" "$result" 'test passed'
 }
 
-appendTests string_quote_remove_test2
-string_quote_remove_test2() {
+string_quote_remove_test2() { # UnitTest
 	. ../shell-quote
 
 	local string="'test passed'"
@@ -18,8 +16,7 @@ string_quote_remove_test2() {
 	assertEquals "$string" "$result" 'test passed'
 }
 
-appendTests string_quote_remove_test3
-string_quote_remove_test3() {
+string_quote_remove_test3() { # UnitTest
 	. ../shell-quote
 
 	local string="'test passed\""
@@ -27,8 +24,7 @@ string_quote_remove_test3() {
 	assertEquals "$string" "$result" "'test passed\""
 }
 
-appendTests string_quote_remove_test4
-string_quote_remove_test4() {
+string_quote_remove_test4() { # UnitTest
 	. ../shell-quote
 
 	local string="test ' passed"

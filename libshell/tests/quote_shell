@@ -1,7 +1,6 @@
 #!/bin/ash -efu
 
-appendTests quote_shell_test1
-quote_shell_test1() {
+quote_shell_test1() { # UnitTest
 	. ../shell-quote
 	local string='`true`'
 	local result
@@ -9,8 +8,7 @@ quote_shell_test1() {
 	assertEquals "$string" "$result" "$string"
 }
 
-appendTests quote_shell_test2
-quote_shell_test2() {
+quote_shell_test2() { # UnitTest
 	. ../shell-quote
 	local string='$(true)'
 	local result
@@ -18,8 +16,7 @@ quote_shell_test2() {
 	assertEquals "$string" "$result" "$string"
 }
 
-appendTests quote_shell_test3
-quote_shell_test3() {
+quote_shell_test3() { # UnitTest
 	. ../shell-quote
 	local string='\`true\`; echo zzz'
 	local result

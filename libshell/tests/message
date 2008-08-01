@@ -2,16 +2,14 @@
 
 PROG='TEST'
 
-appendTests message_test1
-message_test1() {
+message_test1() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message message;"
 	result=`message "message message" 2>&1 |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests message_test2
-message_test2() {
+message_test2() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message;message;"
 	result=`message "message
@@ -19,8 +17,7 @@ message" 2>&1 |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests message_test3
-message_test3() {
+message_test3() { # UnitTest
 	. ../shell-error
 	zzz=ZZZ
 	expect="$PROG: message ZZZ message;"
@@ -28,8 +25,7 @@ message_test3() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests message_test4
-message_test4() {
+message_test4() { # UnitTest
 	. ../shell-error
 	expect="$PROG: message message;another message;"
 	result=`{ message "message message" 2>&1; echo "another message"; } |tr '\n' ';'`

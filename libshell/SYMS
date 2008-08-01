@@ -31,6 +31,7 @@ shell-unittest	assertNull
 shell-unittest	assertSame
 shell-unittest	assertTrue
 shell-unittest	messageTest
+shell-unittest	registerTests
 shell-unittest	runUnitTests
 shell-unittest	setUp
 shell-unittest	setUpTests

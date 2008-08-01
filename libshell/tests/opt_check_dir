@@ -1,7 +1,6 @@
 #!/bin/ash -efu
 
-appendTests opt_check_dir_test1
-opt_check_dir_test1() {
+opt_check_dir_test1() { # UnitTest
 	. ../shell-args
 
 	[ -d "$WORKDIR/dir-644" ] ||
@@ -15,8 +14,7 @@ opt_check_dir_test1() {
 	assertEquals "$result" "$result" "$expect"
 }
 
-appendTests opt_check_dir_test2
-opt_check_dir_test2() {
+opt_check_dir_test2() { # UnitTest
 	. ../shell-args
 
 	[ -d "$WORKDIR/dir-755" ] ||
