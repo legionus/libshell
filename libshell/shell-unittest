@@ -5,6 +5,9 @@ __included_shell_unittest=1
 
 . shell-error
 
+# Append tests condition to comment message if test failed.
+unittest_show_condition=
+
 # Called before each test is run.
 setUp() { :; }
 
@@ -45,6 +48,8 @@ assertTrue() {
 	fi
 
 	if ! ( eval "$condition" ) >/dev/null; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($condition) == false"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -67,6 +72,8 @@ assertFalse() {
 	fi
 
 	if ( eval "$condition" ) >/dev/null; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($condition) == true"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -83,6 +90,8 @@ assertEquals() {
 	actual="$1"; shift
 
 	if [ "$expected" != "$actual" ]; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($expected) != ($actual)"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -105,6 +114,8 @@ assertNotEquals() {
 	actual="$1"; shift
 
 	if [ "$expected" = "$actual" ]; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($expected) == ($actual)"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -126,6 +137,8 @@ assertNull() {
 	value="$1"; shift
 
 	if [ -n "$value" ]; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($value) == ''"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -141,6 +154,8 @@ assertNotNull() {
 	value="$1"; shift
 
 	if [ -z "$value" ]; then
+		[ -z "$unittest_show_condition" ] ||
+			comment="${comment:+$comment }($value) != ''"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
