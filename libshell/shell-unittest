@@ -24,7 +24,14 @@ tearDownTests() { :; }
 # appendTests (TestFunc)
 __shell_unit_tests=
 appendTests() {
-	__shell_unit_tests="$__shell_unit_tests $*"
+	local n
+	while [ "$#" -gt 0 ]; do
+		n="$1"
+		if [ -z "${__shell_unit_tests}" -o -n "${__shell_unit_tests##* $n *}" ]; then
+			__shell_unit_tests="$__shell_unit_tests $n "
+		fi
+		shift
+	done
 }
 
 # Skip test (called in testing function)
