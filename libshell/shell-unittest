@@ -59,15 +59,18 @@ assertTrue() {
 		{ comment="$1"; shift; }
 	condition="$1"; shift
 
+	[ -z "$unittest_show_condition" ] ||
+		comment="${comment:+$comment }($condition) == false"
+
 	if [ -n "${condition##*[!0-9\-]*}" ]; then
 		[ $condition -ne 0 ] ||
 			return 0
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		exit 1
 	fi
 
 	if ! ( eval "$condition" ) >/dev/null; then
-		[ -z "$unittest_show_condition" ] ||
-			comment="${comment:+$comment }($condition) == false"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
@@ -83,15 +86,18 @@ assertFalse() {
 		{ comment="$1"; shift; }
 	condition="$1"; shift
 
+	[ -z "$unittest_show_condition" ] ||
+		comment="${comment:+$comment }($condition) == true"
+
 	if [ -n "${condition##*[!0-9\-]*}" ]; then
 		[ $condition -eq 0 ] ||
 			return 0
+		[ -z "$comment" ] ||
+			printf '%s' "$comment"
 		exit 1
 	fi
 
 	if ( eval "$condition" ) >/dev/null; then
-		[ -z "$unittest_show_condition" ] ||
-			comment="${comment:+$comment }($condition) == true"
 		[ -z "$comment" ] ||
 			printf '%s' "$comment"
 		exit 1
