@@ -35,13 +35,14 @@ appendTests() {
 }
 
 # Automatically register test functions with 'UnitTest' comment.
-# registerTests /tmp/Tests-File
+# Name of current shell script will be used if argument is not present.
+# registerTests([/tmp/Tests-File])
 # Example:
 # my_testcase_function() { # UnitTest
 #     blah blah blah ...
 # }
 registerTests() {
-	local l="$(sed -ne 's/^\([[:alnum:]_]\+\)().*[[:space:]]*#[[:space:]]*UnitTest/\1/p' "$1")"
+	local l="$(sed -ne 's/^\([[:alnum:]_]\+\)().*[[:space:]]*#[[:space:]]*UnitTest/\1/p' "${1:-$0}")"
 	[ -z "$l" ] || appendTests $l
 }
 
