@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.5
+Version: 0.0.6
 Release: alt1
 
 Summary:  A library of shell functions
@@ -27,6 +27,24 @@ chmod 644 %buildroot/bin/*
 %doc COPYING SYMS
 
 %changelog
+* Mon Sep 29 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.6-alt1
+- New utilities:
+  + shell-ini-config: New functions to read/write
+    ini-like config files.
+  + shell-signal: Add signal handling functions (experimental).
+- shell-getopt changes:
+  + Add env variables desciption.
+- shell-unittest changes:
+  + registerTests argument is optional.
+  + assertTrue() and assertFalse() should always display message
+    if test failed.
+  + Add new function to able register test functions automatically.
+  + appendTests(): test function could be registered only once.
+  + Add unittest_show_condition parameter.
+  + runUnitTests should return 1 if some tests has failed.
+- shell-ip-address changes:
+  + Add regular expression to IP address validation.
+
 * Thu Jun 05 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.5-alt1
 - Add shell-unittest for writing Unit tests.
 
