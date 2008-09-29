@@ -12,5 +12,5 @@ are Copyright (C) 2007  Dmitry V. Levin <ldv@altlinux.org>,
 
 The files
 	shell-version, shell-config, shell-error, shell-ip-address,
-	shell-mail-address, shell-unittest
+	shell-mail-address, shell-unittest, shell-signal
 are Copyright (C) 2008  Alexey Gladkov <legion@altlinux.org>

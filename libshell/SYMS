@@ -21,6 +21,9 @@ shell-mail-address	valid_email
 shell-quote	quote_sed_regexp
 shell-quote	quote_shell
 shell-quote	string_quote_remove
+shell-signal	set_cleanup_handler
+shell-signal	signal_handler
+shell-signal	unset_cleanup_handler
 shell-unittest	appendTests
 shell-unittest	assertEquals
 shell-unittest	assertFalse

@@ -1,0 +1,89 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_signal-}" ]; then
+__included_shell_signal=1
+
+if [ -n "${__libshell_experimental-}" ]; then
+
+. shell-error
+. shell-quote
+
+__shell_signal_handlers=
+# Set handler code whan any of the specified signals are received.
+# Special handlers is SIG_IGN and SIG_DFL (See signal(2)).
+# Usage example:
+# signal_handler 'echo $rc' TERM EXIT HUP
+# signal_handler SIG_IGN TERM EXIT HUP
+# signal_handler SIG_DFL TERM EXIT HUP
+signal_handler() {
+	act="$1"
+	shift
+
+	__shell_signal_handler() {
+		local s rc=$? sign="$1"
+		eval set -- ${__shell_signal_handlers-}
+		for s; do
+			[ -n "${s##$sign:*}" ] ||
+				eval ${s#$sign:} $rc ||:
+		done
+	}
+
+	__shell_signal_append() {
+		local s arg="$1"
+		eval set -- ${__shell_signal_handlers-}
+		for s; do
+			[ "$s" != "$arg" ] || return 0
+		done
+		__shell_signal_handlers="$__shell_signal_handlers $arg"
+	}
+
+	__shell_signal_remove() {
+		local s nlist= sign="$1"
+		eval set -- ${__shell_signal_handlers-}
+		for s; do
+			[ -z "${s##$sign:*}" ] || nlist="$nlist $s"
+		done
+		__shell_signal_handlers="$nlist"
+	}
+
+	for sign; do
+		case "$act" in
+			SIG_IGN)
+				__shell_signal_remove "$sign"
+				act=:
+				;;
+			SIG_DFL)
+				__shell_signal_remove "$sign"
+				act=-
+				;;
+			*)
+				act="$(quote_shell "$act")"
+				__shell_signal_append "\"$sign:$act\""
+				act="__shell_signal_handler $sign"
+				;;
+		esac
+		trap "$act" $sign
+	done
+}
+
+__cleanup_handler_name=
+set_cleanup_handler() {
+	__cleanup_handler_name="${1-}"
+	__cleanup_handler() {
+		trap - EXIT
+		[ -z "${__cleanup_handler_name-}" ] ||
+			"$__cleanup_handler_name" "$1" ||:
+		exit "$1"
+	}
+	signal_handler '__cleanup_handler $rc' EXIT
+	signal_handler '__cleanup_handler   1' HUP PIPE INT QUIT TERM
+}
+
+unset_cleanup_handler() {
+	signal_handler SIG_DFL EXIT HUP PIPE INT QUIT TERM
+	__cleanup_handler_name=
+}
+
+fi #__libshell_experimental
+
+fi #__included_shell_signal
