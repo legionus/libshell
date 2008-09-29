@@ -1,0 +1,103 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_ini_config-}" ]; then
+__included_shell_ini_config=1
+
+shell_ini_config_rdelim='[[:space:]]*=[[:space:]]*'
+shell_ini_config_wdelim=' = '
+shell_ini_config_comment='# '
+
+shell_ini_config_lbegin='^[[:space:]]*'
+shell_ini_config_sbegin="$shell_ini_config_lbegin\["
+shell_ini_config_send='\]'
+
+. shell-quote
+
+ini_config_get() {
+	[ "$#" -eq 3 ] ||
+		fatal 'Usage: ini_config_get file section name'
+
+	local fn section name
+
+	fn="$1"
+	section="$(quote_sed_regexp "$2")"
+	name="$(quote_sed_regexp "$3")"
+
+	sed -n -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim\(.*\)/\1/p" \
+		"$fn"
+}
+
+ini_config_set() {
+	[ "$#" -eq 4 ] ||
+		fatal 'Usage: ini_config_set file section name value'
+
+	local fn section name value
+
+	fn="$1"
+	section="$(quote_sed_regexp "$2")"
+	name="$(quote_sed_regexp "$3")"
+	value="$(quote_sed_regexp "$4")"
+
+	sed -i -e \
+		"/$shell_ini_config_sbegin$section$shell_ini_config_send/ {
+		:loop
+		n
+
+		    /$shell_ini_config_lbegin$name$shell_ini_config_rdelim/  {
+			s/\($shell_ini_config_lbegin$name\)$shell_ini_config_rdelim.*/\1$shell_ini_config_wdelim$value/
+			b end
+		    }
+
+		    /$shell_ini_config_sbegin/ {
+			i \ $name$shell_ini_config_wdelim$value
+			b end
+		    }
+
+		    \$! b loop
+		    \$ a \ $name$shell_ini_config_wdelim$value
+		    :end
+		}" \
+		"$fn"
+}
+
+ini_config_del() {
+	[ "$#" -ge 2 -a "$#" -le 3 ] ||
+		fatal 'Usage: ini_config_del file section [name]'
+
+	local fn section name=
+
+	fn="$1"
+	section="$(quote_sed_regexp "$2")"
+	[ -z "${3-}" ] ||
+		name="$(quote_sed_regexp "$3")"
+
+	if [ -n "$name" ];then
+		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ {/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/ d}" \
+			"$fn"
+	else
+		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ {/$shell_ini_config_sbegin$section$shell_ini_config_send/ d;/$shell_ini_config_sbegin/! d}" \
+			"$fn"
+	fi
+}
+
+ini_config_comment() {
+	[ "$#" -ge 2 -a "$#" -le 3 ] ||
+		fatal 'Usage: ini_config_comment file section [name]'
+
+	local fn section name=
+
+	fn="$1"
+	section="$(quote_sed_regexp "$2")"
+	[ -z "${3-}" ] ||
+		name="$(quote_sed_regexp "$3")"
+
+	if [ -n "$name" ];then
+		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ { s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/$shell_ini_config_comment&/ }" \
+			"$fn"
+	else
+		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ { /$shell_ini_config_sbegin/! s/^.*/$shell_ini_config_comment&/; s/$shell_ini_config_sbegin$section$shell_ini_config_send/$shell_ini_config_comment&/}" \
+			"$fn"
+	fi
+}
+
+fi #__included_shell_ini_config

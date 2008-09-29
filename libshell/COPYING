@@ -10,6 +10,11 @@ The files
 are Copyright (C) 2007  Dmitry V. Levin <ldv@altlinux.org>,
                   2008  Alexey Gladkov <legion@altlinux.org>
 
+The file
+	shell-ini-config
+are Copyright (C) 2008  Stanislav Ievlev <inger@altlinux.org>,
+                  2008  Alexey Gladkov <legion@altlinux.org>
+
 The files
 	shell-version, shell-config, shell-error, shell-ip-address,
 	shell-mail-address, shell-unittest, shell-signal
