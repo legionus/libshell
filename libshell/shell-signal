@@ -42,12 +42,15 @@ signal_handler() {
 	}
 
 	__shell_signal_remove() {
-		local s nlist= sign="$1"
+		local s sign="$1"
 		eval set -- ${__shell_signal_handlers-}
+		__shell_signal_handlers=
 		for s; do
-			[ -z "${s##$sign:*}" ] || nlist="$nlist $s"
+			[ -n "${s##$sign:*}" ] ||
+				continue
+			s="$(quote_shell "$s")"
+			__shell_signal_handlers="$__shell_signal_handlers \"$s\""
 		done
-		__shell_signal_handlers="$nlist"
 	}
 
 	for sign; do
