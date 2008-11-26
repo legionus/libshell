@@ -280,7 +280,7 @@ getopt() {
 		EOF
 	}
 
-	local PROG='getopt' OPTERR=1 prg= opts= lopts= quiet_output= alt= order= rc
+	local PROG='getopt' OPTIND=1 OPTERR=1 prg= opts= lopts= quiet_output= alt= order= rc
 	local GETOPT_POSIXLY_CORRECT
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
