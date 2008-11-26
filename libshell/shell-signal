@@ -32,24 +32,24 @@ signal_handler() {
 	}
 
 	__shell_signal_append() {
-		local s arg="$1" __quote_shell_result
+		local s arg="$1"
 		eval set -- ${__shell_signal_handlers-}
 		for s; do
 			[ "$s" != "$arg" ] || return 0
 		done
-		__quote_shell "$arg"
-		__shell_signal_handlers="$__shell_signal_handlers \"$__quote_shell_result\""
+		quote_shell_variable arg "$arg"
+		__shell_signal_handlers="$__shell_signal_handlers \"$arg\""
 	}
 
 	__shell_signal_remove() {
-		local s sign="$1" __quote_shell_result
+		local s sign="$1"
 		eval set -- ${__shell_signal_handlers-}
 		__shell_signal_handlers=
 		for s; do
 			[ -n "${s##$sign:*}" ] ||
 				continue
-			__quote_shell "$s"
-			__shell_signal_handlers="$__shell_signal_handlers \"$__quote_shell_result\""
+			quote_shell_variable s "$s"
+			__shell_signal_handlers="$__shell_signal_handlers \"$s\""
 		done
 	}
 

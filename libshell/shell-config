@@ -15,7 +15,7 @@ shell_config_get() {
 
 	[ -s "$file" ] ||
 		return 0
-	name="$(quote_sed_regexp "$name")"
+	quote_sed_regexp_variable name "$name"
 	sed -n -e "s/^[[:space:]]*$name$delim//p" -- "$file"
 }
 
@@ -37,11 +37,11 @@ shell_config_set() {
 	fi
 
 	if [ -z "$created" ]; then
-		n="$(quote_sed_regexp "$name")"
+		quote_sed_regexp_variable n "$name"
 
 		if v="$(grep -m1 "^[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
 			if [ "${v#*$name$r_delim}" != "$value" ]; then
-				nv="$(quote_sed_regexp "$w_delim$value")"
+				quote_sed_regexp_variable nv "$w_delim$value"
 				sed -i -e "s/^[[:space:]]*$n$r_delim.*/$n$nv/" -- "$file"
 			fi
 			return
@@ -49,8 +49,8 @@ shell_config_set() {
 
 		if [ -n "${__shell_config_comment-}" ] &&
 		   v="$(grep -m1 "^[[:space:]]*${__shell_config_comment:-#}[[:space:]]*$n$r_delim" -- "$file" 2>/dev/null)"; then
-			v="$(quote_sed_regexp "$v")"
-			nv="$(quote_sed_regexp "$w_delim$value")"
+			quote_sed_regexp_variable v "$v"
+			quote_sed_regexp_variable nv "$w_delim$value"
 			sed -i -e "s/^$v\$/$n$nv/" -- "$file"
 			return
 		fi
@@ -66,7 +66,7 @@ shell_config_del() {
 
 	[ -s "$file" ] ||
 		return 0
-	name="$(quote_sed_regexp "$name")"
+	quote_sed_regexp_variable name "$name"
 	sed -i -e "/^[[:space:]]*$name$delim/d" -- "$file"
 }
 
@@ -77,7 +77,7 @@ shell_config_comment() {
 
 	[ -s "$file" ] ||
 		return 0
-	name="$(quote_sed_regexp "$name")"
+	quote_sed_regexp_variable name "$name"
 	sed -i -e "s/^[[:space:]]*$name$delim.*/${__shell_config_comment:-#}&/" -- "$file"
 }
 

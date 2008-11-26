@@ -20,8 +20,8 @@ ini_config_get() {
 	local fn section name
 
 	fn="$1"
-	section="$(quote_sed_regexp "$2")"
-	name="$(quote_sed_regexp "$3")"
+	quote_sed_regexp_variable section "$2"
+	quote_sed_regexp_variable name "$3"
 
 	sed -n -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim\(.*\)/\1/p" \
 		"$fn"
@@ -34,9 +34,9 @@ ini_config_set() {
 	local fn section name value
 
 	fn="$1"
-	section="$(quote_sed_regexp "$2")"
-	name="$(quote_sed_regexp "$3")"
-	value="$(quote_sed_regexp "$4")"
+	quote_sed_regexp_variable section "$2"
+	quote_sed_regexp_variable name "$3"
+	quote_sed_regexp_variable value "$4"
 
 	sed -i -e \
 		"/$shell_ini_config_sbegin$section$shell_ini_config_send/ {
@@ -67,9 +67,9 @@ ini_config_del() {
 	local fn section name=
 
 	fn="$1"
-	section="$(quote_sed_regexp "$2")"
+	quote_sed_regexp_variable section "$2"
 	[ -z "${3-}" ] ||
-		name="$(quote_sed_regexp "$3")"
+		quote_sed_regexp_variable name "$3"
 
 	if [ -n "$name" ];then
 		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ {/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/ d}" \
@@ -87,9 +87,9 @@ ini_config_comment() {
 	local fn section name=
 
 	fn="$1"
-	section="$(quote_sed_regexp "$2")"
+	quote_sed_regexp_variable section "$2"
 	[ -z "${3-}" ] ||
-		name="$(quote_sed_regexp "$3")"
+		quote_sed_regexp_variable name "$3"
 
 	if [ -n "$name" ];then
 		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ { s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/$shell_ini_config_comment&/ }" \

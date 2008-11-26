@@ -3,38 +3,51 @@
 if [ -z "${__included_shell_quote-}" ]; then
 __included_shell_quote=1
 
-__quote_sed_regexp() {
-	local out="$*"
-	__quote_sed_regexp_result="$out"
+# Quote argument for sed basic regular expression and store result into variable.
+# Usage example:
+# quote_sed_regexp_variable var_pattern "$pattern"
+# quote_sed_regexp_variable var_replace "$replace"
+# sed "s/$var_pattern/$var_replace/"
+quote_sed_regexp_variable() {
+	local name out
+	name="$1"; shift
+	out="$*"
 	if [ -z "${out##*[\[\].*&^\$\\\\/]*}" ]; then
-		__quote_sed_regexp_result="$(printf %s "$out" |sed -e 's/[].*&^$[\/]/\\&/g')" ||
+		out="$(printf %s "$out" |sed -e 's/[].*&^$[\/]/\\&/g')" ||
 			return 1
 	fi
+	eval "$name=\"\$out\""
 }
 
 # Quote given arguments for sed basic regular expression.
 # Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
 quote_sed_regexp() {
-	local __quote_sed_regexp_result
-	__quote_sed_regexp "$@"
-	printf %s "$__quote_sed_regexp_result"
+	local result
+	quote_sed_regexp_variable result "$@"
+	printf %s "$result"
 }
 
-__quote_shell() {
-	local out="$*"
-	__quote_shell_result="$out"
+# Quote argument for shell and store result into variable.
+# Usage example:
+# quote_shell_variable var_name "$var_value"
+# printf '%s\n' "$var_name"
+quote_shell_variable() {
+	local name out
+	name="$1"; shift
+	out="$*"
 	if [ -z "${out##*[\"\$\`\\\\]*}" ]; then
-		__quote_shell_result="$(printf %s "$out" |sed -e 's/["$`\\]/\\&/g')" ||
+		out="$(printf %s "$out" |sed -e 's/["$`\\]/\\&/g')" ||
 			return 1
 	fi
+	eval "$name=\"\$out\""
 }
 
 # Quote argument for shell.
 # Usage example: eval "$var_name=\"$(quote_shell "$var_value")\""
 quote_shell() {
-	local __quote_shell_result
-	__quote_shell "$@"
-	printf %s "$__quote_shell_result"
+	local result
+	quote_shell_variable result "$@"
+	printf %s "$result"
 }
 
 # Remove quote symbol from string
