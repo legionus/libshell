@@ -1,5 +1,8 @@
 #!/bin/ash -efu
 
+srcdir="$(readlink -ev ..)"
+export PATH="$srcdir:$PATH"
+
 . ../shell-unittest
 
 WORKDIR=

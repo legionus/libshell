@@ -149,7 +149,9 @@ getoptex() {
 		OPTARG=
 
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
-			OPTUKN="${OPTUKN:+$OPTUKN }\"$(quote_shell "$1")\""
+			local __quote_shell_result
+			__quote_shell "$1"
+			OPTUKN="${OPTUKN:+$OPTUKN }\"$__quote_shell_result\""
 			return 0
 		fi
 		message "unrecognized option '$1'"
@@ -344,10 +346,12 @@ getopt() {
 		GETOPT_POSIXLY_CORRECT=1
 
 	__getopt_out_arg() {
+		local __quote_shell_result
 		shift $(($OPTIND-1))
+		__quote_shell "$1"
 		[ -z "$order" ] &&
-			out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\"" ||
-			out="${out%% -- *} \"$(quote_shell "$1")\" -- ${out#* -- }"
+			out="${out%% -- *} -- ${out#* -- } \"$__quote_shell_result\"" ||
+			out="${out%% -- *} \"$__quote_shell_result\" -- ${out#* -- }"
 	}
 
 	PROG="$prg"
@@ -373,10 +377,12 @@ getopt() {
 		out="${out%% -- *} $pfx$OPTOPT ${OPTTYP:+'$OPTARG'} -- ${out#* -- }"
 	done
 
+	local __quote_shell_result
 	shift $(($OPTIND-1))
 	set -- "$@"
 	while [ "$#" -gt 0 ]; do
-		out="${out%% -- *} -- ${out#* -- } \"$(quote_shell "$1")\""
+		__quote_shell "$1"
+		out="${out%% -- *} -- ${out#* -- } \"$__quote_shell_result\""
 		shift
 	done
 
