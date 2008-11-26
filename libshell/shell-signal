@@ -10,13 +10,16 @@ if [ -n "${__libshell_experimental-}" ]; then
 
 __shell_signal_handlers=
 # Set handler code whan any of the specified signals are received.
-# Special handlers is SIG_IGN and SIG_DFL (See signal(2)).
+# Return code of handler function will be ignored. Special handlers is
+# SIG_IGN and SIG_DFL (See signal(2)).
+#
 # Usage example:
 # signal_handler 'echo $rc' TERM EXIT HUP
 # signal_handler SIG_IGN TERM EXIT HUP
 # signal_handler SIG_DFL TERM EXIT HUP
 signal_handler() {
-	act="$1"
+	local user_action real_action
+	user_action="$1"
 	shift
 
 	__shell_signal_handler() {
@@ -34,7 +37,8 @@ signal_handler() {
 		for s; do
 			[ "$s" != "$arg" ] || return 0
 		done
-		__shell_signal_handlers="$__shell_signal_handlers $arg"
+		arg="$(quote_shell "$arg")"
+		__shell_signal_handlers="$__shell_signal_handlers \"$arg\""
 	}
 
 	__shell_signal_remove() {
@@ -47,25 +51,29 @@ signal_handler() {
 	}
 
 	for sign; do
-		case "$act" in
+		case "$user_action" in
 			SIG_IGN)
 				__shell_signal_remove "$sign"
-				act=:
+				real_action=:
 				;;
 			SIG_DFL)
 				__shell_signal_remove "$sign"
-				act=-
+				real_action=-
 				;;
 			*)
-				act="$(quote_shell "$act")"
-				__shell_signal_append "\"$sign:$act\""
-				act="__shell_signal_handler $sign"
+				__shell_signal_append "$sign:$user_action"
+				real_action="__shell_signal_handler $sign"
 				;;
 		esac
-		trap "$act" $sign
+		trap "$real_action" "$sign"
 	done
 }
 
+# Set exit handler. Return code of handler function will be ignored.
+#
+# Usage example:
+# exit_function() { echo "Exit with return code '$1'"; }
+# set_cleanup_handler exit_function
 __cleanup_handler_name=
 set_cleanup_handler() {
 	__cleanup_handler_name="${1-}"
@@ -79,6 +87,9 @@ set_cleanup_handler() {
 	signal_handler '__cleanup_handler   1' HUP PIPE INT QUIT TERM
 }
 
+# Remove exit handler.
+#
+# Usage example: unset_cleanup_handler
 unset_cleanup_handler() {
 	signal_handler SIG_DFL EXIT HUP PIPE INT QUIT TERM
 	__cleanup_handler_name=
