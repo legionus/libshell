@@ -1,0 +1,71 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+__libshell_experimental=1
+
+signal_test_handler() {
+	printf '%s\n' "$PROG: signal_test_handler() called"
+}
+
+signal_test1() { # UnitTest
+	. ../shell-signal
+	expect="0 0"
+	result=`signal_handler 'echo $rc' EXIT HUP;`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test2() { # UnitTest
+	. ../shell-signal
+	expect="0 0"
+	result=`signal_handler 'echo $rc' CHLD HUP; kill -CHLD $$;`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test3() { # UnitTest
+	. ../shell-signal
+	expect="0 0"
+	result=`signal_handler 'echo $rc' TERM EXIT HUP;
+		signal_handler 'echo $rc' TERM EXIT HUP;`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test3() { # UnitTest
+	. ../shell-signal
+	expect="0 0"
+	result=`signal_handler 'echo $rc' TERM EXIT HUP;
+		signal_handler 'echo $rc' TERM EXIT HUP;`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test4() { # UnitTest
+	. ../shell-signal
+	expect="$PROG: signal_test_handler() called
+0 0"
+	result=`signal_handler signal_test_handler TERM EXIT HUP;
+		signal_handler 'echo $rc' TERM EXIT HUP;`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test5() { # UnitTest
+	. ../shell-signal
+	expect='[ "TERM:echo \$rc" "EXIT:echo \$rc" "HUP:echo \$rc" "EXIT:echo \$1"]
+[]'
+	result=`signal_handler 'echo $rc' TERM EXIT HUP;
+		signal_handler 'echo $1' EXIT;
+		printf '[%s]\n' "${__shell_signal_handlers}";
+		signal_handler SIG_DFL TERM EXIT HUP;
+		printf '[%s]\n' "${__shell_signal_handlers}";`
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test6() { # UnitTest
+	. ../shell-signal
+	expect='[ "TERM:echo \$rc" "EXIT:echo \$rc" "HUP:echo \$rc" "EXIT:echo \$1"]
+[ "TERM:echo \$rc" "HUP:echo \$rc"]'
+	result=`signal_handler 'echo $rc' TERM EXIT HUP;
+		signal_handler 'echo $1' EXIT;
+		printf '[%s]\n' "${__shell_signal_handlers}";
+		signal_handler SIG_DFL EXIT;
+		printf '[%s]\n' "${__shell_signal_handlers}";`
+	assertEquals "$result" "$result" "$expect"
+}
