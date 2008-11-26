@@ -51,6 +51,8 @@ signal_handler() {
 	}
 
 	for sign; do
+		sign="${sign#SIG}"
+
 		case "$user_action" in
 			SIG_IGN)
 				__shell_signal_remove "$sign"
