@@ -49,7 +49,7 @@ getoptex() {
 
 	getoptex_badarg() {
 		[ -z "${OPTERR-}" ] ||
-			message "option requires an argument -- $OPTOPT"
+			message "option requires an argument -- '$OPTOPT'"
 		OPTARG="$OPTOPT"
 		OPTOPT='?'
 	}
@@ -149,10 +149,10 @@ getoptex() {
 		OPTARG=
 
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
-			OPTUKN="${OPTUKN:+$OPTUKN } \"$(quote_shell "$1")\""
+			OPTUKN="${OPTUKN:+$OPTUKN }\"$(quote_shell "$1")\""
 			return 0
 		fi
-		message "unrecognized option \`$1'"
+		message "unrecognized option '$1'"
 		return 2
 	fi
 	OPTOPT='?'
