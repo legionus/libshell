@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.6
+Version: 0.0.7
 Release: alt1
 
 Summary:  A library of shell functions
@@ -13,20 +13,39 @@ Source: %name-%version.tar
 %description
 This package contains common functions for shell projects to increase code reuse.
 
-
 %prep
 %setup -q
 
 %install
-mkdir -p %buildroot/bin
-cp -a shell-* %buildroot/bin/
-chmod 644 %buildroot/bin/*
+%make_install DESTDIR=%buildroot
 
 %files
 /bin/*
+%_man3dir/*
 %doc COPYING SYMS
 
 %changelog
+* Sun Nov 30 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.7-alt1
+- shell-getopt changes:
+  + getopt(): OPTIND should be local.
+  + Fix messages compatibility with getopt(1).
+- shell-signal changes:
+  + signal_handler(): Fix SIG_DFL special action.
+  + signal_handler(): Remove SIG prefix from a signal symbolic name.
+  + signal_handler(): Fix quoting.
+  + module is no longer a experimental.
+- shell-quote changes:
+  + Add quote_shell_variable() and quote_sed_regexp_variable()
+    functions.
+  + Use an internal quoting function to avoid unnecessary subshells.
+- Documentation changes:
+  + libshell.man: Add shell-error.
+  + shell-error.man: Add man-page for shell-error.
+  + libshell.man: Add libshell man-page.
+- Other changes:
+  + Add makefile.
+  + Add unit tests for shell-signal.
+
 * Mon Sep 29 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.6-alt1
 - New utilities:
   + shell-ini-config: New functions to read/write
