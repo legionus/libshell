@@ -3,8 +3,6 @@
 if [ -z "${__included_shell_signal-}" ]; then
 __included_shell_signal=1
 
-if [ -n "${__libshell_experimental-}" ]; then
-
 . shell-error
 . shell-quote
 
@@ -99,7 +97,5 @@ unset_cleanup_handler() {
 	signal_handler SIG_DFL EXIT HUP PIPE INT QUIT TERM
 	__cleanup_handler_name=
 }
-
-fi #__libshell_experimental
 
 fi #__included_shell_signal
