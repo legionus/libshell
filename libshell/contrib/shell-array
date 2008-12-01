@@ -1,0 +1,70 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_array-}" ]; then
+__included_shell_array=1
+
+if [ -n "${__libshell_experimental-}" ]; then
+
+. shell-error
+
+# Create shell array
+# Usage: array_create ARR 'value1' 'value2' 'value3'
+array_create() {
+	local __array_create_arrname __array_create_arg __array_create_i=0
+	__array_create_arrname="$1"; shift
+
+	for __array_create_arg; do
+		eval "__SHELL_ARRAY_${__array_create_arrname}_${__array_create_i}=\"\$__array_create_arg\""
+		__array_create_i=$(($__array_create_i + 1))
+	done
+	eval "${__array_create_arrname}=$#"
+}
+
+# Destroy shell array
+# Usage: array_destroy ARR
+array_destroy() {
+	local __array_destroy_arrname __array_destroy_i
+	__array_destroy_arrname="$1"; shift
+
+	eval "__array_destroy_i=\"\$$__array_destroy_arrname\"; unset $arrname;"
+
+	while [ $__array_destroy_i -ge 0 ]; do
+		eval "unset __SHELL_ARRAY_${__array_destroy_arrname}_$__array_destroy_i"
+		__array_destroy_i=$(($__array_destroy_i-1))
+	done
+}
+
+# Show array elements
+# Usage:
+# array_create ARR 'a1' 'a2' 'a3' 'a4' 'a5'
+# array_lookup ARR 1 2 4
+# a1
+# a2
+# a4
+array_lookup() {
+	local __array_lookup_arrname __array_lookup_i
+	__array_lookup_arrname="$1"; shift
+
+	for __array_lookup_i; do
+		eval "[ -z \"\${__SHELL_ARRAY_${__array_lookup_arrname}_${__array_lookup_i}-}\" ] ||
+				printf '%s\\n' \"\${__SHELL_ARRAY_${__array_lookup_arrname}_${__array_lookup_i}-}\""
+	done
+}
+
+# Get shell element and store result into variable.
+# Usage: array_get_variable result ARR 3
+array_get_variable() {
+	eval "
+		$1='';
+		[ -n \"\${$2-}\" ] ||
+			{ message '$2: Not found'; return 1; };
+
+		[ \"\${$2-}\" -gt '$3' ] ||
+			{ message '$2[$3]: Not found'; return 1; };
+
+		$1=\"\${__SHELL_ARRAY_${2}_$3-}\";"
+}
+
+fi #__libshell_experimental
+
+fi #__included_shell_array
