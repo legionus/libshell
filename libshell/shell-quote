@@ -9,14 +9,15 @@ __included_shell_quote=1
 # quote_sed_regexp_variable var_replace "$replace"
 # sed "s/$var_pattern/$var_replace/"
 quote_sed_regexp_variable() {
-	local name out
-	name="$1"; shift
-	out="$*"
-	if [ -z "${out##*[\[\].*&^\$\\\\/]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/[].*&^$[\/]/\\&/g')" ||
+	local __quote_set_regexp_variable_var __quote_set_regexp_variable_out
+	__quote_set_regexp_variable_var="$1"; shift
+	__quote_set_regexp_variable_out="$*"
+	if [ -z "${__quote_set_regexp_variable_out##*[\[\].*&^\$\\\\/]*}" ]; then
+		__quote_set_regexp_variable_out="$(printf %s "$__quote_set_regexp_variable_out" |
+				sed -e 's/[].*&^$[\/]/\\&/g')" ||
 			return 1
 	fi
-	eval "$name=\"\$out\""
+	eval "$__quote_set_regexp_variable_var=\"\$__quote_set_regexp_variable_out\""
 }
 
 # Quote given arguments for sed basic regular expression.
@@ -32,14 +33,15 @@ quote_sed_regexp() {
 # quote_shell_variable var_name "$var_value"
 # printf '%s\n' "$var_name"
 quote_shell_variable() {
-	local name out
-	name="$1"; shift
-	out="$*"
-	if [ -z "${out##*[\"\$\`\\\\]*}" ]; then
-		out="$(printf %s "$out" |sed -e 's/["$`\\]/\\&/g')" ||
+	local __quote_shell_variable_var __quote_shell_variable_out
+	__quote_shell_variable_var="$1"; shift
+	__quote_shell_variable_out="$*"
+	if [ -z "${__quote_shell_variable_out##*[\"\$\`\\\\]*}" ]; then
+		__quote_shell_variable_out="$(printf %s "$__quote_shell_variable_out" |
+				sed -e 's/[\"$\`\\]/\\&/g')" ||
 			return 1
 	fi
-	eval "$name=\"\$out\""
+	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
 }
 
 # Quote argument for shell.
