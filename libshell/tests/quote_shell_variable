@@ -1,0 +1,25 @@
+#!/bin/ash -efu
+
+quote_shell_variable_test1() { # UnitTest
+	. ../shell-quote
+	local string='`true`' expect='\`true\`'
+	local result
+	quote_shell_variable result "$string"
+	assertEquals "$string" "$result" "$expect"
+}
+
+quote_shell_variable_test2() { # UnitTest
+	. ../shell-quote
+	local string='$(true)' expect='\$(true)'
+	local result
+	quote_shell_variable result "$string"
+	assertEquals "$string" "$result" "$expect"
+}
+
+quote_shell_variable_test3() { # UnitTest
+	. ../shell-quote
+	local string='\`true\`; echo zzz' expect='\\\`true\\\`; echo zzz'
+	local result
+	quote_shell_variable result "$string"
+	assertEquals "$string" "$result" "$expect"
+}

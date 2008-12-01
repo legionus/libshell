@@ -17,6 +17,7 @@ tearDownTests() {
 for s in \
 	quote_sed_regexp quote_shell string_quote_remove \
 	opt_check_dir opt_check_number opt_check_read \
+	quote_sed_regexp_variable quote_shell_variable \
 	getopt signal \
 	fatal message verbose \
 	;
