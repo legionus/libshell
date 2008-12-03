@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.7
+Version: 0.0.8
 Release: alt1
 
 Summary:  A library of shell functions
@@ -25,6 +25,14 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Wed Dec 03 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.8-alt1
+- shell-getopt changes:
+  + Fix regression.
+- Other changes:
+  + shell-quote: *_variable(): Fix internal namespace.
+  + Add tests for quote_sed_regexp_variable() and
+    quote_shell_variable().
+
 * Sun Nov 30 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.7-alt1
 - shell-getopt changes:
   + getopt(): OPTIND should be local.
