@@ -151,7 +151,7 @@ getoptex() {
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
 			local q_arg
 			quote_shell_variable q_arg "$1"
-			OPTUKN="${OPTUKN:+$OPTUKN }\"$q_arg\""
+			OPTUKN="${OPTUKN-} \"$q_arg\""
 			return 0
 		fi
 		message "unrecognized option '$1'"
@@ -374,7 +374,7 @@ getopt() {
 		pfx='-'
 		[ "${#OPTOPT}" -eq 1 ] ||
 			pfx='--'
-		out="${out%% -- *} $pfx$OPTOPT ${OPTTYP:+'$OPTARG'} -- ${out#* -- }"
+		out="${out%% -- *} $pfx$OPTOPT${OPTTYP:+ '$OPTARG'} -- ${out#* -- }"
 	done
 
 	local q_arg

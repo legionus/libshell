@@ -141,9 +141,9 @@ getopt_test16() { # UnitTest
 getopt_test17() { # UnitTest
 	LANG=C
 	. ../shell-getopt
-	expect=' -a  -b  -- 
- -a  -b  -- 
- -a  -b  -- '
+	expect=' -a -b -- 
+ -a -b -- 
+ -a -b -- '
 	result=`for i in 1 2 3; do getopt -n TEST -o 'a,b' -- -ab; done 2>&1`
 	assertEquals "$result" "$result" "$expect"
 }
