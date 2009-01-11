@@ -15,46 +15,38 @@ __shell_quicksort() {
 }
 
 __shell_quicksort_partition() {
-	local arr_x arr_y i
-	local var="$1" arr="$2" p="$3" r="$4"
-
-	i=$p
+	local arr_x arr_y i=$p j=$p var="$1"
 	array_get "$arr" "$r" arr_x
 
-	while [ "$p" -lt "$r" ]; do
-		array_get "$arr" "$p" arr_y
-		if $QUICKSORT le "$arr_y" "$arr_x"; then
-			array_flip "$arr" "$p" "$i"
+	while [ "$j" -lt "$r" ]; do
+		array_get "$arr" "$j" arr_y
+		if $QUICKSORT "$order" "$arr_y" "$arr_x"; then
+			array_flip "$arr" "$j" "$i"
 			i=$(($i+1))
 		fi
-		p=$(($p+1))
+		j=$(($j+1))
 	done
 	array_flip "$arr" "$i" "$r"
 	eval "$var=\"$i\""
 }
 
-quicksort() {
-	local q arr p=0 r
-	#echo quicksort
-	arr="$1"; shift
-
-	if [ "$#" -gt 0 ]; then
-		p="$1"
-		shift
-	fi
-
-	if [ "$#" -eq 0 ]; then
-		array_size "$arr" r
-		r=$(($r-1))
-	else
-		r=$1
-	fi
-
+__quicksort() {
+	local q arr="$1" p="$2" r="$3"
 	while [ "$p" -lt "$r" ]; do
-		__shell_quicksort_partition q "$arr" "$p" "$r"
-		quicksort "$arr" "$p" "$(($q-1))"
+		__shell_quicksort_partition q
+		__quicksort "$arr" "$p" "$(($q-1))"
 		p=$(($q+1))
 	done
+}
+
+# Usage: quicksort ARR [order]
+quicksort() {
+	local order=le arr r
+	arr="$1"; shift
+	[ "$#" -eq 0 ] || order=ge
+
+	array_size "$arr" r
+	__quicksort "$arr" 0 "$(($r-1))"
 }
 
 fi #__libshell_experimental
