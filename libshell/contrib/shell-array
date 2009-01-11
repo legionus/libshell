@@ -10,8 +10,9 @@ if [ -n "${__libshell_experimental-}" ]; then
 # Function return array size.
 # Usage: array_size ARR arrsize; echo "$arrsize"
 array_size() {
+	local __array_size_var="$2"
 	eval "set -- \$$1"
-	eval "$2=$#"
+	eval "$__array_size_var=$#"
 }
 
 # Get array element and store result into variable.
@@ -40,16 +41,27 @@ array_get() {
 	eval "$__array_get_var=\"\${__ARRAY_${__array_get_arr}_$1-}\""
 }
 
+# Get first array element.
 # Usage: array_first ARR var; echo "$var"
 array_first() {
+	if [ "$#" -ne 2 ]; then
+		message "array_first: More arguments required"
+		return 1
+	fi
 	array_get "$1" 'first' "$2"
 }
 
+# Get last array element.
 # Usage: array_last ARR var; echo "$var"
 array_last() {
+	if [ "$#" -ne 2 ]; then
+		message "array_last: More arguments required"
+		return 1
+	fi
 	array_get "$1" 'last' "$2"
 }
 
+# Remove array element by index.
 # Usage: array_remove ARR index [old_result]
 array_remove() {
 	if [ "$#" -lt 2 ]; then
@@ -92,92 +104,109 @@ array_remove() {
 # Shift an element off the beginning of array.
 # Usage: array_shift ARR [old_result]
 array_shift() {
+	if [ "$#" -eq 0 ]; then
+		message "array_shift: More arguments required"
+		return 1
+	fi
 	array_remove "$1" 'first' "${2-}"
 }
 
 # Pop the element off the end of array.
 # Usage: array_pop ARR [old_result]
 array_pop() {
+	if [ "$#" -eq 0 ]; then
+		message "array_pop: More arguments required"
+		return 1
+	fi
 	array_remove "$1" 'last' "${2-}"
 }
 
-# Usage: array_insert ARR index 'new-value'
+# Usage: array_insert ARR index 'new-value' ['new-value1' ...]
 array_insert() {
-	if [ "$#" -ne 3 ]; then
+	if [ "$#" -lt 3 ]; then
 		message "array_insert: More arguments required"
 		return 1
 	fi
 
-	local __array_insert_arr="$1" __array_insert_index="$2" __array_insert_value="$3"
+	local arr index size
+	arr="$1"; shift
+	index="$1"; shift
 
-	eval "set -- \$$__array_insert_arr"
-	local __array_insert_size=$#
+	array_size "$arr" size
 
-	if [ "$__array_insert_index" = 'first' ]; then
-		__array_insert_index=0
-	elif [ "$__array_insert_index" = 'last' ]; then
-		__array_insert_index=$__array_insert_size
+	if [ "$index" = 'first' ]; then
+		index=0
+	elif [ "$index" = 'last' ]; then
+		index=$size
 	else
-		if [ "$__array_insert_index" -lt 0 -o "$__array_insert_index" -ge "$__array_insert_size" ]; then
-			message "index '$__array_insert_index' out of range"
+		if [ "$index" -lt 0 -o "$index" -ge "$size" ]; then
+			message "index '$index' out of range"
 			return 1
 		fi
-		__array_insert_index=$(($__array_insert_index+1))
+		index=$(($index+1))
 	fi
 
-	local __array_insert_arg  __array_insert_out= __array_insert_max=0
-	while [ $__array_insert_index -gt 0 ]; do
-		[ "$__array_insert_max" -gt "$1" ] ||
-			__array_insert_max="$1"
-		__array_insert_out="$__array_insert_out $1"
-		__array_insert_index=$(($__array_insert_index-1))
-		shift
-	done
+	local arrvals arg prev= rest= max=0
 
-	for __array_insert_arg; do
-		[ "$__array_insert_max" -gt "$__array_insert_arg" ] ||
-			max="$__array_insert_arg"
+	eval "arrvals=\"\$$arr\""
+	for arg in $arrvals; do
+		[ "$max" -gt "$arg" ] ||
+			max="$arg"
+		if [ $index -eq 0 ]; then
+			rest="$rest $arg"
+			continue
+		fi
+		prev="$prev $arg"
+		index=$(($index-1))
 	done
-	__array_insert_max=$(($__array_insert_max+1))
+	max=$(($max+1))
 
-	eval "__ARRAY_${__array_insert_arr}_$__array_insert_max=\"\$__array_insert_value\";
-	      $__array_insert_arr=\"$__array_insert_out $__array_insert_max ${1:+$* }\""
+	local new=
+	for arg; do
+		eval "__ARRAY_${arr}_$max=\"\$arg\""
+		new="$new $max"
+		max=$(($max+1))
+	done
+	eval "$arr=\"$prev$new$rest \""
 }
 
 # Push one or more elements onto the end of array.
-# Usage: array_push ARR 'value1' 'value2' 'value3'
+# Usage: array_push ARR 'value1' ['value2' ...]
 array_push() {
 	if [ "$#" -lt 2 ]; then
 		message "array_push: More arguments required"
 		return 1
 	fi
-	local __array_push_arg __array_push_arr="$1"
+	local arr="$1"
 	shift
-
-	for __array_push_arg; do
-		array_insert "$__array_push_arr" 'last' "$__array_push_arg"
-	done
+	array_insert "$arr" 'last' "$@"
 }
 
 # Prepend one or more elements to the beginning of an array
-# Usage: array_unshift ARR 'value1' 'value2' 'value3'
+# Usage: array_unshift ARR 'value1' ['value2'...]
 array_unshift() {
-	array_insert "$1" 'first' "${2-}"
+	if [ "$#" -lt 2 ]; then
+		message "array_unshift: More arguments required"
+		return 1
+	fi
+	local arr="$1"
+	shift
+	array_insert "$1" 'first' "$@"
 }
 
 # Create shell array
-# Usage: array_create ARR 'value1' 'value2' 'value3'
+# Usage: array_create ARR ['value' ...]
 array_create() {
 	if [ "$#" -lt 1 ]; then
 		message "array_create: More arguments required"
 		return 1
 	fi
-	local __array_create_arr="$1"
+	local arr="$1"
 	shift
 
-	eval "$__array_create_arr=''"
+	eval "$arr=''"
 	[ -z "${1-}" ] ||
-		array_push "$__array_create_arr" "$@"
+		array_push "$arr" "$@"
 }
 
 # Destroy shell array
@@ -187,13 +216,13 @@ array_destroy() {
 		message "array_destroy: More arguments required"
 		return 1
 	fi
-	local __array_destroy_arg __array_destroy_arr="$1"
+	local arg arr="$1"
 	shift
 
-	for __array_destroy_arg in $__array_destroy_arr; do
-		eval "unset __ARRAY_${__array_destroy_arr}_$__array_destroy_arg"
+	for arg in $arr; do
+		eval "unset __ARRAY_${arr}_$arg"
 	done
-	eval "unset $__array_destroy_arr"
+	eval "unset $arr"
 }
 
 # Array iterator
@@ -217,6 +246,7 @@ array_foreach() {
 	eval "$__array_foreach_val=\"\$__ARRAY_${__array_foreach_arr}_$ARRAY_FOREACH_NUM\""
 }
 
+# Exchanges two elements in an array
 # Usage: array_flip ARR $src_i $dst_i
 array_flip() {
 	if [ "$#" -lt 3 ]; then
