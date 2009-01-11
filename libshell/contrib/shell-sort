@@ -1,0 +1,62 @@
+#!/bin/ash -efu
+
+if [ -z "${__included_shell_sort-}" ]; then
+__included_shell_sort=1
+
+if [ -n "${__libshell_experimental-}" ]; then
+
+. ./shell-array
+
+QUICKSORT='__shell_quicksort'
+__shell_quicksort() {
+	local res=0
+	[ "$2" -"$1" "$3" ] || res=1
+	return $res
+}
+
+__shell_quicksort_partition() {
+	local arr_x arr_y i
+	local var="$1" arr="$2" p="$3" r="$4"
+
+	i=$p
+	array_get "$arr" "$r" arr_x
+
+	while [ "$p" -lt "$r" ]; do
+		array_get "$arr" "$p" arr_y
+		if $QUICKSORT le "$arr_y" "$arr_x"; then
+			array_flip "$arr" "$p" "$i"
+			i=$(($i+1))
+		fi
+		p=$(($p+1))
+	done
+	array_flip "$arr" "$i" "$r"
+	eval "$var=\"$i\""
+}
+
+quicksort() {
+	local q arr p=0 r
+	#echo quicksort
+	arr="$1"; shift
+
+	if [ "$#" -gt 0 ]; then
+		p="$1"
+		shift
+	fi
+
+	if [ "$#" -eq 0 ]; then
+		array_size "$arr" r
+		r=$(($r-1))
+	else
+		r=$1
+	fi
+
+	while [ "$p" -lt "$r" ]; do
+		__shell_quicksort_partition q "$arr" "$p" "$r"
+		quicksort "$arr" "$p" "$(($q-1))"
+		p=$(($q+1))
+	done
+}
+
+fi #__libshell_experimental
+
+fi #__included_shell_quicksort
