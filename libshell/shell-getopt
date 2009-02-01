@@ -369,8 +369,13 @@ getopt() {
 			2)	ret=1
 				;;
 		esac
-		[ "$OPTOPT" != '?' ] ||
+		if [ "$OPTOPT" = '?' ]; then
+			if [ -n "$GETOPT_ALLOW_UNKNOWN" ]; then
+				out="${out%% -- *} -- ${out#* -- }$OPTUKN"
+				OPTUKN=
+			fi
 			continue
+		fi
 		pfx='-'
 		[ "${#OPTOPT}" -eq 1 ] ||
 			pfx='--'
