@@ -5,274 +5,174 @@ __included_shell_array=1
 
 if [ -n "${__libshell_experimental-}" ]; then
 
-. ../shell-error
+. shell-error
 
-# Function return array size.
-# Usage: array_size ARR arrsize; echo "$arrsize"
+# Format:
+# __ARRAY_{name}='{size}'
+# __ARRAY_{name}_{index}='{value}'
+#
+# __ARRAY_test='3'
+# __ARRAY_test_0='AAA'
+# __ARRAY_test_1='BBB'
+# __ARRAY_test_2='CCC'
+
+__array_init() {
+	local __array_init_arr __array_init_index
+	__array_init_arr="${1%%\[*}"
+	__array_init_index="${1##$__array_init_arr}"
+	__array_init_index="${__array_init_index#\[}"
+	__array_init_index="${__array_init_index%\]}"
+	eval "$2=\"\$__array_init_arr\";
+	      $3=\"\$__array_init_index\";
+	      $4=\"\${__ARRAY_${__array_init_arr}:-0}\""
+}
+
+# Usage: array_size ARR   retvar
+# Usage: array_size ARR[] retvar
 array_size() {
-	local __array_size_var="$2"
-	eval "set -- \$$1"
-	eval "$__array_size_var=$#"
-}
-
-# Get array element and store result into variable.
-# Usage: array_get ARR $index var
-array_get() {
-	if [ "$#" -ne 3 ]; then
-		message "array_get: More arguments required"
-		return 1
-	fi
-	local __array_get_arr="$1" __array_get_index="$2" __array_get_var="$3"
-
-	eval "set -- \$$__array_get_arr"
-	local __array_get_size=$#
-
-	if [ "$__array_get_index" = 'first' ]; then
-		__array_get_index=0
-	elif [ "$__array_get_index" = 'last' ]; then
-		__array_get_index=$(($__array_get_size-1))
-	else
-		if [ "$__array_get_index" -lt 0 -o "$__array_get_index" -ge "$__array_get_size" ]; then
-			message "index '$__array_get_index' out of range"
-			return 1
-		fi
-	fi
-	shift $__array_get_index
-	eval "$__array_get_var=\"\${__ARRAY_${__array_get_arr}_$1-}\""
-}
-
-# Get first array element.
-# Usage: array_first ARR var; echo "$var"
-array_first() {
-	if [ "$#" -ne 2 ]; then
-		message "array_first: More arguments required"
-		return 1
-	fi
-	array_get "$1" 'first' "$2"
-}
-
-# Get last array element.
-# Usage: array_last ARR var; echo "$var"
-array_last() {
-	if [ "$#" -ne 2 ]; then
-		message "array_last: More arguments required"
-		return 1
-	fi
-	array_get "$1" 'last' "$2"
-}
-
-# Remove array element by index.
-# Usage: array_remove ARR index [old_result]
-array_remove() {
 	if [ "$#" -lt 2 ]; then
-		message "array_remove: More arguments required"
+		message "More arguments required"
 		return 1
 	fi
-
-	local __array_remove_arr="$1" __array_remove_index="$2" __array_remove_var="${3-}"
-
-	eval "set -- \$$__array_remove_arr"
-	local __array_remove_size=$#
-
-	if [ "$__array_remove_index" = 'first' ]; then
-		__array_remove_index=0
-	elif [ "$__array_remove_index" = 'last' ]; then
-		__array_remove_index=$(($__array_remove_size-1))
-	else
-		if [ "$__array_remove_index" -lt 0 -o "$__array_remove_index" -ge "$__array_remove_size" ]; then
-			message "index '$__array_remove_index' out of range"
-			return 1
-		fi
-	fi
-
-	local __array_remove_out=
-	while [ $__array_remove_index -gt 0 ]; do
-		__array_remove_out="$__array_remove_out $1"
-		__array_remove_index=$(($__array_remove_index-1))
-		shift
-	done
-
-	eval "[ -z \"$__array_remove_var\" ] ||
-			$__array_remove_var=\"\$__ARRAY_${__array_remove_arr}_$1\";
-		unset __ARRAY_${__array_remove_arr}_$1"
-	shift
-
-	__array_remove_out="$__array_remove_out${1:+ $*} "
-	eval "$__array_remove_arr=\"\$__array_remove_out\""
+	eval "$2=\"\$__ARRAY_$1\""
 }
 
-# Shift an element off the beginning of array.
-# Usage: array_shift ARR [old_result]
-array_shift() {
-	if [ "$#" -eq 0 ]; then
-		message "array_shift: More arguments required"
-		return 1
-	fi
-	array_remove "$1" 'first' "${2-}"
-}
-
-# Pop the element off the end of array.
-# Usage: array_pop ARR [old_result]
-array_pop() {
-	if [ "$#" -eq 0 ]; then
-		message "array_pop: More arguments required"
-		return 1
-	fi
-	array_remove "$1" 'last' "${2-}"
-}
-
-# Usage: array_insert ARR index 'new-value' ['new-value1' ...]
-array_insert() {
-	if [ "$#" -lt 3 ]; then
-		message "array_insert: More arguments required"
-		return 1
-	fi
-
-	local arr index size
-	arr="$1"; shift
-	index="$1"; shift
-
-	array_size "$arr" size
-
-	if [ "$index" = 'first' ]; then
-		index=0
-	elif [ "$index" = 'last' ]; then
-		index=$size
-	else
-		if [ "$index" -lt 0 -o "$index" -ge "$size" ]; then
-			message "index '$index' out of range"
-			return 1
-		fi
-		index=$(($index+1))
-	fi
-
-	local arrvals arg prev= rest= max=0
-
-	eval "arrvals=\"\$$arr\""
-	for arg in $arrvals; do
-		[ "$max" -gt "$arg" ] ||
-			max="$arg"
-		if [ $index -eq 0 ]; then
-			rest="$rest $arg"
-			continue
-		fi
-		prev="$prev $arg"
-		index=$(($index-1))
-	done
-	max=$(($max+1))
-
-	local new=
-	for arg; do
-		eval "__ARRAY_${arr}_$max=\"\$arg\""
-		new="$new $max"
-		max=$(($max+1))
-	done
-	eval "$arr=\"$prev$new$rest \""
-}
-
-# Push one or more elements onto the end of array.
-# Usage: array_push ARR 'value1' ['value2' ...]
-array_push() {
-	if [ "$#" -lt 2 ]; then
-		message "array_push: More arguments required"
-		return 1
-	fi
-	local arr="$1"
-	shift
-	array_insert "$arr" 'last' "$@"
-}
-
-# Prepend one or more elements to the beginning of an array
-# Usage: array_unshift ARR 'value1' ['value2'...]
-array_unshift() {
-	if [ "$#" -lt 2 ]; then
-		message "array_unshift: More arguments required"
-		return 1
-	fi
-	local arr="$1"
-	shift
-	array_insert "$1" 'first' "$@"
-}
-
-# Create shell array
-# Usage: array_create ARR ['value' ...]
+# Usage: array_create ARR
+# Usage: array_create ARR[SIZE]
 array_create() {
-	if [ "$#" -lt 1 ]; then
-		message "array_create: More arguments required"
-		return 1
-	fi
-	local arr="$1"
-	shift
-
-	eval "$arr=''"
-	[ -z "${1-}" ] ||
-		array_push "$arr" "$@"
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+	eval "__ARRAY_$__array_arr=\"${__array_index-0}\""
 }
 
-# Destroy shell array
 # Usage: array_destroy ARR
 array_destroy() {
-	if [ "$#" -eq 0 ]; then
-		message "array_destroy: More arguments required"
-		return 1
-	fi
-	local arg arr="$1"
-	shift
+	local __array_arr __array_index __array_size i=0
+	__array_init "$1" __array_arr __array_index __array_size
 
-	for arg in $arr; do
-		eval "unset __ARRAY_${arr}_$arg"
+	while [ $i -lt $__array_size ]; do
+		unset "__ARRAY_${__array_arr}_$i"
+		i=$(($i+1))
 	done
-	eval "unset $arr"
+	unset "__ARRAY_$__array_arr"
 }
 
-# Array iterator
-# Usage: while array_foreach ARR var; do echo "$var"; done
-ARRAY_FOREACH_NUM=0
-array_foreach() {
+# Usage: array_set ARR[i] val
+array_set() {
 	if [ "$#" -lt 2 ]; then
-		message "array_foreach: More arguments required"
+		message "More arguments required"
 		return 1
 	fi
 
-	local __array_foreach_arr="$1" __array_foreach_val="$2"
-	eval "set -- \$$__array_foreach_arr"
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
 
-	ARRAY_FOREACH_NUM=$(($ARRAY_FOREACH_NUM+1))
-	if [ "$ARRAY_FOREACH_NUM" -gt $# ]; then
+	eval "__ARRAY_${__array_arr}_$__array_index=\"\$2\";"
+	[ "$__array_index" -lt "$__array_size" ] ||
+		eval "__ARRAY_$__array_arr=\"$(($__array_index+1))\""
+}
+
+# Usage: array_push ARR   val [val1 ...]
+# Usage: array_push ARR[] val [val1 ...]
+array_push() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size 
+	__array_init "$1" __array_arr __array_index __array_size
+	shift
+
+	for arg; do
+		eval "__ARRAY_${__array_arr}_$__array_size=\"\$arg\";"
+		__array_size=$(($__array_size+1))
+	done
+	eval "__ARRAY_${__array_arr}=\"$__array_size\""
+}
+
+# Usage: array_get ARR[i] var
+array_get() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size 
+	__array_init "$1" __array_arr __array_index __array_size
+
+	if [ "$__array_index" -ge "$__array_size" ]; then
+		message "index '$__array_index' out of range"
+		return 1
+	fi
+	eval "$2=\"\${__ARRAY_${__array_arr}_$__array_index-}\""
+}
+
+
+# Usage: array_swap ARR[i] ARR1[j]
+array_swap() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+
+	local arg __array_arr1 __array_index1 __array_size1
+	__array_init "$2" __array_arr1 __array_index1 __array_size1
+
+	eval "arg=\"\$__ARRAY_${__array_arr}_$__array_index\";
+	      __ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\";
+	      __ARRAY_${__array_arr1}_$__array_index1=\"\$arg\""
+}
+
+# Usage: array_equal ARR[i] ARR1[j]
+array_equal() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+
+	local arg __array_arr1 __array_index1 __array_size1
+	__array_init "$2" __array_arr1 __array_index1 __array_size1
+
+	eval "__ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\""
+}
+
+# Usage: array_compare funcname ARR[i] ARR1[j] [optional arguments for 'funcname'...]
+array_compare() {
+	if [ "$#" -lt 3 ]; then
+		message "More arguments required"
+		return 1
+	fi
+	local __func="$1"
+	shift
+
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+	shift
+
+	local __array_arr1 __array_index1 __array_size1
+	__array_init "$1" __array_arr1 __array_index1 __array_size1
+	shift
+
+	eval "$__func \"\$__ARRAY_${__array_arr}_$__array_index\" \"\$__ARRAY_${__array_arr1}_$__array_index1\" \"$@\""
+}
+
+ARRAY_FOREACH_NUM=0
+array_foreach() {
+	local __array_foreach_size
+	eval "__array_foreach_size=\"\$__ARRAY_$1\""
+	if [ "${ARRAY_FOREACH_NUM:-0}" -eq "${__array_foreach_size}" ]; then
 		ARRAY_FOREACH_NUM=0
 		return 1
 	fi
-
-	eval "$__array_foreach_val=\"\$__ARRAY_${__array_foreach_arr}_$ARRAY_FOREACH_NUM\""
-}
-
-# Exchanges two elements in an array
-# Usage: array_flip ARR $src_i $dst_i
-array_flip() {
-	if [ "$#" -lt 3 ]; then
-		message "array_flip: More arguments required"
-		return 1
-	fi
-	local arg
-	local arr="$1" src="$2" dst="$3"
-
-	eval "set -- \$$arr"
-	local size=$#
-
-	for arg in "$src" "$dst"; do
-		if [ "$arg" -lt 0 -o "$arg" -ge "$size" ]; then
-			message "index '$arg' out of range"
-			return 1
-		fi
-	done
-
-	src=$(($src+1))
-	dst=$(($dst+1))
-
-	eval "src=\"\$$src\"; dst=\"\$$dst\";
-	      arg=\"\$__ARRAY_${arr}_$src\";
-	      __ARRAY_${arr}_$src=\"\$__ARRAY_${arr}_$dst\";
-	      __ARRAY_${arr}_$dst=\"\$arg\";"
+	eval "$2=\"\${__ARRAY_${1}_${ARRAY_FOREACH_NUM:-0}-}\""
+	ARRAY_FOREACH_NUM=$((${ARRAY_FOREACH_NUM:-0}+1))
 }
 
 fi #__libshell_experimental
