@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.0.8
+Version: 0.0.9
 Release: alt1
 
 Summary:  A library of shell functions
@@ -25,6 +25,14 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Thu Feb 19 2009 Alexey Gladkov <legion@altlinux.org> 0.0.9-alt1
+- shell-getopt changes:
+  + preserves the options order.
+- Other changes:
+  + Add .gear/changelog file.
+  + contrib/shell-sort: Implementation of sorting the array.
+  + contrib/shell-array: Reimplement arrays.
+
 * Wed Dec 03 2008 Alexey Gladkov <legion@altlinux.ru> 0.0.8-alt1
 - shell-getopt changes:
   + Fix regression.
