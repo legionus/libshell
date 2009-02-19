@@ -1,0 +1,24 @@
+group: New utilities
+regexp: New
+
+group: shell-getopt changes
+regexp: ^shell-getopt:
+filter: s/^shell-getopt: //
+
+group: shell-signal changes
+regexp: ^shell-signal:
+filter: s/^shell-signal: //
+
+group: shell-unittest changes
+regexp: ^shell-unittest:
+filter: s/^shell-unittest: //
+
+group: shell-ip-address changes
+regexp: ^shell-ip-address:
+filter: s/^shell-ip-address: //
+
+group: Documentation changes
+regexp: ^[^:]+\.man:
+
+group: Other changes
+regexp: .*
