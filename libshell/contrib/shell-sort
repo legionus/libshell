@@ -1,0 +1,105 @@
+#!/bin/ash -efu
+
+if [ -z "${__included_shell_sort-}" ]; then
+__included_shell_sort=1
+
+if [ -n "${__libshell_experimental-}" ]; then
+
+. ./shell-array
+
+INSERTIONSORT='__shell_compare_sort'
+QUICKSORT='__shell_compare_sort'
+HEAPSORT='__shell_compare_sort'
+__shell_compare_sort() {
+	test "$1" "$3" "$2" || return 1
+}
+
+__insertion_sort() {
+	local arr="$1" first="$2" last="$3"
+	local i j=0 key_i key_j
+
+	j=$(($first+1))
+	while [ $j -lt $last ]; do
+		array_get "$arr[$j]" key_j
+		i=$(($j-1))
+
+		while [ $i -ge $first ]; do
+			array_get "$arr[$i]" key_i
+			if array_compare "$INSERTIONSORT" "$arr[$i]" "$arr[$j]" "$order"; then
+				array_set "$arr[$(($i+1))]" "$key_i"
+				i=$(($i-1))
+			else
+				break
+			fi
+		done
+		array_set "$arr[$(($i+1))]" "$key_j"
+		j=$(($j+1))
+	done
+}
+
+# Usage: insertion_sort ARR
+insertion_sort() {
+	local order=-ge arr r
+	arr="$1"; shift
+	array_size "$arr" r
+	__insertion_sort "$arr" 0 "$r"
+}
+
+__shell_partition() {
+	local var="$1" arr="$2" p="$3" r="$4"
+	local i=$p j=$p
+
+	while [ "$j" -lt "$r" ]; do
+		if array_compare "$QUICKSORT" "$arr[$r]" "$arr[$j]" "$order"; then
+			array_swap "$arr[$i]" "$arr[$j]"
+			i=$(($i+1))
+		fi
+		j=$(($j+1))
+	done
+	array_swap "$arr[$i]" "$arr[$r]"
+	eval "$var=\"$i\""
+}
+
+__quicksort() {
+	local q arr="$1" p="$2" r="$3"
+	while [ "$p" -lt "$r" ]; do
+		__shell_partition q "$arr" "$p" "$r"
+		__quicksort "$arr" "$p" "$(($q-1))"
+		p=$(($q+1))
+	done
+}
+
+# Usage: quicksort ARR [order]
+quicksort() {
+	local order=-le arr r
+	arr="$1"; shift
+	[ "$#" -eq 0 ] || order=-ge
+
+	array_size "$arr" r
+	__quicksort "$arr" 0 "$(($r-1))"
+}
+
+heapsort() {
+	local arr siz c p i=1 order=-gt
+	arr="$1"; shift
+	[ "$#" -eq 0 ] || order=-lt
+
+	array_size "$arr" siz
+	while [ $i -lt $siz ]; do
+		c=$i
+		while [ $c -gt 0 ]; do
+			p=$(($c-1))
+			if array_compare "$HEAPSORT" "$arr[$p]" "$arr[$c]" "$order"; then
+				array_swap "$arr[$p]" "$arr[$c]"
+				c=$p
+			else
+				break
+			fi
+		done
+		i=$(($i+1))
+	done
+}
+
+fi #__libshell_experimental
+
+fi #__included_shell_sort
