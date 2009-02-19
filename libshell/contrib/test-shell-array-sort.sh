@@ -3,7 +3,7 @@
 __libshell_experimental=1
 
 . ./shell-array
-. ./shell-sort4
+. ./shell-sort
 
 #array_create zzz 111 222 333 444 555
 

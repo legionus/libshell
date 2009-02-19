@@ -9,6 +9,7 @@ if [ -n "${__libshell_experimental-}" ]; then
 
 INSERTIONSORT='__shell_compare_sort'
 QUICKSORT='__shell_compare_sort'
+HEAPSORT='__shell_compare_sort'
 __shell_compare_sort() {
 	test "$1" "$3" "$2" || return 1
 }
@@ -76,6 +77,27 @@ quicksort() {
 
 	array_size "$arr" r
 	__quicksort "$arr" 0 "$(($r-1))"
+}
+
+heapsort() {
+	local arr siz c p i=1 order=-gt
+	arr="$1"; shift
+	[ "$#" -eq 0 ] || order=-lt
+
+	array_size "$arr" siz
+	while [ $i -lt $siz ]; do
+		c=$i
+		while [ $c -gt 0 ]; do
+			p=$(($c-1))
+			if array_compare "$HEAPSORT" "$arr[$p]" "$arr[$c]" "$order"; then
+				array_swap "$arr[$p]" "$arr[$c]"
+				c=$p
+			else
+				break
+			fi
+		done
+		i=$(($i+1))
+	done
 }
 
 fi #__libshell_experimental
