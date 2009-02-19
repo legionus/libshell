@@ -7,62 +7,172 @@ if [ -n "${__libshell_experimental-}" ]; then
 
 . shell-error
 
-# Create shell array
-# Usage: array_create ARR 'value1' 'value2' 'value3'
-array_create() {
-	local __array_create_arrname __array_create_arg __array_create_i=0
-	__array_create_arrname="$1"; shift
+# Format:
+# __ARRAY_{name}='{size}'
+# __ARRAY_{name}_{index}='{value}'
+#
+# __ARRAY_test='3'
+# __ARRAY_test_0='AAA'
+# __ARRAY_test_1='BBB'
+# __ARRAY_test_2='CCC'
 
-	for __array_create_arg; do
-		eval "__SHELL_ARRAY_${__array_create_arrname}_${__array_create_i}=\"\$__array_create_arg\""
-		__array_create_i=$(($__array_create_i + 1))
-	done
-	eval "${__array_create_arrname}=$#"
+__array_init() {
+	local __array_init_arr __array_init_index
+	__array_init_arr="${1%%\[*}"
+	__array_init_index="${1##$__array_init_arr}"
+	__array_init_index="${__array_init_index#\[}"
+	__array_init_index="${__array_init_index%\]}"
+	eval "$2=\"\$__array_init_arr\";
+	      $3=\"\$__array_init_index\";
+	      $4=\"\${__ARRAY_${__array_init_arr}:-0}\""
 }
 
-# Destroy shell array
+# Usage: array_size ARR   retvar
+# Usage: array_size ARR[] retvar
+array_size() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+	eval "$2=\"\$__ARRAY_$1\""
+}
+
+# Usage: array_create ARR
+# Usage: array_create ARR[SIZE]
+array_create() {
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+	eval "__ARRAY_$__array_arr=\"${__array_index-0}\""
+}
+
 # Usage: array_destroy ARR
 array_destroy() {
-	local __array_destroy_arrname __array_destroy_i
-	__array_destroy_arrname="$1"; shift
+	local __array_arr __array_index __array_size i=0
+	__array_init "$1" __array_arr __array_index __array_size
 
-	eval "__array_destroy_i=\"\$$__array_destroy_arrname\"; unset $arrname;"
-
-	while [ $__array_destroy_i -ge 0 ]; do
-		eval "unset __SHELL_ARRAY_${__array_destroy_arrname}_$__array_destroy_i"
-		__array_destroy_i=$(($__array_destroy_i-1))
+	while [ $i -lt $__array_size ]; do
+		unset "__ARRAY_${__array_arr}_$i"
+		i=$(($i+1))
 	done
+	unset "__ARRAY_$__array_arr"
 }
 
-# Show array elements
-# Usage:
-# array_create ARR 'a1' 'a2' 'a3' 'a4' 'a5'
-# array_lookup ARR 1 2 4
-# a1
-# a2
-# a4
-array_lookup() {
-	local __array_lookup_arrname __array_lookup_i
-	__array_lookup_arrname="$1"; shift
+# Usage: array_set ARR[i] val
+array_set() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
 
-	for __array_lookup_i; do
-		eval "[ -z \"\${__SHELL_ARRAY_${__array_lookup_arrname}_${__array_lookup_i}-}\" ] ||
-				printf '%s\\n' \"\${__SHELL_ARRAY_${__array_lookup_arrname}_${__array_lookup_i}-}\""
-	done
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+
+	eval "__ARRAY_${__array_arr}_$__array_index=\"\$2\";"
+	[ "$__array_index" -lt "$__array_size" ] ||
+		eval "__ARRAY_$__array_arr=\"$(($__array_index+1))\""
 }
 
-# Get shell element and store result into variable.
-# Usage: array_get_variable result ARR 3
-array_get_variable() {
-	eval "
-		$1='';
-		[ -n \"\${$2-}\" ] ||
-			{ message '$2: Not found'; return 1; };
+# Usage: array_push ARR   val [val1 ...]
+# Usage: array_push ARR[] val [val1 ...]
+array_push() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
 
-		[ \"\${$2-}\" -gt '$3' ] ||
-			{ message '$2[$3]: Not found'; return 1; };
+	local arg __array_arr __array_index __array_size 
+	__array_init "$1" __array_arr __array_index __array_size
+	shift
 
-		$1=\"\${__SHELL_ARRAY_${2}_$3-}\";"
+	for arg; do
+		eval "__ARRAY_${__array_arr}_$__array_size=\"\$arg\";"
+		__array_size=$(($__array_size+1))
+	done
+	eval "__ARRAY_${__array_arr}=\"$__array_size\""
+}
+
+# Usage: array_get ARR[i] var
+array_get() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size 
+	__array_init "$1" __array_arr __array_index __array_size
+
+	if [ "$__array_index" -ge "$__array_size" ]; then
+		message "index '$__array_index' out of range"
+		return 1
+	fi
+	eval "$2=\"\${__ARRAY_${__array_arr}_$__array_index-}\""
+}
+
+
+# Usage: array_swap ARR[i] ARR1[j]
+array_swap() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+
+	local arg __array_arr1 __array_index1 __array_size1
+	__array_init "$2" __array_arr1 __array_index1 __array_size1
+
+	eval "arg=\"\$__ARRAY_${__array_arr}_$__array_index\";
+	      __ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\";
+	      __ARRAY_${__array_arr1}_$__array_index1=\"\$arg\""
+}
+
+# Usage: array_equal ARR[i] ARR1[j]
+array_equal() {
+	if [ "$#" -lt 2 ]; then
+		message "More arguments required"
+		return 1
+	fi
+
+	local arg __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+
+	local arg __array_arr1 __array_index1 __array_size1
+	__array_init "$2" __array_arr1 __array_index1 __array_size1
+
+	eval "__ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\""
+}
+
+# Usage: array_compare funcname ARR[i] ARR1[j] [optional arguments for 'funcname'...]
+array_compare() {
+	if [ "$#" -lt 3 ]; then
+		message "More arguments required"
+		return 1
+	fi
+	local __func="$1"
+	shift
+
+	local __array_arr __array_index __array_size
+	__array_init "$1" __array_arr __array_index __array_size
+	shift
+
+	local __array_arr1 __array_index1 __array_size1
+	__array_init "$1" __array_arr1 __array_index1 __array_size1
+	shift
+
+	eval "$__func \"\$__ARRAY_${__array_arr}_$__array_index\" \"\$__ARRAY_${__array_arr1}_$__array_index1\" \"$@\""
+}
+
+ARRAY_FOREACH_NUM=0
+array_foreach() {
+	local __array_foreach_size
+	eval "__array_foreach_size=\"\$__ARRAY_$1\""
+	if [ "${ARRAY_FOREACH_NUM:-0}" -eq "${__array_foreach_size}" ]; then
+		ARRAY_FOREACH_NUM=0
+		return 1
+	fi
+	eval "$2=\"\${__ARRAY_${1}_${ARRAY_FOREACH_NUM:-0}-}\""
+	ARRAY_FOREACH_NUM=$((${ARRAY_FOREACH_NUM:-0}+1))
 }
 
 fi #__libshell_experimental
