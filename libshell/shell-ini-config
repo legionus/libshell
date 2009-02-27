@@ -11,6 +11,7 @@ shell_ini_config_lbegin='^[[:space:]]*'
 shell_ini_config_sbegin="$shell_ini_config_lbegin\["
 shell_ini_config_send='\]'
 
+. shell-error
 . shell-quote
 
 ini_config_get() {
