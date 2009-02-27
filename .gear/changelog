@@ -17,6 +17,10 @@ group: shell-ip-address changes
 regexp: ^shell-ip-address:
 filter: s/^shell-ip-address: //
 
+group: shell*-config changes
+regexp: ^shell(-ini)?-config:
+filter: s/^shell(-ini)?-config: //
+
 group: Documentation changes
 regexp: ^[^:]+\.man:
 

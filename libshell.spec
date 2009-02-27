@@ -1,6 +1,6 @@
 Name: libshell
 Version: 0.0.9
-Release: alt1
+Release: alt2
 
 Summary:  A library of shell functions
 License: GPL
@@ -25,6 +25,10 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Fri Feb 27 2009 Alexey Gladkov <legion@altlinux.org> 0.0.9-alt2
+- shell*-config changes:
+  + Fix dependency.
+
 * Thu Feb 19 2009 Alexey Gladkov <legion@altlinux.org> 0.0.9-alt1
 - shell-getopt changes:
   + preserves the options order.
