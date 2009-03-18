@@ -19,3 +19,7 @@ The files
 	shell-version, shell-config, shell-error, shell-ip-address,
 	shell-mail-address, shell-unittest, shell-signal
 are Copyright (C) 2008  Alexey Gladkov <legion@altlinux.org>
+
+All files in this package may be freely copied under the terms
+of the GNU General Public License (GPL), version 2, or at your
+option any later version.
