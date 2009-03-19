@@ -3,6 +3,8 @@
 if [ -z "${__included_shell_quote-}" ]; then
 __included_shell_quote=1
 
+. shell-version
+
 # Quote argument for sed basic regular expression and store result into variable.
 # Usage example:
 # quote_sed_regexp_variable var_pattern "$pattern"
@@ -52,11 +54,9 @@ quote_shell() {
 	printf %s "$result"
 }
 
-# Remove quote symbol from string
-# Usage example: for i in "\"str1\"" "'str2'" "\"str3'"; do echo "$(string_quote_remove "$i")"; done
-# str1
-# str2
-# "str3'
+
+if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
+# Obsolete function. You shouldn't use it.
 string_quote_remove() {
 	local out="$1"
 	if [ -z "${1##*'}${1%%'*}" ]; then
@@ -68,5 +68,6 @@ string_quote_remove() {
 	fi
 	printf %s "$out"
 }
+fi # __export_compatibility_string_quote_remove
 
 fi #__included_shell_quote
