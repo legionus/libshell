@@ -60,7 +60,7 @@ parse_common_option() {
 	case "$1" in
 		-h|--help) show_help
 			;;
-		-q|--quiet) quiet=-q
+		-q|--quiet) quiet=-q; verbose=
 			;;
 		-v|--verbose) verbose=-v; quiet=
 			;;
