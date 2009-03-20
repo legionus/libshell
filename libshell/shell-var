@@ -40,20 +40,29 @@ shell_var_trim() {
 }
 
 # Remove quote symbol from string
-# Usage example: for i in "\"str1\"" "'str2'" "\"str3'"; do echo "$(shell_var_unquote "$i")"; done
+# Usage example:
+# for i in "\"str1\"" "'str2'" "\"str3'"; do
+#    shell_var_unquote var "$i";
+#    echo "$var";
+# done
+#
+# Result:
 # str1
 # str2
 # "str3'
+#
 shell_var_unquote() {
-	local out="$1"
+	[ "$#" -eq 2 ] ||
+		fatal "Usage: shell_var_unquote varname value"
+	local __shell_var_unquote_var="$1" __shell_var_unquote_out="$2"
 	if [ -z "${1##*'}${1%%'*}" ]; then
-		out="${1#'}"
-		out="${out%'}"
+		__shell_var_unquote_out="${1#'}"
+		__shell_var_unquote_out="${__shell_var_unquote_out%'}"
 	elif [ -z "${1##*\"}${1%%\"*}" ]; then
-		out="${1#\"}"
-		out="${out%\"}"
+		__shell_var_unquote_out="${1#\"}"
+		__shell_var_unquote_out="${__shell_var_unquote_out%\"}"
 	fi
-	printf %s "$out"
+	eval "$__shell_var_unquote_var=\"\$__shell_var_unquote_out\""
 }
 
 fi #__included_shell_var
