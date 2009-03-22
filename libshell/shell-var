@@ -3,7 +3,7 @@
 if [ -z "${__included_shell_var-}" ]; then
 __included_shell_var=1
 
-shell_var_yes() {
+shell_var_is_yes() {
 	[ "$#" -eq 1 ] ||
 		fatal "Usage: shell_var_yes value"
 	case "$1" in
@@ -12,7 +12,7 @@ shell_var_yes() {
 	return 1
 }
 
-shell_var_no() {
+shell_var_is_no() {
 	[ "$#" -eq 1 ] ||
 		fatal "Usage: shell_var_no value"
 	case "$1" in
