@@ -48,3 +48,7 @@ shell-unittest	shouldSkip
 shell-unittest	showSummary
 shell-unittest	tearDown
 shell-unittest	tearDownTests
+shell-var	shell_var_is_no
+shell-var	shell_var_is_yes
+shell-var	shell_var_trim
+shell-var	shell_var_unquote

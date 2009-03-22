@@ -1,0 +1,68 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_var-}" ]; then
+__included_shell_var=1
+
+shell_var_is_yes() {
+	[ "$#" -eq 1 ] ||
+		fatal "Usage: shell_var_yes value"
+	case "$1" in
+		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|[Yy]|1) return 0 ;;
+	esac
+	return 1
+}
+
+shell_var_is_no() {
+	[ "$#" -eq 1 ] ||
+		fatal "Usage: shell_var_no value"
+	case "$1" in
+		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|[Nn]|0) return 0 ;;
+	esac
+	return 1
+}
+
+# Strip whitespace from the beginning and end of a string
+# Usage: shell_var_trim retval "   aaa bb  aaa "; echo "[$retval]"
+# [aaa bb  aaa]
+shell_var_trim() {
+	[ "$#" -eq 2 ] ||
+		fatal "Usage: shell_var_trim varname value"
+	local __shell_var_trim_var="$1" __shell_var_trim_ret="$2"
+	set -- $__shell_var_trim_ret
+	if [ "$#" -eq 0 ]; then
+		eval "$__shell_var_trim_var=''"
+		return
+	fi
+	__shell_var_trim_ret="$1${__shell_var_trim_ret#*$1}"
+	shift $(($#-1))
+	__shell_var_trim_ret="${__shell_var_trim_ret%$1*}$1"
+	eval "$__shell_var_trim_var=\"\$__shell_var_trim_ret\""
+}
+
+# Remove quote symbol from string
+# Usage example:
+# for i in "\"str1\"" "'str2'" "\"str3'"; do
+#    shell_var_unquote var "$i";
+#    echo "$var";
+# done
+#
+# Result:
+# str1
+# str2
+# "str3'
+#
+shell_var_unquote() {
+	[ "$#" -eq 2 ] ||
+		fatal "Usage: shell_var_unquote varname value"
+	local __shell_var_unquote_var="$1" __shell_var_unquote_out="$2"
+	if [ -z "${1##*'}${1%%'*}" ]; then
+		__shell_var_unquote_out="${1#'}"
+		__shell_var_unquote_out="${__shell_var_unquote_out%'}"
+	elif [ -z "${1##*\"}${1%%\"*}" ]; then
+		__shell_var_unquote_out="${1#\"}"
+		__shell_var_unquote_out="${__shell_var_unquote_out%\"}"
+	fi
+	eval "$__shell_var_unquote_var=\"\$__shell_var_unquote_out\""
+}
+
+fi #__included_shell_var
