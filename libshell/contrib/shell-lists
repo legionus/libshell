@@ -1,0 +1,72 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_lists-}" ]; then
+__included_shell_lists=1
+
+. shell-quote
+
+shell_list_add() {
+	local __shell_list_add_var="$1"
+	shift
+	local __shell_list_add_qvalue
+	while [ "$#" -gt 0 ]; do
+		quote_shell_variable __shell_list_add_qvalue "$1"
+		eval "$__shell_list_add_var=\"\$$__shell_list_add_var \\\"\$__shell_list_add_qvalue\\\"\""
+		shift
+	done
+}
+
+shell_list_remove() {
+	local __shell_list_remove_var __shell_list_remove_value
+	__shell_list_remove_var="$1"; shift
+	__shell_list_remove_value="$1"; shift
+
+	local __shell_list_remove_qvalue __shell_list_remove_nvar=
+
+	eval "__shell_list_remove_nvar=\$$var"
+	eval "set -- $__shell_list_remove_nvar"
+	eval "__shell_list_remove_nvar=''"
+
+	while [ "$#" -gt 0 ]; do
+		if [ "$__shell_list_remove_value" != "$1" ]; then
+			quote_shell_variable __shell_list_remove_qvalue "$1"
+			eval "__shell_list_remove_nvar=\"\$__shell_list_remove_nvar \\\"\$__shell_list_remove_qvalue\\\"\""
+		fi
+		shift
+	done
+
+	eval "$__shell_list_remove_var=\"\$__shell_list_remove_nvar\""
+}
+
+shell_list_get() {
+	local __shell_list_get_var __shell_list_get_name __shell_list_get_value
+	__shell_list_get_var="$1"; shift
+	__shell_list_get_name="$1"; shift
+	__shell_list_get_value="$1"; shift
+
+	local __shell_list_get_lst=
+	eval "__shell_list_get_lst=\"\$$__shell_list_get_var\""
+	eval "set -- $__shell_list_get_lst"
+	[ "$__shell_list_get_value" -le "$#" ] ||
+		return 1
+	eval "$__shell_list_get_name=\"\${$__shell_list_get_value-}\""
+}
+
+SHELLLIST_FOREACH=1
+shell_list_foreach() {
+	local __shell_list_foreach_var __shell_list_foreach_name
+	__shell_list_foreach_var="$1"; shift
+	__shell_list_foreach_name="$1"; shift
+
+	local __shell_list_foreach_lst=
+	eval "__shell_list_foreach_lst=\"\$$__shell_list_foreach_var\""
+	eval "set -- $__shell_list_foreach_lst"
+	if [ "$SHELLLIST_FOREACH" -gt "$#" ]; then
+		SHELLLIST_FOREACH=1
+		return 1
+	fi
+	eval "$__shell_list_foreach_name=\"\$$SHELLLIST_FOREACH\""
+	SHELLLIST_FOREACH=$(( $SHELLLIST_FOREACH + 1 ))
+}
+
+fi # __included_shell_lists
