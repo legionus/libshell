@@ -25,6 +25,7 @@ shell-mail-address	valid_email
 shell-quote	quote_sed_regexp
 shell-quote	quote_sed_regexp_variable
 shell-quote	quote_shell
+shell-quote	quote_shell_args
 shell-quote	quote_shell_variable
 shell-quote	string_quote_remove
 shell-signal	set_cleanup_handler

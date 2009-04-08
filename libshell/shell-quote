@@ -54,6 +54,21 @@ quote_shell() {
 	printf %s "$result"
 }
 
+# Quote argument for shell and store result into variable.
+# Usage example:
+# quote_shell_variable args "$var_args"
+# eval "set -- $args"
+quote_shell_args() {
+	local __quote_shell_args_var __quote_shell_args_out
+	__quote_shell_args_var="$1"; shift
+	__quote_shell_args_out="$*"
+	if [ -z "${__quote_shell_args_out##*[\$\`]*}" ]; then
+		__quote_shell_args_out="$(printf %s "$__quote_shell_args_out" |
+				sed -e 's/[$\`]/\\&/g')" ||
+			return 1
+	fi
+	eval "$__quote_shell_args_var=\"\$__quote_shell_args_out\""
+}
 
 if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
 # Obsolete function. You shouldn't use it.
