@@ -54,9 +54,11 @@ quote_shell() {
 	printf %s "$result"
 }
 
-# Quote argument for shell and store result into variable.
+# Quote argument for shell and store result into variable. This function is similar
+# to the quote_shell_variable(), but the quotes only '$' and '`' characters.
+#
 # Usage example:
-# quote_shell_variable args "$var_args"
+# quote_shell_args args "$var_args"
 # eval "set -- $args"
 quote_shell_args() {
 	local __quote_shell_args_var __quote_shell_args_out
