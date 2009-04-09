@@ -76,9 +76,9 @@ if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
 # Obsolete function. You shouldn't use it.
 string_quote_remove() {
 	local out="$1"
-	if [ -z "${1##*'}${1%%'*}" ]; then
-		out="${1#'}"
-		out="${out%'}"
+	if [ -z "${1##*\'}${1%%\'*}" ]; then
+		out="${1#\'}"
+		out="${out%\'}"
 	elif [ -z "${1##*\"}${1%%\"*}" ]; then
 		out="${1#\"}"
 		out="${out%\"}"
