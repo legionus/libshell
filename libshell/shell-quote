@@ -54,22 +54,84 @@ quote_shell() {
 	printf %s "$result"
 }
 
-# Quote argument for shell and store result into variable. This function is similar
-# to the quote_shell_variable(), but the quotes only '$' and '`' characters.
+# Quote argument for shell and store result into variable.
 #
 # Usage example:
 # quote_shell_args args "$var_args"
 # eval "set -- $args"
 quote_shell_args() {
-	local __quote_shell_args_var __quote_shell_args_out
-	__quote_shell_args_var="$1"; shift
-	__quote_shell_args_out="$*"
-	if [ -z "${__quote_shell_args_out##*[\$\`]*}" ]; then
-		__quote_shell_args_out="$(printf %s "$__quote_shell_args_out" |
-				sed -e 's/[$\`]/\\&/g')" ||
+	local __quote_shell_args_m= __quote_shell_args_r= __quote_shell_args_q= __quote_shell_args_c= __quote_shell_args_l="$2"
+	local __quote_shell_args_dq= __quote_shell_args_sq=
+
+	__quote_shell_args_revert() {
+		[ -n "$2" ] && eval "$1=''" || eval "$1=\$3"
+	}
+
+	__quote_shell_args_char_unquoted() {
+		[ "${#__quote_shell_args_q}" = "$(((${#__quote_shell_args_q}/2)*2))" ] ||
 			return 1
-	fi
-	eval "$__quote_shell_args_var=\"\$__quote_shell_args_out\""
+	}
+
+	__quote_shell_args_char_chkquote() {
+		if [ -n "$__quote_shell_args_q" ]; then
+			! __quote_shell_args_char_unquoted ||
+				__quote_shell_args_q="$__quote_shell_args_q\\"
+		else
+			__quote_shell_args_q='\'
+		fi
+	}
+
+	while [ ${#__quote_shell_args_m} -lt $((${#__quote_shell_args_l}-1)) ]; do
+		__quote_shell_args_m="$__quote_shell_args_m?"
+	done
+
+	while [ -n "$__quote_shell_args_l" ]; do
+		__quote_shell_args_c="${__quote_shell_args_l%$__quote_shell_args_m}"
+		__quote_shell_args_l="${__quote_shell_args_l#?}"
+		__quote_shell_args_m="${__quote_shell_args_m#?}"
+
+		case "$__quote_shell_args_c" in
+			\")
+				if [ -z "$__quote_shell_args_sq" ]; then
+					if [ -n "$__quote_shell_args_q" ]; then
+						! __quote_shell_args_char_unquoted ||
+							__quote_shell_args_revert __quote_shell_args_dq "$__quote_shell_args_dq" $__quote_shell_args_c
+					else
+						__quote_shell_args_revert __quote_shell_args_dq "$__quote_shell_args_dq" $__quote_shell_args_c
+					fi
+				fi
+				;;
+			\')
+				if [ -n "$__quote_shell_args_q" ]; then
+					__quote_shell_args_char_unquoted ||
+						{ messgae "invalid character (')"; return 1; }
+				else
+					[ -n "$__quote_shell_args_dq" ] ||
+						__quote_shell_args_revert __quote_shell_args_sq "$__quote_shell_args_sq" $__quote_shell_args_c
+				fi
+				;;
+			\$|\`)
+				[ -n "$__quote_shell_args_sq" ] ||
+					__quote_shell_args_char_chkquote
+				;;
+			\\)
+				__quote_shell_args_q="$__quote_shell_args_q$__quote_shell_args_c"
+				continue
+				;;
+			[!A-Za-z0-9_\ ])
+				[ -n "$__quote_shell_args_dq" -o -n "$__quote_shell_args_sq" ] ||
+					__quote_shell_args_char_chkquote
+				;;
+		esac
+		__quote_shell_args_r="$__quote_shell_args_r$__quote_shell_args_q$__quote_shell_args_c"
+		__quote_shell_args_q=
+	done
+	[ -z "$__quote_shell_args_dq" -a -z "$__quote_shell_args_sq" ] ||
+		{ message "unquoted character ($__quote_shell_args_dq$__quote_shell_args_sq)"; return 1; }
+
+	unset __quote_shell_args_revert __quote_shell_args_char_unquoted __quote_shell_args_char_chkquote
+
+	eval "$1=\"\$__quote_shell_args_r\""
 }
 
 if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
