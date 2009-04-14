@@ -5,6 +5,14 @@ group: shell-getopt changes
 regexp: ^shell-getopt:
 filter: s/^shell-getopt: //
 
+group: shell-quote changes
+regexp: ^shell-quote:
+filter: s/^shell-quote: //
+
+group: shell-var changes
+regexp: ^shell-var:
+filter: s/^shell-var: //
+
 group: shell-signal changes
 regexp: ^shell-signal:
 filter: s/^shell-signal: //
