@@ -60,78 +60,81 @@ quote_shell() {
 # quote_shell_args args "$var_args"
 # eval "set -- $args"
 quote_shell_args() {
-	local __quote_shell_args_m= __quote_shell_args_r= __quote_shell_args_q= __quote_shell_args_c= __quote_shell_args_l="$2"
-	local __quote_shell_args_dq= __quote_shell_args_sq=
+# This is an internal function to avoid the use of ugly namespace.
+__quote_shell_args() {
+	local m= r= c= l="$1"
+	# backslash/double/single quote mode
+	local bq= dq= sq=
 
-	__quote_shell_args_revert() {
-		[ -n "$2" ] && eval "$1=''" || eval "$1=\$3"
+	__quote_shell_args_toggle() {
+		# toggle $1 value
+		eval [ -n \"\$$1\" ] && eval "$1=" || eval "$1=\$$2"
 	}
 
-	__quote_shell_args_char_unquoted() {
-		[ "${#__quote_shell_args_q}" = "$(((${#__quote_shell_args_q}/2)*2))" ] ||
-			return 1
-	}
-
-	__quote_shell_args_char_chkquote() {
-		if [ -n "$__quote_shell_args_q" ]; then
-			! __quote_shell_args_char_unquoted ||
-				__quote_shell_args_q="$__quote_shell_args_q\\"
-		else
-			__quote_shell_args_q='\'
-		fi
-	}
-
-	while [ ${#__quote_shell_args_m} -lt $((${#__quote_shell_args_l}-1)) ]; do
-		__quote_shell_args_m="$__quote_shell_args_m?"
+	while [ ${#m} -lt $((${#l}-1)) ]; do
+		m="$m?"
 	done
 
-	while [ -n "$__quote_shell_args_l" ]; do
-		__quote_shell_args_c="${__quote_shell_args_l%$__quote_shell_args_m}"
-		__quote_shell_args_l="${__quote_shell_args_l#?}"
-		__quote_shell_args_m="${__quote_shell_args_m#?}"
+	while [ -n "$l" ]; do
+		c="${l%$m}"
+		l="${l#?}"
+		m="${m#?}"
 
-		case "$__quote_shell_args_c" in
+		case "$c" in
 			\")
-				if [ -z "$__quote_shell_args_sq" ]; then
-					if [ -n "$__quote_shell_args_q" ]; then
-						! __quote_shell_args_char_unquoted ||
-							__quote_shell_args_revert __quote_shell_args_dq "$__quote_shell_args_dq" $__quote_shell_args_c
+				# toggle double quote mode unless
+				# in backslash or single quote mode
+				[ -n "$bq$sq" ] || __quote_shell_args_toggle dq c
+				;;
+			\')
+				# toggle single quote mode unless
+				# in backslash or double quote mode
+				[ -n "$bq$dq" ] || __quote_shell_args_toggle sq c
+				;;
+			\$|\`)
+				# quote special character unless
+				# in backslash or single quote mode
+				[ -n "$bq$sq" ] || bq=\\
+				;;
+			\\)
+				# toggle backslash quote mode unless
+				# in single quote mode
+				if [ -z "$sq" ]; then
+					if [ -z "$bq" ]; then
+						# enter backslash quote mode
+						bq=\\
+						continue
 					else
-						__quote_shell_args_revert __quote_shell_args_dq "$__quote_shell_args_dq" $__quote_shell_args_c
+						# leave backslash quote mode
+						r="$r\\"
+						bq=
 					fi
 				fi
 				;;
-			\')
-				if [ -n "$__quote_shell_args_q" ]; then
-					__quote_shell_args_char_unquoted ||
-						{ messgae "invalid character (')"; return 1; }
-				else
-					[ -n "$__quote_shell_args_dq" ] ||
-						__quote_shell_args_revert __quote_shell_args_sq "$__quote_shell_args_sq" $__quote_shell_args_c
-				fi
-				;;
-			\$|\`)
-				[ -n "$__quote_shell_args_sq" ] ||
-					__quote_shell_args_char_chkquote
-				;;
-			\\)
-				__quote_shell_args_q="$__quote_shell_args_q$__quote_shell_args_c"
-				continue
-				;;
 			[!A-Za-z0-9_\ ])
-				[ -n "$__quote_shell_args_dq" -o -n "$__quote_shell_args_sq" ] ||
-					__quote_shell_args_char_chkquote
+				# quote non-regular character unless
+				# in any quote mode
+				[ -n "$bq$dq$sq" ] || bq=\\
 				;;
 		esac
-		__quote_shell_args_r="$__quote_shell_args_r$__quote_shell_args_q$__quote_shell_args_c"
-		__quote_shell_args_q=
+		r="$r$bq$c"
+		# leave backslash quote mode if any
+		bq=
 	done
-	[ -z "$__quote_shell_args_dq" -a -z "$__quote_shell_args_sq" ] ||
-		{ message "unquoted character ($__quote_shell_args_dq$__quote_shell_args_sq)"; return 1; }
 
-	unset __quote_shell_args_revert __quote_shell_args_char_unquoted __quote_shell_args_char_chkquote
+	[ -z "$bq$dq$sq" ] ||
+		{ message "unmatched character ($bq$dq$sq) found"; return 1; }
+	__quote_shell_args_out="$r"
+}
+	local __quote_shell_args_out= __quote_shell_args_rc=0
+	__quote_shell_args "$2" ||
+		__quote_shell_args_rc=1
+	eval "$1=\"\$__quote_shell_args_out\""
 
-	eval "$1=\"\$__quote_shell_args_r\""
+	# Remove internal functions from user namespace.
+	unset __quote_shell_args __quote_shell_args_toggle
+
+	return $__quote_shell_args_rc
 }
 
 if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
