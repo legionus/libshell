@@ -1,0 +1,1 @@
+/bin/shell-* /bin/shell-[a-z]* /bin/shell-{error,getopt}

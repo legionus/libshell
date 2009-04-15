@@ -1,0 +1,379 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+quote_process() {
+	local opts=
+        quote_shell_args opts "$1" &&
+                eval "set -- $opts" ||:
+
+        local a= result=
+        for a; do
+                result="$result[$a] "
+        done
+        printf '%s\n' "${result% }"
+}
+
+quote_shell_args_test_000() { # UnitTest
+	local num=000
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_001() { # UnitTest
+	local num=001
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_002() { # UnitTest
+	local num=002
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_003() { # UnitTest
+	local num=003
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_004() { # UnitTest
+	local num=001
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_005() { # UnitTest
+	local num=005
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_006() { # UnitTest
+	local num=006
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_007() { # UnitTest
+	local num=007
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_008() { # UnitTest
+	local num=008
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_009() { # UnitTest
+	local num=009
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_010() { # UnitTest
+	local num=010
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_011() { # UnitTest
+	local num=011
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_012() { # UnitTest
+	local num=012
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_013() { # UnitTest
+	local num=013
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_014() { # UnitTest
+	local num=014
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_015() { # UnitTest
+	local num=015
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_016() { # UnitTest
+	local num=016
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_017() { # UnitTest
+	local num=017
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_018() { # UnitTest
+	local num=018
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_019() { # UnitTest
+	local num=019
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_020() { # UnitTest
+	local num=020
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1 |tr '\n' ' ')"
+
+	assertEquals "$result" 'TEST: unmatched character (\) found [a\] ' "$result"
+}
+
+quote_shell_args_test_021() { # UnitTest
+	local num=021
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1 |tr '\n' ' ')"
+
+	assertEquals "$result" 'TEST: unmatched character (") found [1"22"333"4444] ' "$result"
+}
+
+quote_shell_args_test_022() { # UnitTest
+	local num=022
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1 |tr '\n' ' ')"
+
+	assertEquals "$result" "TEST: unmatched character (') found [1'22'333'4444] " "$result"
+}
+
+quote_shell_args_test_023() { # UnitTest
+	local num=023
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1 |tr '\n' ' ')"
+
+	assertEquals "$result" 'TEST: unmatched character (\") found ["\] ' "$result"
+}
+
+quote_shell_args_test_024() { # UnitTest
+	local num=024
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_025() { # UnitTest
+	local num=025
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_026() { # UnitTest
+	local num=026
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}
+
+quote_shell_args_test_027() { # UnitTest
+	local num=027
+
+	. ../shell-error
+	. ../shell-quote
+
+	local input="$(cat ./data/$num-quote_shell_args-pattern)"
+	local expect="$(cat ./data/$num-quote_shell_args-result)"
+	local result="$(quote_process "$input" 2>&1)"
+
+	assertEquals "$result" "$expect" "$result"
+}

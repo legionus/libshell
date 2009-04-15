@@ -1,0 +1,1 @@
+a b <<EOF "<<EOF" '<<EOF' <<'__EOF__' c

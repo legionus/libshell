@@ -20,6 +20,7 @@ for s in \
 	quote_sed_regexp_variable quote_shell_variable \
 	getopt signal \
 	fatal message verbose \
+	quote_shell_args \
 	;
 do
 	. "./$s"
