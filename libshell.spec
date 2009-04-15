@@ -1,6 +1,6 @@
 Name: libshell
-Version: 0.0.9
-Release: alt2
+Version: 0.1.0
+Release: alt1
 
 Summary:  A library of shell functions
 License: GPL
@@ -25,6 +25,25 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Wed Apr 15 2009 Alexey Gladkov <legion@altlinux.org> 0.1.0-alt1
+- New utilities:
+  + shell-var: New functions to handle shell parameters.
+- shell-quote changes:
+  + Major changes in quote_shell_args().
+  + Rewrite quote_shell_args() from scratch, to avoid the dangerous
+    shell constructions.
+  + Fix Usage for quote_shell_args.
+  + Add quote_shell_args().
+- shell-unittest changes:
+  + Add default comment initialization.
+- shell-args changes:
+  + parse_common_option(): Option --quiet cancels option --verbose.
+- Other changes:
+  + Update COPYING.
+  + UnitTest: Add tests for quote_shell_args() function.
+  + shell_var_unquote(), string_quote_remove(): Fix "'" unquote
+    for bash.
+
 * Fri Feb 27 2009 Alexey Gladkov <legion@altlinux.org> 0.0.9-alt2
 - shell*-config changes:
   + Fix dependency.
