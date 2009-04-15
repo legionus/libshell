@@ -55,7 +55,7 @@ shouldSkip() {
 # assertTrue([comment], condition)
 # assertTrue([comment], integer)
 assertTrue() {
-	local comment condition
+	local comment= condition
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
 	condition="$1"; shift
@@ -82,7 +82,7 @@ assertTrue() {
 # assertFalse([comment], condition)
 # assertFalse([comment], integer)
 assertFalse() {
-	local comment condition
+	local comment= condition
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
 	condition="$1"; shift
@@ -108,7 +108,7 @@ assertFalse() {
 # Asserts that two arguments are equal to one another.
 # assertEquals([comment], expected, actual)
 assertEquals() {
-	local comment expected actual
+	local comment= expected actual
 	[ "$#" -lt 3 ] ||
 		{ comment="$1"; shift; }
 	expected="$1"; shift
@@ -132,7 +132,7 @@ assertSame() {
 # Asserts that two arguments are not equal to one another.
 # assertNotEquals([comment], expected, actual)
 assertNotEquals() {
-	local comment expected actual
+	local comment= expected actual
 	[ "$#" -lt 3 ] ||
 		{ comment="$1"; shift; }
 	expected="$1"; shift
@@ -156,7 +156,7 @@ assertNotSame() {
 # Asserts that argument is a zero-length string.
 # assertNull([comment], value)
 assertNull() {
-	local comment value
+	local comment= value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
 	value="$1"; shift
@@ -173,7 +173,7 @@ assertNull() {
 # Asserts that argument is not empty string.
 # assertNotNull([comment], value)
 assertNotNull() {
-	local comment value
+	local comment= value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
 	value="$1"; shift
