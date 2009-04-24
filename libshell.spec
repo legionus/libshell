@@ -1,6 +1,6 @@
 Name: libshell
 Version: 0.1.0
-Release: alt1
+Release: alt2
 
 Summary:  A library of shell functions
 License: GPL
@@ -25,6 +25,9 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Fri Apr 24 2009 Alexey Gladkov <legion@altlinux.org> 0.1.0-alt2
+- Fix shell-var installation.
+
 * Wed Apr 15 2009 Alexey Gladkov <legion@altlinux.org> 0.1.0-alt1
 - New utilities:
   + shell-var: New functions to handle shell parameters.
