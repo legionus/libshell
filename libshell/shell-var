@@ -28,6 +28,8 @@ shell_var_trim() {
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_trim varname value"
 	local __shell_var_trim_var="$1" __shell_var_trim_ret="$2"
+	local IFS=' 	
+'
 	set -- $__shell_var_trim_ret
 	if [ "$#" -eq 0 ]; then
 		eval "$__shell_var_trim_var=''"

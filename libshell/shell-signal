@@ -22,6 +22,8 @@ signal_handler() {
 
 	__shell_signal_handler() {
 		local s rc=$? sign="$1"
+		local IFS=' 	
+'
 		eval set -- ${__shell_signal_handlers-}
 		for s; do
 			[ -n "${s##$sign:*}" ] ||
@@ -31,6 +33,8 @@ signal_handler() {
 
 	__shell_signal_append() {
 		local s arg="$1"
+		local IFS=' 	
+'
 		eval set -- ${__shell_signal_handlers-}
 		for s; do
 			[ "$s" != "$arg" ] || return 0
@@ -41,6 +45,8 @@ signal_handler() {
 
 	__shell_signal_remove() {
 		local s sign="$1"
+		local IFS=' 	
+'
 		eval set -- ${__shell_signal_handlers-}
 		__shell_signal_handlers=
 		for s; do

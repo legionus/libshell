@@ -219,6 +219,8 @@ runUnitTests() {
 
 	run_or_exit setUpTests
 
+	local IFS=' 	
+'
 	set -- ${__shell_unit_tests-}
 
 	local retval=0 rc passed=0 failed=0 skipped=0 total="$#"
