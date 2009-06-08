@@ -18,6 +18,7 @@ are Copyright (C) 2008  Stanislav Ievlev <inger@altlinux.org>,
 The files
 	shell-version, shell-config, shell-error, shell-ip-address,
 	shell-mail-address, shell-unittest, shell-signal, shell-var
+	shell-source shell-run
 are Copyright (C) 2009  Alexey Gladkov <legion@altlinux.org>
 
 All files in this package may be freely copied under the terms

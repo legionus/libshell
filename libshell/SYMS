@@ -28,6 +28,8 @@ shell-quote	quote_shell
 shell-quote	quote_shell_args
 shell-quote	quote_shell_variable
 shell-quote	string_quote_remove
+shell-run	run_if_executable
+shell-run	run_scripts
 shell-signal	set_cleanup_handler
 shell-signal	signal_handler
 shell-signal	unset_cleanup_handler

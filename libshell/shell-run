@@ -1,0 +1,39 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_run-}" ]; then
+__included_shell_run=1
+
+. shell-args
+. shell-source
+
+# Execute command if file is executable.
+# Usage: run_if_executable /file arg1 arg2
+#    or: run_if_executable  file arg1 arg2
+run_if_executable() {
+	local v f
+	f="$1"; shift
+	! __shell_source_find v "$f" || [ ! -x "$v" ] || "$v" "$@"
+}
+
+# Run scripts from directory.
+# Usage: run_scripts <dir> [args]
+SHELL_RUN_ALL_SCRIPTS=
+run_scripts() {
+	[ "$#" -ge 1 ] ||
+		fatal "Usage: run_scripts <dir> [args]"
+	local f d rc=0
+	d="$(opt_check_dir "dir" "$1")"; shift
+
+	for f in $(find "$d" -mindepth 1 -maxdepth 1 -type f); do
+		case "$f" in
+		    *.rpm*|*.swp|*,v|*~|*.\#)
+			    [ -n "${SHELL_RUN_ALL_SCRIPTS-}" ] ||
+				    continue
+			    ;;
+		esac
+		run_if_executable "$f" "$@" || rc=1
+	done
+	return $rc
+}
+
+fi #__included_shell_run
