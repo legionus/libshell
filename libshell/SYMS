@@ -31,6 +31,9 @@ shell-quote	string_quote_remove
 shell-signal	set_cleanup_handler
 shell-signal	signal_handler
 shell-signal	unset_cleanup_handler
+shell-source	source_if_executable
+shell-source	source_if_exists
+shell-source	source_if_notempty
 shell-unittest	appendTests
 shell-unittest	assertEquals
 shell-unittest	assertFalse

@@ -1,0 +1,52 @@
+#!/bin/sh -efu
+
+if [ -z "${__included_shell_source-}" ]; then
+__included_shell_source=1
+
+__shell_source_find() {
+	local __shell_source_find_v __shell_source_find_f IFS=:
+	__shell_source_find_v="$1"; shift
+	__shell_source_find_f="$1"; shift
+
+	if [ -n "${__shell_source_find_f##*/*}" ]; then
+		set -- ${PATH-}
+		while [ "$#" -gt 0 ]; do
+			if [ -e "$1/$__shell_source_find_f" ]; then
+				__shell_source_find_f="$1/$__shell_source_find_f"
+				break
+			fi
+			shift
+		done
+	fi
+	[ -e "$__shell_source_find_f" ] || return 1
+	eval "$__shell_source_find_v=\"\$__shell_source_find_f\""
+}
+
+# Execute commands from file in the current environment if file exists.
+# Usage: source_if_exists /file arg1 arg2
+#    or: source_if_exists  file arg1 arg2
+source_if_exists() {
+	local v f
+	f="$1";	shift
+	! __shell_source_find v "$f" || [ ! -f "$v" ] || . "$v" "$@"
+}
+
+# Execute commands from file in the current environment if file is not empty.
+# Usage: source_if_notempty /file arg1 arg2
+#    or: source_if_notempty  file arg1 arg2
+source_if_notempty() {
+	local v f
+	f="$1"; shift
+	! __shell_source_find v "$f" || [ ! -s "$v" ] || . "$v" "$@"
+}
+
+# Execute commands from file in the current environment if file is executable.
+# Usage: source_if_executable /file arg1 arg2
+#    or: source_if_executable  file arg1 arg2
+source_if_executable() {
+	local v f
+	f="$1"; shift
+	! __shell_source_find v "$f" || [ ! -x "$v" ] || . "$v" "$@"
+}
+
+fi #__included_shell_source
