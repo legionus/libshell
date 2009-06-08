@@ -24,7 +24,7 @@ run_scripts() {
 	local f d rc=0
 	d="$(opt_check_dir "dir" "$1")"; shift
 
-	for f in $(find "$d" -mindepth 1 -maxdepth 1 -type f); do
+	for f in $(find -L "$d" -mindepth 1 -maxdepth 1 -type f); do
 		case "$f" in
 		    *.rpm*|*.swp|*,v|*~|*.\#)
 			    [ -n "${SHELL_RUN_ALL_SCRIPTS-}" ] ||
