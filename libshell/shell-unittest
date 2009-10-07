@@ -24,12 +24,13 @@ tearDownTests() { :; }
 # appendTests (TestFunc)
 __shell_unit_tests=
 appendTests() {
-	local n
+	local t n
 	while [ "$#" -gt 0 ]; do
 		n="$1"
-		if [ -z "${__shell_unit_tests}" -o -n "${__shell_unit_tests##* $n *}" ]; then
-			__shell_unit_tests="$__shell_unit_tests $n "
-		fi
+		for t in $__shell_unit_tests; do
+			[ "$n" != "$t" ] || continue 2
+		done
+		__shell_unit_tests="$__shell_unit_tests $n "
 		shift
 	done
 }
