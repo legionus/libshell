@@ -21,6 +21,14 @@ group: shell-unittest changes
 regexp: ^shell-unittest:
 filter: s/^shell-unittest: //
 
+group: shell-run changes
+regexp: ^shell-run:
+filter: s/^shell-run: //
+
+group: shell-source changes
+regexp: ^shell-source:
+filter: s/^shell-source: //
+
 group: shell-ip-address changes
 regexp: ^shell-ip-address:
 filter: s/^shell-ip-address: //

@@ -1,6 +1,6 @@
 Name: libshell
-Version: 0.1.0
-Release: alt2
+Version: 0.1.1
+Release: alt1
 
 Summary:  A library of shell functions
 License: GPL
@@ -25,6 +25,15 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Thu Oct 08 2009 Alexey Gladkov <legion@altlinux.ru> 0.1.1-alt1
+- New utilities:
+  + shell-run: New functions to scripts from directory.
+  + shell-source: New functions to source shell code under some conditions.
+- shell-quote changes:
+  + Allow \t as delimiter.
+- Other changes:
+  + Protect IFS variable when 'set --' executing.
+
 * Fri Apr 24 2009 Alexey Gladkov <legion@altlinux.org> 0.1.0-alt2
 - Fix shell-var installation.
 
