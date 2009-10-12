@@ -7,7 +7,7 @@ __included_shell_ip_address=1
 readonly regex_byte='([01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'
 
 # Regexp for 4-byte address
-readonly regex_ipaddr="$regexp_byte(\.$regexp_byte){3}"
+readonly regex_ipaddr="$regex_byte(\.$regex_byte){3}"
 
 # Regexp for IPv4 address
 #
