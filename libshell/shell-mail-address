@@ -28,7 +28,7 @@ if [ -n "${shell_mail_address_strict-}" ]; then
 
 	regex_tld="($regex_gtld|$regex_cctld_active|$regex_cctld_reserved|$regex_cctld_allocated|$regex_cctld_phaseout)"
 else
-	regex_tld='([a-zA-Z]{2,4}|museum)'
+	regex_tld='([a-zA-Z]{2,4}|museum|travel)'
 fi
 
 # 6. ADDRESS SPECIFICATION (http://tools.ietf.org/html/rfc822)
