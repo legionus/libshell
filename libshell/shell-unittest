@@ -9,7 +9,7 @@ __included_shell_unittest=1
 . shell-error
 
 # Append tests condition to comment message if test failed.
-unittest_show_condition=
+unittest_show_condition="${unittest_show_condition-}"
 
 # Called before each test is run.
 setUp() { :; }
