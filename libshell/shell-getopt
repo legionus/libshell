@@ -67,7 +67,7 @@ getoptex() {
 		[ -n "$OPTARG" -a -n "${OPTARG%%-*}" ] ||
 			{ getoptex_badarg; return 1; }
 
-		OPTARG="${1#\#}"
+		OPTARG="${1#[#]}"
 		OPTIND=$(($OPTIND+1)) # skip option's argument
 	}
 	getoptex_option_long() {
