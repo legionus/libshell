@@ -27,13 +27,9 @@ tearDownTests() { :; }
 # appendTests (TestFunc)
 __shell_unit_tests=
 appendTests() {
-	local t n
 	while [ "$#" -gt 0 ]; do
-		n="$1"
-		for t in $__shell_unit_tests; do
-			[ "$n" != "$t" ] || continue 2
-		done
-		__shell_unit_tests="$__shell_unit_tests $n "
+		__shell_unit_tests="$__shell_unit_tests
+$1"
 		shift
 	done
 }
@@ -225,6 +221,7 @@ runUnitTests() {
 
 	local IFS=' 	
 '
+	__shell_unit_tests="$(printf '%s\n' "$__shell_unit_tests" |sort -u)"
 	set -- ${__shell_unit_tests-}
 
 	local retval=0 rc passed=0 failed=0 skipped=0 total="$#"
