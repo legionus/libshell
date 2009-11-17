@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.1.1
+Version: 0.1.2
 Release: alt1
 
 Summary:  A library of shell functions
@@ -25,6 +25,14 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Tue Nov 17 2009 Alexey Gladkov <legion@altlinux.ru> 0.1.2-alt1
+- shell-unittest: Increase performance.
+- shell-unittest: Allow to set unittest_show_condition variable
+  prior to executing test-running
+- shell-ip-address: Fix unbound variable.
+- shell-mail-address: .travel TLD is lost when shell_mail_address_strict is unset.
+- shell-getopt: Fix for FreeBSD-7.2.
+
 * Thu Oct 08 2009 Alexey Gladkov <legion@altlinux.ru> 0.1.1-alt1
 - New utilities:
   + shell-run: New functions to scripts from directory.
