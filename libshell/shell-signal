@@ -15,66 +15,35 @@ __shell_signal_handlers=
 # SIG_IGN and SIG_DFL (See signal(2)).
 #
 # Usage example:
-# signal_handler 'echo $rc' TERM EXIT HUP
-# signal_handler SIG_IGN TERM EXIT HUP
-# signal_handler SIG_DFL TERM EXIT HUP
+# signal_handler 'echo $arg' TERM EXIT HUP
+# signal_handler SIG_IGN     TERM EXIT HUP
+# signal_handler SIG_DFL     TERM EXIT HUP
 signal_handler() {
-	local user_action real_action
-	user_action="$1"
-	shift
-
-	__shell_signal_handler() {
-		local s rc=$? sign="$1"
-		local IFS=' 	
-'
-		eval set -- ${__shell_signal_handlers-}
-		for s; do
-			[ -n "${s##$sign:*}" ] ||
-				eval ${s#$sign:} $rc ||:
-		done
+	__signal_handler() {
+		local handler arg="$1"
+		eval "handler=\"\${__signal_handlers_$arg-}\""
+		[ -n "$handler" ] ||
+			return 0
+		eval "$handler"
 	}
 
-	__shell_signal_append() {
-		local s arg="$1"
-		local IFS=' 	
-'
-		eval set -- ${__shell_signal_handlers-}
-		for s; do
-			[ "$s" != "$arg" ] || return 0
-		done
-		quote_shell_variable arg "$arg"
-		__shell_signal_handlers="$__shell_signal_handlers \"$arg\""
-	}
-
-	__shell_signal_remove() {
-		local s sign="$1"
-		local IFS=' 	
-'
-		eval set -- ${__shell_signal_handlers-}
-		__shell_signal_handlers=
-		for s; do
-			[ -n "${s##$sign:*}" ] ||
-				continue
-			quote_shell_variable s "$s"
-			__shell_signal_handlers="$__shell_signal_handlers \"$s\""
-		done
-	}
+	local action real_action sign
+	action="$1"; shift
 
 	for sign; do
 		sign="${sign#SIG}"
-
-		case "$user_action" in
+		case "$action" in
 			SIG_IGN)
-				__shell_signal_remove "$sign"
+				eval "unset __signal_handlers_$sign"
 				real_action=:
 				;;
 			SIG_DFL)
-				__shell_signal_remove "$sign"
+				eval "unset __signal_handlers_$sign"
 				real_action=-
 				;;
 			*)
-				__shell_signal_append "$sign:$user_action"
-				real_action="__shell_signal_handler $sign"
+				eval "__signal_handlers_$sign=\"\${__signal_handlers_$sign-} \$action;\""
+				real_action="__signal_handler $sign"
 				;;
 		esac
 		trap "$real_action" "$sign"
@@ -95,8 +64,8 @@ set_cleanup_handler() {
 			"$__cleanup_handler_name" "$1" ||:
 		exit "$1"
 	}
-	signal_handler '__cleanup_handler $rc' EXIT
-	signal_handler '__cleanup_handler   1' HUP PIPE INT QUIT TERM
+	signal_handler '__cleanup_handler $?' EXIT
+	signal_handler '__cleanup_handler  1' HUP PIPE INT QUIT TERM
 }
 
 # Remove exit handler.
