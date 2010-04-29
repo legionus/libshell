@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.1.2
+Version: 0.1.3
 Release: alt1
 
 Summary:  A library of shell functions
@@ -25,6 +25,11 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Thu Apr 29 2010 Alexey Gladkov <legion@altlinux.ru> 0.1.3-alt1
+- shell-signal: Reimplement signal_handler function.
+- shell-ip-address: Add ipv4_ip_subnet, ipv4_mask2prefix and
+  ipv4_prefix2mask functions.
+
 * Tue Nov 17 2009 Alexey Gladkov <legion@altlinux.ru> 0.1.2-alt1
 - shell-unittest: Increase performance.
 - shell-unittest: Allow to set unittest_show_condition variable
