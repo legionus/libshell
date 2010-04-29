@@ -20,6 +20,9 @@ shell-ini-config	ini_config_comment
 shell-ini-config	ini_config_del
 shell-ini-config	ini_config_get
 shell-ini-config	ini_config_set
+shell-ip-address	ipv4_ip_subnet
+shell-ip-address	ipv4_mask2prefix
+shell-ip-address	ipv4_prefix2mask
 shell-ip-address	valid_ipv4
 shell-mail-address	valid_email
 shell-quote	quote_sed_regexp

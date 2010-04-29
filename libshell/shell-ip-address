@@ -63,4 +63,104 @@ valid_ipv4() {
 		return 1
 }
 
+__ipv4_hex() {
+	[ -n "${1-}" ] ||
+		return 2
+
+	local IFS=.
+	set -- $1
+
+	local i=0
+	for b; do
+		[ "$b" -ge 0 -a "$b" -le 255 ] 2>/dev/null ||
+			return 2
+		i=$(($i + 1))
+	done
+
+	[ "$i" -eq 4 ] ||
+		return 2
+
+	printf '0x'
+	printf '%02x' "$@"
+}
+
+# Checks that IP address is in subnet
+# Usage example:
+# ipv4_ip_subnet 172.16.1.2 172.16.1.0/24; echo res=$?
+# res=0
+#
+# ipv4_ip_subnet 172.16.3.2 172.16.1.0/24; echo res=$?
+# res=1
+ipv4_ip_subnet() {
+	local ip net prefix
+	ip="${1-}"; shift
+	net="${1-}"; shift
+	prefix="${net##*/}"
+
+	[ -n "$prefix" -a "$prefix" -ge 0 ] 2>/dev/null ||
+		return 2
+
+	local hex_addr hex_net hex_mask p
+
+	hex_addr="$(__ipv4_hex "$ip")" &&
+	hex_net="$(__ipv4_hex "${net%%/*}")" ||
+		return 2
+
+	p=$((0xFFFFFFFF))
+	hex_mask="$(($p - ($p >> $prefix)))"
+	[ "$(($hex_net & $hex_mask))" -eq "$(($hex_addr & $hex_mask))" ] ||
+		return 1
+}
+
+# Convert netmask to routing prefix.
+# Usage example:
+# ipv4_mask2prefix 255.255.0.0
+# 16
+#
+# ipv4_prefix2mask 255.255.255.0
+# 24
+ipv4_mask2prefix() {
+	local hex_mask
+	hex_mask="$(__ipv4_hex "${1-}")" ||
+		return 2
+
+	local p i=0 prefix=
+
+	p=$((~$hex_mask & 0xFFFFFFFF))
+
+	while [ "$p" -ne 0 ]; do
+		p=$(($p >> 1 & 0xFFFFFFFF))
+		i=$(($i + 1))
+	done
+	prefix=$((32 - $i))
+
+	[ "$prefix" -ge 0 -a "$prefix" -le 32 ] ||
+		return 1
+	echo "$prefix"
+}
+
+# Convert routing prefix to netmask.
+# Usage example:
+# ipv4_prefix2mask 16
+# 255.255.0.0
+#
+# ipv4_prefix2mask 24
+# 255.255.255.0
+ipv4_prefix2mask() {
+	local len
+	len="${1-}"
+
+	[ "$len" -ge 0 -a "$len" -le 32 ] 2>/dev/null ||
+		return 1
+
+	local position=$((0xFFFFFFFF))
+	local mask=$(($position - ($position >> $len)))
+
+	printf '%s.%s.%s.%s\n' \
+	    "$(($mask >> 24 & 0xFF))" \
+	    "$(($mask >> 16 & 0xFF))" \
+	    "$(($mask >> 8  & 0xFF))" \
+	    "$(($mask       & 0xFF))"
+}
+
 fi #__included_shell_ip_address
