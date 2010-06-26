@@ -5,174 +5,51 @@ __included_shell_array=1
 
 if [ -n "${__libshell_experimental-}" ]; then
 
-. shell-error
+#. shell-crc32
 
-# Format:
-# __ARRAY_{name}='{size}'
-# __ARRAY_{name}_{index}='{value}'
+# arr[ZZZ-zzz] = "XXX-xxx"
 #
-# __ARRAY_test='3'
-# __ARRAY_test_0='AAA'
-# __ARRAY_test_1='BBB'
-# __ARRAY_test_2='CCC'
+# ARRAY_arr_{n}_key="ZZZ-zzz"
+# ARRAY_arr_{n}_arg="XXX-xxx"
+# ARRAY_arr_{sign}={n}
+# ARRAY_arr={size}
 
-__array_init() {
-	local __array_init_arr __array_init_index
-	__array_init_arr="${1%%\[*}"
-	__array_init_index="${1##$__array_init_arr}"
-	__array_init_index="${__array_init_index#\[}"
-	__array_init_index="${__array_init_index%\]}"
-	eval "$2=\"\$__array_init_arr\";
-	      $3=\"\$__array_init_index\";
-	      $4=\"\${__ARRAY_${__array_init_arr}:-0}\""
-}
+shell_array()
+{
+	local arr key arg num i
+	arr="$1"
+	[ "$#" -lt 2 ] || key="$2"
+	[ "$#" -lt 3 ] || arg="$3"
 
-# Usage: array_size ARR   retvar
-# Usage: array_size ARR[] retvar
-array_size() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
-		return 1
+	eval "num=\${ARRAY_$arr:-0}"
+	if [ "$#" -eq 1 ]; then
+		printf '%d\n' "$num"
+		return
 	fi
-	eval "$2=\"\$__ARRAY_$1\""
-}
 
-# Usage: array_create ARR
-# Usage: array_create ARR[SIZE]
-array_create() {
-	local __array_arr __array_index __array_size
-	__array_init "$1" __array_arr __array_index __array_size
-	eval "__ARRAY_$__array_arr=\"${__array_index-0}\""
-}
+	#shell_crc32 "sign" "$key"
+	sign="$(printf '%s' "$key" |sha1sum)"
+	sign="${sign%% *}"
+	eval "i=\"\${ARRAY_${arr}_${sign}-}\""
 
-# Usage: array_destroy ARR
-array_destroy() {
-	local __array_arr __array_index __array_size i=0
-	__array_init "$1" __array_arr __array_index __array_size
-
-	while [ $i -lt $__array_size ]; do
-		unset "__ARRAY_${__array_arr}_$i"
-		i=$(($i+1))
-	done
-	unset "__ARRAY_$__array_arr"
-}
-
-# Usage: array_set ARR[i] val
-array_set() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
+	if [ "$#" -eq 2 ]; then
+		if [ -n "$i" ]; then
+			eval "arg=\$ARRAY_${arr}_${i}_arg"
+			printf '%s\n' "$arg"
+			return
+		fi
 		return 1
 	fi
 
-	local __array_arr __array_index __array_size
-	__array_init "$1" __array_arr __array_index __array_size
-
-	eval "__ARRAY_${__array_arr}_$__array_index=\"\$2\";"
-	[ "$__array_index" -lt "$__array_size" ] ||
-		eval "__ARRAY_$__array_arr=\"$(($__array_index+1))\""
-}
-
-# Usage: array_push ARR   val [val1 ...]
-# Usage: array_push ARR[] val [val1 ...]
-array_push() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
-		return 1
+	if [ -z "$i" ]; then
+		i="$num"
+		num=$(($num+1))
+		eval "ARRAY_$arr=\$num"
 	fi
 
-	local arg __array_arr __array_index __array_size 
-	__array_init "$1" __array_arr __array_index __array_size
-	shift
-
-	for arg; do
-		eval "__ARRAY_${__array_arr}_$__array_size=\"\$arg\";"
-		__array_size=$(($__array_size+1))
-	done
-	eval "__ARRAY_${__array_arr}=\"$__array_size\""
-}
-
-# Usage: array_get ARR[i] var
-array_get() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
-		return 1
-	fi
-
-	local arg __array_arr __array_index __array_size 
-	__array_init "$1" __array_arr __array_index __array_size
-
-	if [ "$__array_index" -ge "$__array_size" ]; then
-		message "index '$__array_index' out of range"
-		return 1
-	fi
-	eval "$2=\"\${__ARRAY_${__array_arr}_$__array_index-}\""
-}
-
-
-# Usage: array_swap ARR[i] ARR1[j]
-array_swap() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
-		return 1
-	fi
-
-	local arg __array_arr __array_index __array_size
-	__array_init "$1" __array_arr __array_index __array_size
-
-	local arg __array_arr1 __array_index1 __array_size1
-	__array_init "$2" __array_arr1 __array_index1 __array_size1
-
-	eval "arg=\"\$__ARRAY_${__array_arr}_$__array_index\";
-	      __ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\";
-	      __ARRAY_${__array_arr1}_$__array_index1=\"\$arg\""
-}
-
-# Usage: array_equal ARR[i] ARR1[j]
-array_equal() {
-	if [ "$#" -lt 2 ]; then
-		message "More arguments required"
-		return 1
-	fi
-
-	local arg __array_arr __array_index __array_size
-	__array_init "$1" __array_arr __array_index __array_size
-
-	local arg __array_arr1 __array_index1 __array_size1
-	__array_init "$2" __array_arr1 __array_index1 __array_size1
-
-	eval "__ARRAY_${__array_arr}_$__array_index=\"\$__ARRAY_${__array_arr1}_$__array_index1\""
-}
-
-# Usage: array_compare funcname ARR[i] ARR1[j] [optional arguments for 'funcname'...]
-array_compare() {
-	if [ "$#" -lt 3 ]; then
-		message "More arguments required"
-		return 1
-	fi
-	local __func="$1"
-	shift
-
-	local __array_arr __array_index __array_size
-	__array_init "$1" __array_arr __array_index __array_size
-	shift
-
-	local __array_arr1 __array_index1 __array_size1
-	__array_init "$1" __array_arr1 __array_index1 __array_size1
-	shift
-
-	eval "$__func \"\$__ARRAY_${__array_arr}_$__array_index\" \"\$__ARRAY_${__array_arr1}_$__array_index1\" \"$@\""
-}
-
-ARRAY_FOREACH_NUM=0
-array_foreach() {
-	local __array_foreach_size
-	eval "__array_foreach_size=\"\$__ARRAY_$1\""
-	if [ "${ARRAY_FOREACH_NUM:-0}" -eq "${__array_foreach_size}" ]; then
-		ARRAY_FOREACH_NUM=0
-		return 1
-	fi
-	eval "$2=\"\${__ARRAY_${1}_${ARRAY_FOREACH_NUM:-0}-}\""
-	ARRAY_FOREACH_NUM=$((${ARRAY_FOREACH_NUM:-0}+1))
+	eval "ARRAY_${arr}_${i}_key=\"\$key\""
+	eval "ARRAY_${arr}_${i}_arg=\"\$arg\""
+	eval "ARRAY_${arr}_${sign}=\"\$i\""
 }
 
 fi #__libshell_experimental
