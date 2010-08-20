@@ -7,22 +7,22 @@ if [ -z "${__included_shell_source-}" ]; then
 __included_shell_source=1
 
 __shell_source_find() {
-	local __shell_source_find_v __shell_source_find_f IFS=:
-	__shell_source_find_v="$1"; shift
-	__shell_source_find_f="$1"; shift
+	local r f IFS=:
+	r="$1"; shift
+	f="$1"; shift
 
-	if [ -n "${__shell_source_find_f##*/*}" ]; then
+	if [ -n "${f##*/*}" ]; then
 		set -- ${PATH-}
 		while [ "$#" -gt 0 ]; do
-			if [ -e "$1/$__shell_source_find_f" ]; then
-				__shell_source_find_f="$1/$__shell_source_find_f"
+			if [ -e "$1/$f" ]; then
+				f="$1/$f"
 				break
 			fi
 			shift
 		done
 	fi
-	[ -e "$__shell_source_find_f" ] || return 1
-	eval "$__shell_source_find_v=\"\$__shell_source_find_f\""
+	[ -e "$f" ] || return 1
+	eval "$r=\"\$f\""
 }
 
 # Execute commands from file in the current environment if file exists.
