@@ -31,7 +31,7 @@ __shell_source_find() {
 source_if_exists() {
 	local v f
 	f="$1";	shift
-	! __shell_source_find v "$f" || [ ! -f "$v" ] || . "$v" "$@"
+	! __shell_source_find v "$f" || [ ! -f "$v" ] || . "$v"
 }
 
 # Execute commands from file in the current environment if file is not empty.
@@ -40,7 +40,7 @@ source_if_exists() {
 source_if_notempty() {
 	local v f
 	f="$1"; shift
-	! __shell_source_find v "$f" || [ ! -s "$v" ] || . "$v" "$@"
+	! __shell_source_find v "$f" || [ ! -s "$v" ] || . "$v"
 }
 
 # Execute commands from file in the current environment if file is executable.
@@ -49,7 +49,7 @@ source_if_notempty() {
 source_if_executable() {
 	local v f
 	f="$1"; shift
-	! __shell_source_find v "$f" || [ ! -x "$v" ] || . "$v" "$@"
+	! __shell_source_find v "$f" || [ ! -x "$v" ] || . "$v"
 }
 
 fi #__included_shell_source
