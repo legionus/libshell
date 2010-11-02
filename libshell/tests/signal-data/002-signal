@@ -1,0 +1,4 @@
+#!/bin/sh -efu
+. ../shell-signal
+signal_handler 'echo INT-2' INT
+/bin/kill -INT $$

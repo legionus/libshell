@@ -8,64 +8,45 @@ signal_test_handler() {
 }
 
 signal_test1() { # UnitTest
-	. ../shell-signal
-	expect="0 0"
-	result=`signal_handler 'echo $rc' EXIT HUP;`
+	expect="EXIT-0"
+	result=$(./signal-data/001-signal)
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test2() { # UnitTest
-	. ../shell-signal
-	expect="0 0"
-	result=`signal_handler 'echo $rc' CHLD HUP; kill -CHLD $$;`
+	expect="INT-2"
+	result=$(./signal-data/002-signal)
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test3() { # UnitTest
-	. ../shell-signal
-	expect="0 0"
-	result=`signal_handler 'echo $rc' TERM EXIT HUP;
-		signal_handler 'echo $rc' TERM EXIT HUP;`
-	assertEquals "$result" "$result" "$expect"
-}
-
-signal_test3() { # UnitTest
-	. ../shell-signal
-	expect="0 0"
-	result=`signal_handler 'echo $rc' TERM EXIT HUP;
-		signal_handler 'echo $rc' TERM EXIT HUP;`
+	expect="EXIT-0
+EXIT-0"
+	result=$(./signal-data/003-signal)
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test4() { # UnitTest
-	. ../shell-signal
-	expect="$PROG: signal_test_handler() called
-0 0"
-	result=`signal_handler signal_test_handler TERM EXIT HUP;
-		signal_handler 'echo $rc' TERM EXIT HUP;`
+	expect="BAR1
+BAR2"
+	result=$(./signal-data/004-signal)
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test5() { # UnitTest
-	. ../shell-signal
-	expect='[ "TERM:echo \$rc" "EXIT:echo \$rc" "HUP:echo \$rc" "EXIT:echo \$1"]
-[]'
-	result=`signal_handler 'echo $rc' TERM EXIT HUP;
-		signal_handler 'echo $1' EXIT;
-		printf '[%s]\n' "${__shell_signal_handlers}";
-		signal_handler SIG_DFL TERM EXIT HUP;
-		printf '[%s]\n' "${__shell_signal_handlers}";`
+	expect="EXIT-5"
+	result=$(./signal-data/005-signal)
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test6() { # UnitTest
-	. ../shell-signal
-	expect='[ "TERM:echo \$rc" "EXIT:echo \$rc" "HUP:echo \$rc" "EXIT:echo \$1"]
-[ "TERM:echo \$rc" "HUP:echo \$rc"]'
-	result=`signal_handler 'echo $rc' TERM EXIT HUP;
-		signal_handler 'echo $1' EXIT;
-		printf '[%s]\n' "${__shell_signal_handlers}";
-		signal_handler SIG_DFL EXIT;
-		printf '[%s]\n' "${__shell_signal_handlers}";`
+	expect="Got 5"
+	result=$(./signal-data/006-signal)
+	assertEquals "$result" "$result" "$expect"
+}
+
+signal_test7() { # UnitTest
+	expect=""
+	result=$(./signal-data/007-signal)
 	assertEquals "$result" "$result" "$expect"
 }

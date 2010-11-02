@@ -19,14 +19,6 @@ __shell_signal_handlers=
 # signal_handler SIG_IGN     TERM EXIT HUP
 # signal_handler SIG_DFL     TERM EXIT HUP
 signal_handler() {
-	__signal_handler() {
-		local handler arg="$1"
-		eval "handler=\"\${__signal_handlers_$arg-}\""
-		[ -n "$handler" ] ||
-			return 0
-		eval "$handler"
-	}
-
 	local action real_action sign
 	action="$1"; shift
 
@@ -36,17 +28,19 @@ signal_handler() {
 			SIG_IGN)
 				eval "unset __signal_handlers_$sign"
 				real_action=:
+				trap : "$sign"
 				;;
 			SIG_DFL)
 				eval "unset __signal_handlers_$sign"
 				real_action=-
+				trap - "$sign"
 				;;
 			*)
-				eval "__signal_handlers_$sign=\"\${__signal_handlers_$sign-} \$action;\""
-				real_action="__signal_handler $sign"
+				eval "handler=\"\${__signal_handlers_$sign-} \$action;\""
+				trap "$handler" "$sign"
+				eval "__signal_handlers_$sign=\"\$handler\""
 				;;
 		esac
-		trap "$real_action" "$sign"
 	done
 }
 

@@ -1,0 +1,11 @@
+#!/bin/sh -efu
+. ../shell-signal
+
+myhand() {
+	echo "Got $1"
+}
+
+set_cleanup_handler myhand;
+unset_cleanup_handler;
+exit 5
+

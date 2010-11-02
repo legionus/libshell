@@ -1,0 +1,9 @@
+#!/bin/sh -efu
+. ../shell-signal
+signal_handler 'echo FOO1' USR2;
+signal_handler 'echo FOO2' USR2;
+signal_handler 'echo BAR1' USR1;
+signal_handler 'echo BAR2' USR1;
+signal_handler 'echo BAZ1' TERM;
+signal_handler 'echo BAZ2' TERM;
+/bin/kill -USR1 $$
