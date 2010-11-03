@@ -14,7 +14,10 @@ if [ -n "${__libshell_experimental-}" ]; then
 # ARRAY_arr_{sign}={n}
 # ARRAY_arr={size}
 
-shell_array()
+# Usage: array ARRNAME key value
+#    or: array ARRNAME key
+#    or: array ARRNAME
+array()
 {
 	local arr key arg num i
 	arr="$1"
@@ -50,6 +53,35 @@ shell_array()
 	eval "ARRAY_${arr}_${i}_key=\"\$key\""
 	eval "ARRAY_${arr}_${i}_arg=\"\$arg\""
 	eval "ARRAY_${arr}_${sign}=\"\$i\""
+}
+
+# Usage: shell_array_foreach ARRNAME callback
+array_foreach()
+{
+	local arrname callback i num key arg
+	arrname="$1"; shift
+	callback="$1"; shift
+
+	eval "num=\${ARRAY_$arrname:-0}"
+	[ "$num" -gt 0 ] ||
+		return 0
+	i=0
+	while [ $i -lt $num ]; do
+		eval "key=\"\$ARRAY_${arrname}_${i}_key\""
+		eval "arg=\"\$ARRAY_${arrname}_${i}_arg\""
+		$callback "$i" "$key" "$arg"
+		i=$(($i+1))
+	done
+}
+
+array_flip()
+{
+	local arrname tmp key1 key2 num1 num2
+	arrname="$1"; shift
+	key1="$1"; shift
+	key2="$1"; shift
+
+	eval 
 }
 
 fi #__libshell_experimental

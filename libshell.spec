@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.1.3
+Version: 0.1.4
 Release: alt1
 
 Summary:  A library of shell functions
@@ -25,6 +25,15 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Wed Nov 03 2010 Alexey Gladkov <legion@altlinux.org> 0.1.4-alt1
+- shell-signal changes:
+  + Fix return status and rewrite tests.
+- shell-source changes:
+  + Remove bashisms.
+  + Reduce size of internal function.
+- Other changes:
+  + contrib: CRC32 implementation.
+
 * Thu Apr 29 2010 Alexey Gladkov <legion@altlinux.ru> 0.1.3-alt1
 - shell-signal: Reimplement signal_handler function.
 - shell-ip-address: Add ipv4_ip_subnet, ipv4_mask2prefix and
