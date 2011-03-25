@@ -7,6 +7,7 @@ if [ -z "${__included_shell_quote-}" ]; then
 __included_shell_quote=1
 
 . shell-version
+. shell-error
 
 # Quote argument for sed basic regular expression and store result into variable.
 # Usage example:
