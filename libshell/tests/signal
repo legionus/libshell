@@ -35,18 +35,18 @@ BAR2"
 
 signal_test5() { # UnitTest
 	expect="EXIT-5"
-	result=$(./signal-data/005-signal)
+	result=$(./signal-data/005-signal) ||:
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test6() { # UnitTest
 	expect="Got 5"
-	result=$(./signal-data/006-signal)
+	result=$(./signal-data/006-signal) ||:
 	assertEquals "$result" "$result" "$expect"
 }
 
 signal_test7() { # UnitTest
 	expect=""
-	result=$(./signal-data/007-signal)
+	result=$(./signal-data/007-signal) ||:
 	assertEquals "$result" "$result" "$expect"
 }
