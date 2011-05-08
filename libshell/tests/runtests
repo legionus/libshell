@@ -22,6 +22,7 @@ for s in \
 	fatal message verbose \
 	quote_shell_args \
 	ini_config_get ini_config_set \
+	shell_var_unquote \
 	;
 do
 	. "./$s"
