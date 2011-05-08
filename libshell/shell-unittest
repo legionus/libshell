@@ -193,6 +193,7 @@ messageTest() {
 		0) printf '[done]' ;;
 		1) printf '[FAIL]' ;;
 		2) printf '[skip]' ;;
+		*) printf '[status=%s]' $3 ;;
 	esac
 	printf ' (%s) %s\n' "$1" "$2"
 }

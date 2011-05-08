@@ -1,0 +1,47 @@
+#!/bin/ash -efu
+
+ini_config_set_test1() { # UnitTest
+	. ../shell-ini-config
+	local result expect="Aaa Bbb"
+	cp -f ini-config/z.ini ini-config/t1.ini
+
+	ini_config_set ini-config/t1.ini global user "$expect"
+
+	result="$(ini_config_get ini-config/t1.ini global user)"
+	assertEquals "$result" "$result" "$expect"
+}
+
+ini_config_set_test2() { # UnitTest
+	. ../shell-ini-config
+	local result expect='$1 \n\1 "Bbb"'
+	cp -f ini-config/z.ini ini-config/t2.ini
+
+	ini_config_set ini-config/t2.ini global user "$expect"
+
+	result="$(ini_config_get ini-config/t2.ini global user)"
+	assertEquals "$result" "$result" "$expect"
+}
+
+ini_config_set_test3() { # UnitTest
+	. ../shell-ini-config
+	local result expect='XXX'
+	cp -f ini-config/z.ini ini-config/t3.ini
+
+	ini_config_del ini-config/t3.ini global user
+	ini_config_set ini-config/t3.ini global user "$expect"
+
+	result="$(ini_config_get ini-config/t3.ini global user)"
+	assertEquals "$result" "$result" "$expect"
+}
+
+ini_config_set_test4() { # UnitTest
+	. ../shell-ini-config
+	local result expect='XXX'
+	cp -f ini-config/z.ini ini-config/t4.ini
+
+	ini_config_comment ini-config/t4.ini global user
+	ini_config_set ini-config/t4.ini global user "$expect"
+
+	result="$(ini_config_get ini-config/t4.ini global user)"
+	assertEquals "$result" "$result" "$expect"
+}

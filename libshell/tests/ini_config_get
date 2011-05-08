@@ -1,0 +1,22 @@
+#!/bin/ash -efu
+
+ini_config_get_test1() { # UnitTest
+	. ../shell-ini-config
+	local result expect="Foo Bar"
+	result="$(ini_config_get ini-config/z.ini global user)"
+	assertEquals "$result" "$result" "$expect"
+}
+
+ini_config_get_test2() { # UnitTest
+	. ../shell-ini-config
+	local result expect="foo@bar"
+	result="$(ini_config_get ini-config/z.ini global email)"
+	assertEquals "$result" "$result" "$expect"
+}
+
+ini_config_get_test3() { # UnitTest
+	. ../shell-ini-config
+	local result expect="\"ZZZ XXX\""
+	result="$(ini_config_get ini-config/z.ini sect opt)"
+	assertEquals "$result" "$result" "$expect"
+}
