@@ -1,0 +1,43 @@
+#!/bin/sh
+
+shell_var_trim_test1() { # UnitTest
+	. ../shell-var
+
+	local result string='test'
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" 'test'
+}
+
+shell_var_trim_test2() { # UnitTest
+	. ../shell-var
+
+	local result string='test   '
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" 'test'
+}
+
+shell_var_trim_test3() { # UnitTest
+	. ../shell-var
+
+	local result string='test	
+        '
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" 'test'
+}
+
+shell_var_trim_test4() { # UnitTest
+	. ../shell-var
+
+	local result string='	   test 	 test	
+        '
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" 'test 	 test'
+}
+
+shell_var_trim_test5() { # UnitTest
+	. ../shell-var
+
+	local result string=' " test " '
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" '" test "'
+}
