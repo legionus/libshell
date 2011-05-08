@@ -6,6 +6,8 @@
 if [ -z "${__included_shell_var-}" ]; then
 __included_shell_var=1
 
+. shell-error
+
 shell_var_is_yes() {
 	[ "$#" -eq 1 ] ||
 		fatal "Usage: shell_var_yes value"
