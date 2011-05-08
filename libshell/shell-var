@@ -60,11 +60,11 @@ shell_var_unquote() {
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_unquote varname value"
 	local __shell_var_unquote_var="$1" __shell_var_unquote_out="$2"
-	if [ -z "${1##*\'}${1%%\'*}" ]; then
-		__shell_var_unquote_out="${1#\'}"
+	if [ -z "${__shell_var_unquote_out##*\'}${__shell_var_unquote_out%%\'*}" ]; then
+		__shell_var_unquote_out="${__shell_var_unquote_out#\'}"
 		__shell_var_unquote_out="${__shell_var_unquote_out%\'}"
-	elif [ -z "${1##*\"}${1%%\"*}" ]; then
-		__shell_var_unquote_out="${1#\"}"
+	elif [ -z "${__shell_var_unquote_out##*\"}${__shell_var_unquote_out%%\"*}" ]; then
+		__shell_var_unquote_out="${__shell_var_unquote_out#\"}"
 		__shell_var_unquote_out="${__shell_var_unquote_out%\"}"
 	fi
 	eval "$__shell_var_unquote_var=\"\$__shell_var_unquote_out\""
