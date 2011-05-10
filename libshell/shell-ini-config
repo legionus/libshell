@@ -6,102 +6,140 @@
 if [ -z "${__included_shell_ini_config-}" ]; then
 __included_shell_ini_config=1
 
-shell_ini_config_rdelim='[[:space:]]*=[[:space:]]*'
-shell_ini_config_wdelim=' = '
-shell_ini_config_comment='# '
-
-shell_ini_config_lbegin='^[[:space:]]*'
-shell_ini_config_sbegin="$shell_ini_config_lbegin\["
-shell_ini_config_send='\]'
+shell_ini_config_comment='#'
 
 . shell-error
-. shell-quote
+. shell-var
 
+# Usage: ini_config_get file section var
 ini_config_get() {
-	[ "$#" -eq 3 ] ||
-		fatal 'Usage: ini_config_get file section name'
+	local fn section var sect= str eof= n v
+	fn="$1" section="$2" var="$3"
 
-	local fn section name
+	while [ -z "$eof" ]; do
+		read -r str || eof=1
 
-	fn="$1"
-	quote_sed_regexp_variable section "$2"
-	quote_sed_regexp_variable name "$3"
+		case "$str" in
+			"["*"]")
+				[ "$str" != "[$section]" ] ||
+					sect=1
+				;;
+			"$shell_ini_config_comment"*|'')
+				;;
+			*)
+				if [ -n "$sect" ]; then
+					shell_var_trim n "${str%%=*}"
 
-	sed -n -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim\(.*\)/\1/p" \
-		"$fn"
+					if [ "$n" = "$var" ]; then
+						shell_var_trim v "${str#*=}"
+						printf '%s\n' "$v"
+						break
+					fi
+				fi
+				;;
+		esac
+	done < "$fn"
 }
 
+# Usage: ini_config_set file section var value
 ini_config_set() {
-	[ "$#" -eq 4 ] ||
-		fatal 'Usage: ini_config_set file section name value'
+	local fn fn_tmp section var value sect= don= str eof= n v
 
-	local fn section name value
+	fn="$1" section="$2" var="$3" value="$4"
+	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
-	fn="$1"
-	quote_sed_regexp_variable section "$2"
-	quote_sed_regexp_variable name "$3"
-	quote_sed_regexp_variable value "$4"
+	while [ -z "$eof" ]; do
+		read -r str || eof=1
 
-	sed -i -e \
-		"/$shell_ini_config_sbegin$section$shell_ini_config_send/ {
-		:loop
-		n
+		case "$str" in
+			"[$section]")
+				sect=2
+				printf '%s\n' "$str"
+				;;
+			"["*"]")
+				[ -z "$sect" -o -n "$don" ] ||
+					printf '\t%s\n' "$var = $value"
+				sect=1
+				printf '%s\n' "$str"
+				;;
+			"$shell_ini_config_comment"*|'')
+				[ -n "$str" ] &&
+					printf ${sect:+'\t'}'%s\n' "$str" ||
+					printf '\n'
+				;;
+			*)
+				shell_var_trim n "${str%%=*}"
+				shell_var_trim v "${str#*=}"
 
-		    /$shell_ini_config_lbegin$name$shell_ini_config_rdelim/  {
-			s/\($shell_ini_config_lbegin$name\)$shell_ini_config_rdelim.*/\1$shell_ini_config_wdelim$value/
-			b end
-		    }
-
-		    /$shell_ini_config_sbegin/ {
-			i \ $name$shell_ini_config_wdelim$value
-			b end
-		    }
-
-		    \$! b loop
-		    \$ a \ $name$shell_ini_config_wdelim$value
-		    :end
-		}" \
-		"$fn"
+				if [ "$sect" = 2 -a "$n" = "$var" ]; then
+					[ -n "$don" ] ||
+						printf '\t%s\n' "$n = $value"
+					don=1
+					continue
+				fi
+				printf '\t%s\n' "$n = $v"
+				;;
+		esac
+	done < "$fn" > "$fn_tmp"
+	mv -f -- "$fn_tmp" "$fn"
 }
 
+__ini_config_del_comment() {
+	local fn_tmp sect= str eof= n v
+	fn_tmp="$(mktemp "$fn.XXXXXX")"
+
+	while [ -z "$eof" ]; do
+		read -r str || eof=1
+
+		case "$str" in
+			"["*"]")
+				sect=1
+				[ "$str" != "[$section]" ] ||
+					sect=2
+				printf '%s\n' "$str"
+				;;
+			"$shell_ini_config_comment"*|'')
+				[ -n "$str" ] &&
+					printf ${sect:+'\t'}'%s\n' "$str" ||
+					printf '\n'
+				;;
+			*)
+				shell_var_trim n "${str%%=*}"
+				shell_var_trim v "${str#*=}"
+
+				[ "$sect" = 2 ] &&
+					__ini_config_action "$n" "$v" ||
+					printf '\t%s\n' "$n = $v"
+				;;
+		esac
+	done < "$fn" > "$fn_tmp"
+	mv -f -- "$fn_tmp" "$fn"
+	unset __ini_config_action
+}
+
+# Usage: ini_config_del file section [var]
 ini_config_del() {
-	[ "$#" -ge 2 -a "$#" -le 3 ] ||
-		fatal 'Usage: ini_config_del file section [name]'
+	local fn="$1" section="$2" var="${3-}"
 
-	local fn section name=
-
-	fn="$1"
-	quote_sed_regexp_variable section "$2"
-	[ -z "${3-}" ] ||
-		quote_sed_regexp_variable name "$3"
-
-	if [ -n "$name" ];then
-		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ {/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/ d}" \
-			"$fn"
-	else
-		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ {/$shell_ini_config_sbegin$section$shell_ini_config_send/ d;/$shell_ini_config_sbegin/! d}" \
-			"$fn"
-	fi
+	__ini_config_action() {
+		[ -z "$var" -o "$1" = "$var" ] ||
+			printf '\t%s\n' "$1 = $2"
+	}
+	__ini_config_del_comment
 }
 
+# Usage: ini_config_comment file section [var]
 ini_config_comment() {
-	[ "$#" -ge 2 -a "$#" -le 3 ] ||
-		fatal 'Usage: ini_config_comment file section [name]'
+	local fn="$1" section="$2" var="${3-}"
 
-	local fn section name=
-
-	fn="$1"
-	quote_sed_regexp_variable section "$2"
-	[ -z "${3-}" ] ||
-		quote_sed_regexp_variable name "$3"
-
-	if [ -n "$name" ];then
-		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ { s/$shell_ini_config_lbegin$name$shell_ini_config_rdelim/$shell_ini_config_comment&/ }" \
-			"$fn"
-	else
-		sed -i -e "/$shell_ini_config_sbegin$section$shell_ini_config_send/,/$shell_ini_config_sbegin/ { /$shell_ini_config_sbegin/! s/^.*/$shell_ini_config_comment&/; s/$shell_ini_config_sbegin$section$shell_ini_config_send/$shell_ini_config_comment&/}" \
-			"$fn"
-	fi
+	__ini_config_action() {
+		if [ -n "$var" -a "$1" != "$var" ]; then
+			printf '\t%s\n' "$1 = $2"
+			return
+		fi
+		printf '\t%s\n' "$shell_ini_config_comment $1 = $2"
+	}
+	__ini_config_del_comment
 }
 
 fi #__included_shell_ini_config

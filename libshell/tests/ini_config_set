@@ -45,3 +45,14 @@ ini_config_set_test4() { # UnitTest
 	result="$(ini_config_get ini-config/t4.ini global user)"
 	assertEquals "$result" "$result" "$expect"
 }
+
+ini_config_set_test5() { # UnitTest
+	. ../shell-ini-config
+	local result expect='ZZZ'
+	cp -f ini-config/z.ini ini-config/t5.ini
+
+	ini_config_set ini-config/t5.ini sect1 opt "$expect"
+
+	result="$(ini_config_get ini-config/t5.ini sect1 opt)"
+	assertEquals "$result" "$result" "$expect"
+}
