@@ -1,0 +1,43 @@
+#!/bin/ash -efu
+
+fill_mask_test01() { # UnitTest
+	. ../shell-quote
+	local result string='1234567890'
+	fill_mask result "$string"
+	assertEquals "$string" "$result" "?????????"
+}
+
+fill_mask_test02() { # UnitTest
+	. ../shell-quote
+	local result string='1234567890123'
+	fill_mask result "$string"
+	assertEquals "$string" "$result" "????????????"
+}
+
+fill_mask_test03() { # UnitTest
+	. ../shell-quote
+	local result string='1234567890123'
+	fill_mask result "$string" 1
+	assertEquals "$string" "$result" "?????????????"
+}
+
+fill_mask_test04() { # UnitTest
+	. ../shell-quote
+	local result string='1'
+	fill_mask result "$string"
+	assertEquals "$string" "$result" ""
+}
+
+fill_mask_test05() { # UnitTest
+	. ../shell-quote
+	local result string='12'
+	fill_mask result "$string"
+	assertEquals "$string" "$result" "?"
+}
+
+fill_mask_test06() { # UnitTest
+	. ../shell-quote
+	local result string='123'
+	fill_mask result "$string"
+	assertEquals "$string" "$result" "??"
+}

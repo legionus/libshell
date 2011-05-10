@@ -23,6 +23,7 @@ for s in \
 	quote_shell_args \
 	ini_config_get ini_config_set \
 	shell_var_unquote shell_var_trim \
+	fill_mask \
 	;
 do
 	. "./$s"

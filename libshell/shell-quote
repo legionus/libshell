@@ -8,6 +8,7 @@ __included_shell_quote=1
 
 . shell-version
 . shell-error
+. shell-string
 
 # Quote argument for sed basic regular expression and store result into variable.
 # Usage example:
@@ -75,9 +76,7 @@ __quote_shell_args() {
 		eval [ -n \"\$$1\" ] && eval "$1=" || eval "$1=\$$2"
 	}
 
-	while [ ${#m} -lt $((${#l}-1)) ]; do
-		m="$m?"
-	done
+	fill_mask m "$l"
 
 	while [ -n "$l" ]; do
 		c="${l%$m}"

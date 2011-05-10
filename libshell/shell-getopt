@@ -8,6 +8,7 @@ __included_shell_getopt=1
 
 . shell-error
 . shell-quote
+. shell-string
 
 # Ignore unknown options.
 GETOPT_ALLOW_UNKNOWN=
@@ -183,9 +184,7 @@ getopts() {
 	local l="$1"
 	local m= # mask
 	local r= # to store result
-	while [ ${#m} -lt $((${#l}-1)) ]; do
-		m="$m?"
-	done # create a "???..." mask
+	fill_mask m "$l" # create a "???..." mask
 
 	while [ -n "$l" ]; do
 		r="${r:+"$r "}${l%$m}" # append the first character of $l to $r
@@ -215,9 +214,7 @@ getsubopt() {
 
 	if [ -z "$__getsubopt_arguments" ]; then
 		local ch m=
-		while [ ${#m} -lt $((${#l}-1)) ]; do
-			m="$m?"
-		done
+		fill_mask m "$l"
 
 		__getsubopt_arguments='--'
 		while [ -n "$l" ]; do
