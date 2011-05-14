@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.1.4
+Version: 0.1.5
 Release: alt1
 
 Summary:  A library of shell functions
@@ -19,12 +19,28 @@ This package contains common functions for shell projects to increase code reuse
 %install
 %make_install DESTDIR=%buildroot
 
+%check
+%make check
+
 %files
 /bin/*
 %_man3dir/*
 %doc COPYING SYMS
 
 %changelog
+* Sun May 15 2011 Alexey Gladkov <legion@altlinux.ru> 0.1.5-alt1
+- shell-quote changes:
+  + Fix depends.
+- shell-var changes:
+  + Fix depends.
+  + Fix shell_var_unquote function.
+- shell-ini-config changes:
+  + Rewrite all functions in shell.
+- Other changes:
+  + Update tests.
+- Spec:
+  + Add check section.
+
 * Wed Nov 03 2010 Alexey Gladkov <legion@altlinux.org> 0.1.4-alt1
 - shell-signal changes:
   + Fix return status and rewrite tests.
