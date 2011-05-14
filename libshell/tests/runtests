@@ -1,4 +1,4 @@
-#!/bin/ash -efu
+#!/bin/sh -efu
 
 srcdir="$(readlink -ev ..)"
 export PATH="$srcdir:$PATH"
