@@ -24,3 +24,6 @@ install-man: ${man_TARGETS}
 		d="$${i%.man}.3"; d="$${d##*/}"; \
 		install -m644 $$i ${DESTDIR}${man3dir}/$$d; \
 	done
+
+check:
+	@cd tests; ./runtests
