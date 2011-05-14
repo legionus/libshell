@@ -1,0 +1,68 @@
+#!/bin/sh -efu
+
+stack_push() {
+	local name str last stack
+	name="$1"; shift
+	str="$1"; shift
+
+	eval "stack=\"\${__${name}:-}\";"
+	set $stack
+	last=$(($# + 1))
+
+	eval "__${name}=\"\${__$name:+\$__$name }${last}\";
+	      __${name}_${last}=\"\$str\";"
+}
+
+stack_pop() {
+	local name var last stack
+	name="$1"; shift
+	var="$1"; shift
+
+	eval "stack=\"\${__${name}:-}\";"
+	set $stack
+	last="$#"
+
+	if [ "$last" = 0 ]; then
+		eval "$var=''"
+		return
+	fi
+
+	eval "$var=\"\${__${name}_${last}:-}\";
+	      unset __${name}_${last};
+	      __${name}=\"\${__${name}% *}\";"
+}
+
+stack_shift() {
+	local name var last stack
+	name="$1"; shift
+	var="$1"; shift
+
+	eval "stack=\"\${__${name}:-}\";"
+	set $stack
+	last="$#"
+
+	if [ "$last" = 0 ]; then
+		eval "$var=''"
+		return
+	fi
+
+	last="${stack%% *}"
+	last="${last## }"
+
+	eval "$var=\"\${__${name}_${last}:-}\";
+	      unset __${name}_${last};
+	      __${name}=\"\${__${name}#* }\";"
+}
+
+stack_unshift() {
+	local name str last stack
+	name="$1"; shift
+	str="$1"; shift
+
+	eval "stack=\"\${__${name}:-}\";"
+	set $stack
+	last="$(($# + 1))"
+
+	eval "__${name}=\"${last}\${__$name:+ \$__$name}\";
+	      __${name}_${last}=\"\$str\";"
+}
