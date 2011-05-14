@@ -39,6 +39,7 @@ shell-signal	unset_cleanup_handler
 shell-source	source_if_executable
 shell-source	source_if_exists
 shell-source	source_if_notempty
+shell-string	fill_mask
 shell-unittest	appendTests
 shell-unittest	assertEquals
 shell-unittest	assertFalse
