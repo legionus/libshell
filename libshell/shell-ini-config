@@ -53,13 +53,13 @@ ini_config_set() {
 
 		case "$str" in
 			"[$section]")
-				sect=2
+				sect=1
 				printf '%s\n' "$str"
 				;;
 			"["*"]")
 				[ -z "$sect" -o -n "$don" ] ||
 					printf '\t%s\n' "$var = $value"
-				sect=1
+				sect=
 				printf '%s\n' "$str"
 				;;
 			"$shell_ini_config_comment"*|'')
@@ -71,7 +71,7 @@ ini_config_set() {
 				shell_var_trim n "${str%%=*}"
 				shell_var_trim v "${str#*=}"
 
-				if [ "$sect" = 2 -a "$n" = "$var" ]; then
+				if [ -n "$sect" -a "$n" = "$var" ]; then
 					[ -n "$don" ] ||
 						printf '\t%s\n' "$n = $value"
 					don=1
