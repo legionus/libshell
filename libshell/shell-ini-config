@@ -51,6 +51,7 @@ ini_config_set() {
 	while [ -z "$eof" ]; do
 		read -r str || eof=1
 
+
 		case "$str" in
 			"[$section]")
 				sect=1
@@ -80,6 +81,10 @@ ini_config_set() {
 				printf '\t%s\n' "$n = $v"
 				;;
 		esac
+
+		[ -z "$eof" -o -z "$sect" -o -n "$don" ] ||
+			printf '\t%s\n' "$var = $value"
+
 	done < "$fn" > "$fn_tmp"
 	mv -f -- "$fn_tmp" "$fn"
 }
