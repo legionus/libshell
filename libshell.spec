@@ -1,5 +1,5 @@
 Name: libshell
-Version: 0.1.5
+Version: 0.1.6
 Release: alt1
 
 Summary:  A library of shell functions
@@ -28,6 +28,13 @@ This package contains common functions for shell projects to increase code reuse
 %doc COPYING SYMS
 
 %changelog
+* Wed Jul 27 2011 Alexey Gladkov <legion@altlinux.org> 0.1.6-alt1
+- shell-ini-config changes (ALT#25946):
+  + Fix comment formatting (thx Vladislav Zavjalov);
+  + Add section if it is not exists (thx Vladislav Zavjalov);
+  + Fix error at adding values to the last section (thx Vladislav Zavjalov);
+  + Fix error of adding values into incorrect sections (thx Vladislav Zavjalov).
+
 * Sun May 15 2011 Alexey Gladkov <legion@altlinux.ru> 0.1.5-alt1
 - shell-quote changes:
   + Fix depends.
