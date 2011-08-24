@@ -8,8 +8,13 @@ __included_shell_error=1
 
 PROG="${PROG:-${0##*/}}"
 
+message_time=
+message_time_format=
 message() {
-	printf %s\\n "$PROG: $*" >&2
+	local prefix=
+	[ -z "$message_time" ] ||
+		prefix="$(date +"${message_time_format:-[%Y-%m-%d %T]} " 2>/dev/null)" ||:
+	printf %s\\n "${prefix}$PROG: $*" >&2
 }
 
 fatal() {
