@@ -1,6 +1,6 @@
 #!/bin/ash -efu
 
-CMDLINE='ro rw= root=LABEL=ROOT resume=/dev/sda1 panic=30 initrd=/boot/initrd.img foo.bar="zzz xxx" BOOT-IMAGE=/boot/vmlinuz'
+CMDLINE='ro rw= root=LABEL=ROOT resume=/dev/sda1 panic=30 foo.bar="zzz xxx" BOOT_IMAGE=/bad/param BOOT-IMAGE=/boot/vmlinuz'
 
 cmdline_get_test1() { # UnitTest
 	. ../shell-cmdline

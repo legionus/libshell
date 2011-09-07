@@ -109,10 +109,7 @@ cmdline_get() {
 	unset c m l
 
 	__getval() {
-		if [ "$1" = "$__getn" ]; then
-			eval "$__retv=\"\$2\""
-			return 1
-		fi
+		[ "$1" != "$__getn" ] || eval "$__retv=\"\$2\""
 	}
 	cmdline_foreach "$__cmdline" __getval
 	unset __getval
