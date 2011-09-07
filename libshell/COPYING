@@ -16,10 +16,10 @@ are Copyright (C) 2008  Stanislav Ievlev <inger@altlinux.org>,
                   2008  Alexey Gladkov <legion@altlinux.org>
 
 The files
-	shell-version, shell-config, shell-error, shell-ip-address,
-	shell-mail-address, shell-unittest, shell-signal, shell-var
-	shell-source shell-run
-are Copyright (C) 2009  Alexey Gladkov <legion@altlinux.org>
+	shell-version, shell-cmdline, shell-config, shell-error,
+	shell-ip-address, shell-mail-address, shell-unittest,
+	shell-signal, shell-var, shell-source shell-run
+are Copyright (C) 2009-2011  Alexey Gladkov <legion@altlinux.org>
 
 All files in this package may be freely copied under the terms
 of the GNU General Public License (GPL), version 2, or at your

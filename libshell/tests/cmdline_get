@@ -1,0 +1,59 @@
+#!/bin/ash -efu
+
+CMDLINE='ro rw= root=LABEL=ROOT resume=/dev/sda1 panic=30 initrd=/boot/initrd.img foo.bar="zzz xxx" BOOT-IMAGE=/boot/vmlinuz'
+
+cmdline_get_test1() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'resume' "$CMDLINE"
+	assertEquals "resume=[$result]" "$result" '/dev/sda1'
+}
+
+cmdline_get_test2() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'ro' "$CMDLINE"
+	assertEquals "ro=[$result]" "$result" '1'
+}
+
+cmdline_get_test3() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'rw' "$CMDLINE"
+	assertEquals "rw=[$result]" "$result" ''
+}
+
+cmdline_get_test4() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'root' "$CMDLINE"
+	assertEquals "root=[$result]" "$result" 'LABEL=ROOT'
+}
+
+cmdline_get_test5() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'foo.bar' "$CMDLINE"
+	assertEquals "foo.bar=[$result]" "$result" 'zzz xxx'
+}
+
+cmdline_get_test6() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'BOOT-IMAGE' "$CMDLINE"
+	assertEquals "BOOT-IMAGE=[$result]" "$result" '/boot/vmlinuz'
+}
+
+cmdline_get_test7() { # UnitTest
+	. ../shell-cmdline
+
+	local result
+	cmdline_get 'result' 'BOOT_IMAGE' "$CMDLINE"
+	assertEquals "BOOT_IMAGE=[$result]" "$result" '/boot/vmlinuz'
+}

@@ -24,6 +24,7 @@ for s in \
 	ini_config_get ini_config_set \
 	shell_var_unquote shell_var_trim \
 	fill_mask \
+	cmdline_get \
 	;
 do
 	. "./$s"

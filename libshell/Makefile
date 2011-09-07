@@ -3,7 +3,7 @@ datadir = /usr/share
 man3dir = ${datadir}/man/man3
 bindir = /bin
 
-bin_TARGETS = shell-args shell-config shell-error shell-getopt \
+bin_TARGETS = shell-args shell-cmdline shell-config shell-error shell-getopt \
 	shell-ini-config shell-ip-address shell-mail-address shell-quote \
 	shell-regexp shell-signal shell-unittest shell-version shell-var \
 	shell-source shell-string shell-run

@@ -1,0 +1,121 @@
+#!/bin/sh -efu
+# This file is covered by the GNU General Public License,
+# which should be included with libshell as the file LICENSE.
+# All copyright information are listed in the COPYING.
+
+if [ -z "${__included_shell_cmdline-}" ]; then
+__included_shell_cmdline=1
+
+. shell-string
+
+# Run handler for each variable in /proc/cmdline.
+#
+cmdline_foreach() {
+	local l h c= m=
+
+	l="$1"; shift
+	h="$1"; shift
+
+	__is_set() {
+		[ $(( $1 & $2 )) -eq $2 ]
+	}
+
+	fill_mask m "$l"
+
+	local state=$((0x00))
+	local VALUE=$((0x02))
+	local EQUAL=$((0x04))
+	local QUOTE=$((0x10))
+
+	local n= v=
+
+	while [ -n "$l" ]; do
+		c="${l%$m}"
+
+		case "$c" in
+			'"')
+				__is_set $state $QUOTE &&
+					state=$(($state ^ $QUOTE)) ||
+					state=$(($state | $QUOTE))
+				;;
+			' ')
+				if __is_set $state $QUOTE; then
+					v="$v$c"
+				else
+					__is_set $state $EQUAL ||
+						v=1
+					$h "$n" "$v" ||
+						break
+					n= v=
+					state=$((0x00))
+				fi
+				;;
+			'=')
+				! __is_set $state $VALUE ||
+					v="$v$c"
+				state=$(($state | $VALUE | $EQUAL))
+				;;
+			*)
+				if ! __is_set $state $VALUE; then
+					[ "$c" != '-' ] || c='_'
+					n="$n$c"
+				else
+					v="$v$c"
+				fi
+				;;
+		esac
+
+		l="${l#?}"
+		m="${m#?}"
+	done
+
+	[ -z "$n" ] ||
+		$h "$n" "$v" ||:
+
+	unset __is_set
+}
+
+# Find spicified variable in /proc/cmdline and store result into variable.
+# Usage example:
+#   read cmdline < /proc/cmdline
+#   cmdline_get 'initrd_value' 'initrd' "$cmdline"
+#   echo "$initrd_value"
+# or:
+#   cmdline_get 'initrd_value' 'initrd'
+#   echo "$initrd_value"
+#
+cmdline_get() {
+	local __cmdline __retv __getn
+
+	__retv="$1"; shift
+	__getn="$1"; shift
+	if [ "$#" -eq 0 ]; then
+		read __cmdline < /proc/cmdline
+	else
+		__cmdline="$1"
+	fi
+
+	local c m l="$__getn"
+	__getn=
+
+	fill_mask m "$l"
+	while [ -n "$l" ]; do
+		c="${l%$m}"
+		[ "$c" != '-' ] || c='_'
+		__getn="$__getn$c"
+		l="${l#?}"
+		m="${m#?}"
+	done
+	unset c m l
+
+	__getval() {
+		if [ "$1" = "$__getn" ]; then
+			eval "$__retv=\"\$2\""
+			return 1
+		fi
+	}
+	cmdline_foreach "$__cmdline" __getval
+	unset __getval
+}
+
+fi #__included_shell_cmdline

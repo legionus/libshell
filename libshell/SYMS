@@ -5,6 +5,8 @@ shell-args	parse_common_option
 shell-args	print_version
 shell-args	show_help
 shell-args	show_usage
+shell-cmdline	cmdline_foreach
+shell-cmdline	cmdline_get
 shell-config	shell_config_comment
 shell-config	shell_config_del
 shell-config	shell_config_get
