@@ -27,7 +27,7 @@ run_scripts() {
 	local p f d rc=0
 	d="$(opt_check_dir "dir" "$1")"; shift
 
-	for f in $(find -L "$d" -mindepth 1 -maxdepth 1 -type f); do
+	for f in $(find -L "$d" -mindepth 1 -maxdepth 1 -type f | sort); do
 		for p in $RUN_SCRIPTS_EXCLUDE; do
 			[ -n "${f##$p}" ] ||
 				continue 2
