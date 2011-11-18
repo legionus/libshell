@@ -21,18 +21,21 @@ run_if_executable() {
 # Run scripts from directory.
 # Usage: run_scripts <dir> [args]
 RUN_SCRIPTS_EXCLUDE='*.rpm* *.swp *,v *~ *.\#'
+SCRIPT_ERROR_FATAL=${SCRIPT_ERROR_FATAL:-false}
 run_scripts() {
 	[ "$#" -ge 1 ] ||
 		fatal "Usage: run_scripts <dir> [args]"
 	local p f d rc=0
 	d="$(opt_check_dir "dir" "$1")"; shift
 
-	for f in $(find -L "$d" -mindepth 1 -maxdepth 1 -type f); do
+	for f in $(find -L "$d" -mindepth 1 -maxdepth 1 -type f | sort); do
 		for p in $RUN_SCRIPTS_EXCLUDE; do
 			[ -n "${f##$p}" ] ||
 				continue 2
 		done
 		run_if_executable "$f" "$@" || rc=1
+		[ "$SCRIPT_ERROR_FATAL" = true ] &&
+			[ $rc -gt 0 ] && return $rc
 	done
 	return $rc
 }
