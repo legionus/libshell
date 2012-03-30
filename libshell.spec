@@ -25,7 +25,8 @@ This package contains common functions for shell projects to increase code reuse
 %files
 /bin/*
 %_man3dir/*
-%doc COPYING SYMS
+%_datadir/%name
+%doc COPYING
 
 %changelog
 * Wed Jul 27 2011 Alexey Gladkov <legion@altlinux.org> 0.1.6-alt1

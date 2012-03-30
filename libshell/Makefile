@@ -4,8 +4,9 @@ datadir = /usr/share
 man3dir = ${datadir}/man/man3
 bindir = /bin
 
-GEN_DEPS = $(CURDIR)/gen-deps.sh
-GEN_SYMS = $(CURDIR)/gen-syms.sh
+GEN_DEPS   = $(CURDIR)/gen-deps.sh
+GEN_SYMS   = $(CURDIR)/gen-syms.sh
+GEN_SINGLE = $(CURDIR)/gen-single.sh
 
 bin_TARGETS = shell-args shell-cmdline shell-config shell-error shell-getopt \
 	shell-ini-config shell-ip-address shell-mail-address shell-quote \
@@ -18,8 +19,12 @@ man_TARGETS = docs/libshell.man docs/shell-error.man
 
 install: install-bin install-man
 	install -d -m755 ${DESTDIR}${datadir}/${PROJECT}
-	$(GEN_DEPS) ${DESTDIR}${bindir}/shell-* > ${DESTDIR}${datadir}/${PROJECT}/DEPS
-	$(GEN_SYMS) ${DESTDIR}${bindir}/shell-* > ${DESTDIR}${datadir}/${PROJECT}/SYMS
+	$(GEN_DEPS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/DEPS
+	$(GEN_SYMS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/SYMS
+
+install-single: ${bin_TARGETS}
+	install -d -m755 ${DESTDIR}${bindir}
+	$(GEN_SINGLE) ${bin_TARGETS} > ${DESTDIR}${bindir}/shell-lib
 
 install-bin: ${bin_TARGETS}
 	install -d -m755 ${DESTDIR}${bindir}
