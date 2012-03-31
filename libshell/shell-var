@@ -35,18 +35,23 @@ shell_var_trim()
 {
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_trim varname value"
-	local __shell_var_trim_var="$1" __shell_var_trim_ret="$2"
-	local IFS=' 	
+__shell_var_trim()
+{
+	local r="$1" IFS=' 	
 '
-	set -- $__shell_var_trim_ret
+	set -- $r
 	if [ "$#" -eq 0 ]; then
-		eval "$__shell_var_trim_var=''"
+		__shell_var_trimo=
 		return
 	fi
-	__shell_var_trim_ret="$1${__shell_var_trim_ret#*$1}"
+	r="$1${r#*$1}"
 	shift $(($#-1))
-	__shell_var_trim_ret="${__shell_var_trim_ret%$1*}$1"
-	eval "$__shell_var_trim_var=\"\$__shell_var_trim_ret\""
+	r="${r%$1*}$1"
+	__shell_var_trimo="$r"
+}
+	local __shell_var_trimo
+	__shell_var_trim "$2"
+	eval "$1=\"\$__shell_var_trimo\""
 }
 
 ### Remove quote symbol from string
@@ -65,15 +70,19 @@ shell_var_unquote()
 {
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_unquote varname value"
-	local __shell_var_unquote_var="$1" __shell_var_unquote_out="$2"
-	if [ -z "${__shell_var_unquote_out##*\'}${__shell_var_unquote_out%%\'*}" ]; then
-		__shell_var_unquote_out="${__shell_var_unquote_out#\'}"
-		__shell_var_unquote_out="${__shell_var_unquote_out%\'}"
-	elif [ -z "${__shell_var_unquote_out##*\"}${__shell_var_unquote_out%%\"*}" ]; then
-		__shell_var_unquote_out="${__shell_var_unquote_out#\"}"
-		__shell_var_unquote_out="${__shell_var_unquote_out%\"}"
+__shell_var_unquote()
+{
+	local o="$1"
+	if [ -z "${o##*\'}${o%%\'*}" ]; then
+		o="${o#\'}" o="${o%\'}"
+	elif [ -z "${o##*\"}${o%%\"*}" ]; then
+		o="${o#\"}" o="${o%\"}"
 	fi
-	eval "$__shell_var_unquote_var=\"\$__shell_var_unquote_out\""
+	__shell_var_unquoteo="$o"
+}
+	local __shell_var_unquoteo
+	__shell_var_unquote "$2"
+	eval "$1=\"\$__shell_var_unquoteo\""
 }
 
 fi #__included_shell_var
