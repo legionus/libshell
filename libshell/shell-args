@@ -1,18 +1,19 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_args-}" ]; then
 __included_shell_args=1
 
 . shell-error
 
-# Checks that given option value is a readable file.
-# Arguments: $1 is option name, $2 is option value.
-# If $2 is a readable file, outputs canonicalized file name,
-# otherwise fails.
-opt_check_read() {
+### Checks that given option value is a readable file.
+### Arguments: $1 is option name, $2 is option value.
+### If $2 is a readable file, outputs canonicalized file name,
+### otherwise fails.
+opt_check_read()
+{
 	local value
 	[ -r "$2" ] &&
 	value="$(readlink -ev "$2")" ||
@@ -20,11 +21,12 @@ opt_check_read() {
 	printf %s "$value"
 }
 
-# Checks that given option value is a traversable directory.
-# Arguments: $1 is option name, $2 is option value.
-# If $2 is a readable file, outputs canonicalized directory name,
-# otherwise fails.
-opt_check_dir() {
+### Checks that given option value is a traversable directory.
+### Arguments: $1 is option name, $2 is option value.
+### If $2 is a readable file, outputs canonicalized directory name,
+### otherwise fails.
+opt_check_dir()
+{
 	local value
 	[ -d "$2" -a -x "$2" ] &&
 	value="$(readlink -ev "$2")" ||
@@ -32,9 +34,9 @@ opt_check_dir() {
 	printf %s "$value"
 }
 
-# Checks that given option value is a positive decimal number.
-# Arguments: $1 is option name, $2 is option value.
-# If $2 is a positive decimal number, outputs it, otherwise fails.
+### Checks that given option value is a positive decimal number.
+### Arguments: $1 is option name, $2 is option value.
+### If $2 is a positive decimal number, outputs it, otherwise fails.
 opt_check_number()
 {
 	[ -n "${2##0*}" -a -n "${2##*[!0-9]*}" ] &&
@@ -43,23 +45,27 @@ opt_check_number()
 	printf %s "$2"
 }
 
-show_usage() {
+show_usage()
+{
 	[ -z "$*" ] || message "$*"
 	echo "Try \`$PROG --help' for more information." >&2
 	exit 1
 }
 
-show_help() {
+show_help()
+{
 	fatal "show_help(): Undefined function"
 }
 
-print_version() {
+print_version()
+{
 	fatal "print_version() Undefined function"
 }
 
 readonly getopt_common_opts="q,v,V,h"
 readonly getopt_common_longopts="quiet,verbose,version,help"
-parse_common_option() {
+parse_common_option()
+{
 	case "$1" in
 		-h|--help) show_help
 			;;

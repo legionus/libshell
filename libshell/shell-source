@@ -1,12 +1,13 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_source-}" ]; then
 __included_shell_source=1
 
-__shell_source_find() {
+__shell_source_find()
+{
 	local r f IFS=:
 	r="$1"; shift
 	f="$1"; shift
@@ -25,28 +26,31 @@ __shell_source_find() {
 	eval "$r=\"\$f\""
 }
 
-# Execute commands from file in the current environment if file exists.
-# Usage: source_if_exists /file arg1 arg2
-#    or: source_if_exists  file arg1 arg2
-source_if_exists() {
+### Execute commands from file in the current environment if file exists.
+### Usage: source_if_exists /file arg1 arg2
+###    or: source_if_exists  file arg1 arg2
+source_if_exists()
+{
 	local v f
 	f="$1";	shift
 	! __shell_source_find v "$f" || [ ! -f "$v" ] || . "$v"
 }
 
-# Execute commands from file in the current environment if file is not empty.
-# Usage: source_if_notempty /file arg1 arg2
-#    or: source_if_notempty  file arg1 arg2
-source_if_notempty() {
+### Execute commands from file in the current environment if file is not empty.
+### Usage: source_if_notempty /file arg1 arg2
+###    or: source_if_notempty  file arg1 arg2
+source_if_notempty()
+{
 	local v f
 	f="$1"; shift
 	! __shell_source_find v "$f" || [ ! -s "$v" ] || . "$v"
 }
 
-# Execute commands from file in the current environment if file is executable.
-# Usage: source_if_executable /file arg1 arg2
-#    or: source_if_executable  file arg1 arg2
-source_if_executable() {
+### Execute commands from file in the current environment if file is executable.
+### Usage: source_if_executable /file arg1 arg2
+###    or: source_if_executable  file arg1 arg2
+source_if_executable()
+{
 	local v f
 	f="$1"; shift
 	! __shell_source_find v "$f" || [ ! -x "$v" ] || . "$v"

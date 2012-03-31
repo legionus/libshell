@@ -1,7 +1,7 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_ini_config-}" ]; then
 __included_shell_ini_config=1
@@ -11,8 +11,9 @@ shell_ini_config_comment='#'
 . shell-error
 . shell-var
 
-# Usage: ini_config_get file section var
-ini_config_get() {
+### Usage: ini_config_get file section var
+ini_config_get()
+{
 	local fn section var sect= str eof= n v
 	fn="$1" section="$2" var="$3"
 
@@ -41,8 +42,9 @@ ini_config_get() {
 	done < "$fn"
 }
 
-# Usage: ini_config_set file section var value
-ini_config_set() {
+### Usage: ini_config_set file section var value
+ini_config_set()
+{
 	local fn fn_tmp section var value sect= don= str eof= n v
 
 	fn="$1" section="$2" var="$3" value="$4"
@@ -94,7 +96,8 @@ ini_config_set() {
 	mv -f -- "$fn_tmp" "$fn"
 }
 
-__ini_config_del_comment() {
+__ini_config_del_comment()
+{
 	local fn_tmp sect= str eof= n v
 	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
@@ -127,22 +130,26 @@ __ini_config_del_comment() {
 	unset __ini_config_action
 }
 
-# Usage: ini_config_del file section [var]
-ini_config_del() {
+### Usage: ini_config_del file section [var]
+ini_config_del()
+{
 	local fn="$1" section="$2" var="${3-}"
 
-	__ini_config_action() {
+	__ini_config_action()
+	{
 		[ -z "$var" -o "$1" = "$var" ] ||
 			printf '\t%s\n' "$1 = $2"
 	}
 	__ini_config_del_comment
 }
 
-# Usage: ini_config_comment file section [var]
-ini_config_comment() {
+### Usage: ini_config_comment file section [var]
+ini_config_comment()
+{
 	local fn="$1" section="$2" var="${3-}"
 
-	__ini_config_action() {
+	__ini_config_action()
+	{
 		if [ -n "$var" -a "$1" != "$var" ]; then
 			printf '\t%s\n' "$1 = $2"
 			return

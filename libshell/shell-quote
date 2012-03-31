@@ -1,7 +1,7 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_quote-}" ]; then
 __included_shell_quote=1
@@ -10,12 +10,13 @@ __included_shell_quote=1
 . shell-error
 . shell-string
 
-# Quote argument for sed basic regular expression and store result into variable.
-# Usage example:
-# quote_sed_regexp_variable var_pattern "$pattern"
-# quote_sed_regexp_variable var_replace "$replace"
-# sed "s/$var_pattern/$var_replace/"
-quote_sed_regexp_variable() {
+### Quote argument for sed basic regular expression and store result into variable.
+### Usage example:
+### quote_sed_regexp_variable var_pattern "$pattern"
+### quote_sed_regexp_variable var_replace "$replace"
+### sed "s/$var_pattern/$var_replace/"
+quote_sed_regexp_variable()
+{
 	local __quote_set_regexp_variable_var __quote_set_regexp_variable_out
 	__quote_set_regexp_variable_var="$1"; shift
 	__quote_set_regexp_variable_out="$*"
@@ -27,19 +28,21 @@ quote_sed_regexp_variable() {
 	eval "$__quote_set_regexp_variable_var=\"\$__quote_set_regexp_variable_out\""
 }
 
-# Quote given arguments for sed basic regular expression.
-# Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
-quote_sed_regexp() {
+### Quote given arguments for sed basic regular expression.
+### Usage example: sed "s/$(quote_sed_regexp "$var_pattern")/$(quote_sed_regexp "$var_replacement")/"
+quote_sed_regexp()
+{
 	local result
 	quote_sed_regexp_variable result "$@"
 	printf %s "$result"
 }
 
-# Quote argument for shell and store result into variable.
-# Usage example:
-# quote_shell_variable var_name "$var_value"
-# printf '%s\n' "$var_name"
-quote_shell_variable() {
+### Quote argument for shell and store result into variable.
+### Usage example:
+### quote_shell_variable var_name "$var_value"
+### printf '%s\n' "$var_name"
+quote_shell_variable()
+{
 	local __quote_shell_variable_var __quote_shell_variable_out
 	__quote_shell_variable_var="$1"; shift
 	__quote_shell_variable_out="$*"
@@ -51,28 +54,30 @@ quote_shell_variable() {
 	eval "$__quote_shell_variable_var=\"\$__quote_shell_variable_out\""
 }
 
-# Quote argument for shell.
-# Usage example: eval "$var_name=\"$(quote_shell "$var_value")\""
-quote_shell() {
+### Quote argument for shell.
+### Usage example: eval "$var_name=\"$(quote_shell "$var_value")\""
+quote_shell()
+{
 	local result
 	quote_shell_variable result "$@"
 	printf %s "$result"
 }
 
-# Quote argument for shell and store result into variable.
-#
-# Usage example:
-# quote_shell_args args "$var_args"
-# eval "set -- $args"
-quote_shell_args() {
-# This is an internal function to avoid the use of ugly namespace.
+### Quote argument for shell and store result into variable.
+###
+### Usage example:
+### quote_shell_args args "$var_args"
+### eval "set -- $args"
+quote_shell_args()
+{
+### This is an internal function to avoid the use of ugly namespace.
 __quote_shell_args() {
 	local m= r= c= l="$1"
-	# backslash/double/single quote mode
+	### backslash/double/single quote mode
 	local bq= dq= sq=
 
 	__quote_shell_args_toggle() {
-		# toggle $1 value
+		### toggle $1 value
 		eval [ -n \"\$$1\" ] && eval "$1=" || eval "$1=\$$2"
 	}
 
@@ -85,43 +90,43 @@ __quote_shell_args() {
 
 		case "$c" in
 			\")
-				# toggle double quote mode unless
-				# in backslash or single quote mode
+				### toggle double quote mode unless
+				### in backslash or single quote mode
 				[ -n "$bq$sq" ] || __quote_shell_args_toggle dq c
 				;;
 			\')
-				# toggle single quote mode unless
-				# in backslash or double quote mode
+				### toggle single quote mode unless
+				### in backslash or double quote mode
 				[ -n "$bq$dq" ] || __quote_shell_args_toggle sq c
 				;;
 			\$|\`)
-				# quote special character unless
-				# in backslash or single quote mode
+				### quote special character unless
+				### in backslash or single quote mode
 				[ -n "$bq$sq" ] || bq=\\
 				;;
 			\\)
-				# toggle backslash quote mode unless
-				# in single quote mode
+				### toggle backslash quote mode unless
+				### in single quote mode
 				if [ -z "$sq" ]; then
 					if [ -z "$bq" ]; then
-						# enter backslash quote mode
+						### enter backslash quote mode
 						bq=\\
 						continue
 					else
-						# leave backslash quote mode
+						### leave backslash quote mode
 						r="$r\\"
 						bq=
 					fi
 				fi
 				;;
 			[!A-Za-z0-9_\ \	])
-				# quote non-regular character unless
-				# in any quote mode
+				### quote non-regular character unless
+				### in any quote mode
 				[ -n "$bq$dq$sq" ] || bq=\\
 				;;
 		esac
 		r="$r$bq$c"
-		# leave backslash quote mode if any
+		### leave backslash quote mode if any
 		bq=
 	done
 
@@ -134,15 +139,16 @@ __quote_shell_args() {
 		__quote_shell_args_rc=1
 	eval "$1=\"\$__quote_shell_args_out\""
 
-	# Remove internal functions from user namespace.
+	### Remove internal functions from user namespace.
 	unset __quote_shell_args __quote_shell_args_toggle
 
 	return $__quote_shell_args_rc
 }
 
 if [ -n "${__export_compatibility_string_quote_remove-}" ]; then
-# Obsolete function. You shouldn't use it.
-string_quote_remove() {
+### Obsolete function. You shouldn't use it.
+string_quote_remove()
+{
 	local out="$1"
 	if [ -z "${1##*\'}${1%%\'*}" ]; then
 		out="${1#\'}"
@@ -154,5 +160,4 @@ string_quote_remove() {
 	printf %s "$out"
 }
 fi # __export_compatibility_string_quote_remove
-
 fi #__included_shell_quote

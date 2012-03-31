@@ -1,40 +1,41 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_ip_address-}" ]; then
 __included_shell_ip_address=1
 
-# Regexp for single byte
+### Regexp for single byte
 readonly regex_byte='([01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'
 
-# Regexp for 4-byte address
+### Regexp for 4-byte address
 readonly regex_ipaddr="$regex_byte(\.$regex_byte){3}"
 
-# Regexp for IPv4 address
-#
-# (http://en.wikipedia.org/wiki/IP_address)
-#
-# Some first-octet values have special meanings:
-#
-# * First octet 127 represents the local computer, regardless of what network
-#   it is really in. This is useful when testing internal operations.
-#
-# * First octet 224 and above are reserved for special purposes such as
-#   multicasting.
-#
-# Octets 0 and 255 are not acceptable values in some situations, but 0 can be used
-# as the second and/or third octet (e.g. 10.2.0.100).
-#
+### Regexp for IPv4 address
+###
+### (http://en.wikipedia.org/wiki/IP_address)
+###
+### Some first-octet values have special meanings:
+###
+### * First octet 127 represents the local computer, regardless of what network
+###   it is really in. This is useful when testing internal operations.
+###
+### * First octet 224 and above are reserved for special purposes such as
+###   multicasting.
+###
+### Octets 0 and 255 are not acceptable values in some situations, but 0 can be used
+### as the second and/or third octet (e.g. 10.2.0.100).
+###
 readonly __regex_fbyte='([1-9][0-9]?|1[0-9][0-9]|2[01][0-9]|22[0-3])'
 readonly __regex_sbyte='([1]?[0-9][0-9]?|2[0-4][0-9]|25[0-4])'
 readonly __regex_lbyte='([1]?[0-9][0-9]?|2[0-4][0-9]|25[0-4])'
 
 readonly regex_ipv4="${__regex_fbyte}(\.${__regex_sbyte}){2}\.${__regex_lbyte}"
 
-# Checks that given option value is a valid IPv4 address.
-valid_ipv4() {
+### Checks that given option value is a valid IPv4 address.
+valid_ipv4()
+{
 	local ipaddr="$1"
 	local i=0 byte
 
@@ -63,7 +64,8 @@ valid_ipv4() {
 		return 1
 }
 
-__ipv4_hex() {
+__ipv4_hex()
+{
 	[ -n "${1-}" ] ||
 		return 2
 
@@ -84,14 +86,15 @@ __ipv4_hex() {
 	printf '%02x' "$@"
 }
 
-# Checks that IP address is in subnet
-# Usage example:
-# ipv4_ip_subnet 172.16.1.2 172.16.1.0/24; echo res=$?
-# res=0
-#
-# ipv4_ip_subnet 172.16.3.2 172.16.1.0/24; echo res=$?
-# res=1
-ipv4_ip_subnet() {
+### Checks that IP address is in subnet
+### Usage example:
+### ipv4_ip_subnet 172.16.1.2 172.16.1.0/24; echo res=$?
+### res=0
+###
+### ipv4_ip_subnet 172.16.3.2 172.16.1.0/24; echo res=$?
+### res=1
+ipv4_ip_subnet()
+{
 	local ip net prefix
 	ip="${1-}"; shift
 	net="${1-}"; shift
@@ -112,14 +115,15 @@ ipv4_ip_subnet() {
 		return 1
 }
 
-# Convert netmask to routing prefix.
-# Usage example:
-# ipv4_mask2prefix 255.255.0.0
-# 16
-#
-# ipv4_prefix2mask 255.255.255.0
-# 24
-ipv4_mask2prefix() {
+### Convert netmask to routing prefix.
+### Usage example:
+### ipv4_mask2prefix 255.255.0.0
+### 16
+###
+### ipv4_prefix2mask 255.255.255.0
+### 24
+ipv4_mask2prefix()
+{
 	local hex_mask
 	hex_mask="$(__ipv4_hex "${1-}")" ||
 		return 2
@@ -139,14 +143,15 @@ ipv4_mask2prefix() {
 	echo "$prefix"
 }
 
-# Convert routing prefix to netmask.
-# Usage example:
-# ipv4_prefix2mask 16
-# 255.255.0.0
-#
-# ipv4_prefix2mask 24
-# 255.255.255.0
-ipv4_prefix2mask() {
+### Convert routing prefix to netmask.
+### Usage example:
+### ipv4_prefix2mask 16
+### 255.255.0.0
+###
+### ipv4_prefix2mask 24
+### 255.255.255.0
+ipv4_prefix2mask()
+{
 	local len
 	len="${1-}"
 

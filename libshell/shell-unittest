@@ -1,32 +1,33 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_unittest-}" ]; then
 __included_shell_unittest=1
 
 . shell-error
 
-# Append tests condition to comment message if test failed.
+### Append tests condition to comment message if test failed.
 unittest_show_condition="${unittest_show_condition-}"
 
-# Called before each test is run.
+### Called before each test is run.
 setUp() { :; }
 
-# Called after each test is run.
+### Called after each test is run.
 tearDown() { :; }
 
-# Called before any test is run.
+### Called before any test is run.
 setUpTests() { :; }
 
-# Called after any test is run.
+### Called after any test is run.
 tearDownTests() { :; }
 
-# Register new testing function.
-# appendTests (TestFunc)
+### Register new testing function.
+### appendTests (TestFunc)
 __shell_unit_tests=
-appendTests() {
+appendTests()
+{
 	while [ "$#" -gt 0 ]; do
 		__shell_unit_tests="$__shell_unit_tests
 $1"
@@ -34,27 +35,30 @@ $1"
 	done
 }
 
-# Automatically register test functions with 'UnitTest' comment.
-# Name of current shell script will be used if argument is not present.
-# registerTests([/tmp/Tests-File])
-# Example:
-# my_testcase_function() { # UnitTest
-#     blah blah blah ...
-# }
-registerTests() {
+### Automatically register test functions with 'UnitTest' comment.
+### Name of current shell script will be used if argument is not present.
+### registerTests([/tmp/Tests-File])
+### Example:
+### my_testcase_function() { # UnitTest
+###     blah blah blah ...
+### }
+registerTests()
+{
 	local l="$(sed -ne 's/^\([[:alnum:]_]\+\)().*[[:space:]]*#[[:space:]]*UnitTest/\1/p' "${1:-$0}")"
 	[ -z "$l" ] || appendTests $l
 }
 
-# Skip test (called in testing function)
-shouldSkip() {
+### Skip test (called in testing function)
+shouldSkip()
+{
 	exit 2
 }
 
-# Asserts that a given shell test condition (or integer) is true.
-# assertTrue([comment], condition)
-# assertTrue([comment], integer)
-assertTrue() {
+### Asserts that a given shell test condition (or integer) is true.
+### assertTrue([comment], condition)
+### assertTrue([comment], integer)
+assertTrue()
+{
 	local comment= condition
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
@@ -78,10 +82,11 @@ assertTrue() {
 	fi
 }
 
-# Asserts that a given shell test condition (or integer) is false.
-# assertFalse([comment], condition)
-# assertFalse([comment], integer)
-assertFalse() {
+### Asserts that a given shell test condition (or integer) is false.
+### assertFalse([comment], condition)
+### assertFalse([comment], integer)
+assertFalse()
+{
 	local comment= condition
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
@@ -105,9 +110,10 @@ assertFalse() {
 	fi
 }
 
-# Asserts that two arguments are equal to one another.
-# assertEquals([comment], expected, actual)
-assertEquals() {
+### Asserts that two arguments are equal to one another.
+### assertEquals([comment], expected, actual)
+assertEquals()
+{
 	local comment= expected actual
 	[ "$#" -lt 3 ] ||
 		{ comment="$1"; shift; }
@@ -123,15 +129,17 @@ assertEquals() {
 	fi
 }
 
-# Asserts that two arguments are same.
-# assertSame([comment], expected, actual)
-assertSame() {
+### Asserts that two arguments are same.
+### assertSame([comment], expected, actual)
+assertSame()
+{
 	assertEquals "${@-}"
 }
 
-# Asserts that two arguments are not equal to one another.
-# assertNotEquals([comment], expected, actual)
-assertNotEquals() {
+### Asserts that two arguments are not equal to one another.
+### assertNotEquals([comment], expected, actual)
+assertNotEquals()
+{
 	local comment= expected actual
 	[ "$#" -lt 3 ] ||
 		{ comment="$1"; shift; }
@@ -147,15 +155,17 @@ assertNotEquals() {
 	fi
 }
 
-# Asserts that two arguments are not same.
-# assertNotSame([comment], expected, actual)
-assertNotSame() {
+### Asserts that two arguments are not same.
+### assertNotSame([comment], expected, actual)
+assertNotSame()
+{
 	assertNotEquals "${@-}"
 }
 
-# Asserts that argument is a zero-length string.
-# assertNull([comment], value)
-assertNull() {
+### Asserts that argument is a zero-length string.
+### assertNull([comment], value)
+assertNull()
+{
 	local comment= value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
@@ -170,9 +180,10 @@ assertNull() {
 	fi
 }
 
-# Asserts that argument is not empty string.
-# assertNotNull([comment], value)
-assertNotNull() {
+### Asserts that argument is not empty string.
+### assertNotNull([comment], value)
+assertNotNull()
+{
 	local comment= value
 	[ "$#" -lt 2 ] ||
 		{ comment="$1"; shift; }
@@ -187,8 +198,9 @@ assertNotNull() {
 	fi
 }
 
-# Display status message after each test.
-messageTest() {
+### Display status message after each test.
+messageTest()
+{
 	case "$3" in
 		0) printf '[done]' ;;
 		1) printf '[FAIL]' ;;
@@ -198,8 +210,9 @@ messageTest() {
 	printf ' (%s) %s\n' "$1" "$2"
 }
 
-# Display summary statistic.
-showSummary() {
+### Display summary statistic.
+showSummary()
+{
 	if [ "$total" -eq 0 ]; then
 		message "Nothing to do"
 		return
@@ -211,13 +224,13 @@ showSummary() {
 	printf 'tests total:   %6d\n\n' "$total"
 }
 
-# Run tests.
-runUnitTests() {
-
-	run_or_exit() {
+### Run tests.
+runUnitTests()
+{
+	run_or_exit()
+	{
 		"$@" || fatal "$1() fail rc=$?"
 	}
-
 	run_or_exit setUpTests
 
 	local IFS=' 	
@@ -239,13 +252,11 @@ runUnitTests() {
 			2) skipped=$(($skipped+1)) ;;
 		esac
 		run_or_exit messageTest "$1" "$msg" "$rc"
-
 		run_or_exit tearDown
 		shift
 	done
 	run_or_exit showSummary
 	run_or_exit tearDownTests
-
 	return $retval
 }
 

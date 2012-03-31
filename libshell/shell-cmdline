@@ -1,16 +1,16 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_cmdline-}" ]; then
 __included_shell_cmdline=1
 
 . shell-string
 
-# Run handler for each variable in /proc/cmdline.
-#
-cmdline_foreach() {
+### Run handler for each variable in /proc/cmdline.
+cmdline_foreach()
+{
 	local l h c= m=
 
 	l="$1"; shift
@@ -75,16 +75,17 @@ cmdline_foreach() {
 	unset __is_set
 }
 
-# Find spicified variable in /proc/cmdline and store result into variable.
-# Usage example:
-#   read cmdline < /proc/cmdline
-#   cmdline_get 'initrd_value' 'initrd' "$cmdline"
-#   echo "$initrd_value"
-# or:
-#   cmdline_get 'initrd_value' 'initrd'
-#   echo "$initrd_value"
-#
-cmdline_get() {
+### Find spicified variable in /proc/cmdline and store result into variable.
+### Usage example:
+###   read cmdline < /proc/cmdline
+###   cmdline_get 'initrd_value' 'initrd' "$cmdline"
+###   echo "$initrd_value"
+### or:
+###   cmdline_get 'initrd_value' 'initrd'
+###   echo "$initrd_value"
+###
+cmdline_get()
+{
 	local __cmdline __retv __getn
 
 	__retv="$1"; shift
@@ -108,7 +109,8 @@ cmdline_get() {
 	done
 	unset c m l
 
-	__getval() {
+	__getval()
+	{
 		[ "$1" != "$__getn" ] || eval "$__retv=\"\$2\""
 	}
 	cmdline_foreach "$__cmdline" __getval

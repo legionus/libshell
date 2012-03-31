@@ -16,9 +16,9 @@ done
 
 cat <<EOF
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_single-}" ]; then
 __included_shell_single=1
@@ -35,12 +35,13 @@ while :; do
 			continue
 		fi
 
-		printf '# %s\n' "$name"
+		printf '\n### %s\n' "$name"
 		sed \
-			-e '/^[[:space:]]*#.*$/d' \
-			-e '/^$/d'                \
-			-e '/^. shell-.*/d'       \
-			-e '/__included_shell_/d' \
+			-e '/^#!\/bin\/sh/d'        \
+			-e 's/[[:space:]]*###.*$//' \
+			-e '/^$/d'                  \
+			-e '/^. shell-.*/d'         \
+			-e '/__included_shell_/d'   \
 			"$src"
 
 		sed -i -e "/[[:space:]]$name\$/d" "$temp"

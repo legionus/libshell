@@ -1,7 +1,7 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_run-}" ]; then
 __included_shell_run=1
@@ -9,20 +9,22 @@ __included_shell_run=1
 . shell-args
 . shell-source
 
-# Execute command if file is executable.
-# Usage: run_if_executable /file arg1 arg2
-#    or: run_if_executable  file arg1 arg2
-run_if_executable() {
+### Execute command if file is executable.
+### Usage: run_if_executable /file arg1 arg2
+###    or: run_if_executable  file arg1 arg2
+run_if_executable()
+{
 	local v f
 	f="$1"; shift
 	! __shell_source_find v "$f" || [ ! -x "$v" ] || "$v" "$@"
 }
 
-# Run scripts from directory.
-# Usage: run_scripts <dir> [args]
+### Run scripts from directory.
+### Usage: run_scripts <dir> [args]
 RUN_SCRIPTS_EXCLUDE='*.rpm* *.swp *,v *~ *.\#'
 SCRIPT_ERROR_FATAL=${SCRIPT_ERROR_FATAL:-false}
-run_scripts() {
+run_scripts()
+{
 	[ "$#" -ge 1 ] ||
 		fatal "Usage: run_scripts <dir> [args]"
 	local p f d rc=0

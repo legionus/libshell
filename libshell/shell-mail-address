@@ -1,29 +1,29 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_mail_address-}" ]; then
 __included_shell_mail_address=1
 
 if [ -n "${shell_mail_address_strict-}" ]; then
-	#
-	# (http://en.wikipedia.org/wiki/Country_code_top-level_domain)
-	#
-	# A country code top-level domain (ccTLD) is an Internet top-level domain
-	# generally used or reserved for a country or a dependent territory.
-	#
+	###
+	### (http://en.wikipedia.org/wiki/Country_code_top-level_domain)
+	###
+	### A country code top-level domain (ccTLD) is an Internet top-level domain
+	### generally used or reserved for a country or a dependent territory.
+	###
 	readonly regex_cctld_active='(a[cdefgilmnoqrstuwxz]|b[abdefghijmnorstwyz]|c[acdfghiklmnoruvxyz]|d[ejkmoz]|e[cegrstu]|f[ijkmor]|g[adefghilmnpqrstuwy]|h[kmnrtu]|i[delmnoqrst]|j[emop]|k[eghimnprwyz]|l[abcikrstuvy]|m[acdeghklmnopqrstuvwxyz]|n[acefgilopruz]|om|p[aefghklnrstwy]|qa|r[eosuw]|s[abcdeghiklmnrtuvyz]|t[cdfghjklmnortvwz]|u[agksyz]|v[aceginu]|w[fs]|ye|z[amw])'
 	readonly regex_cctld_reserved='(um|bl|eh|mf)'
 	readonly regex_cctld_allocated='(bv|gb|pm|sj|so|yt)'
 	readonly regex_cctld_phaseout='(tp|yu)'
 	readonly regex_cctld_deleted='(cs|dd|zr)'
 
-	# (http://en.wikipedia.org/wiki/GTLD)
-	#
-	# A generic top-level domain (gTLD) is a top-level domain used by a
-	# particular class of organization.
-	#
+	### (http://en.wikipedia.org/wiki/GTLD)
+	###
+	### A generic top-level domain (gTLD) is a top-level domain used by a
+	### particular class of organization.
+	###
 	readonly regex_gtld='(aero|arpa|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel)'
 
 	regex_tld="($regex_gtld|$regex_cctld_active|$regex_cctld_reserved|$regex_cctld_allocated|$regex_cctld_phaseout)"
@@ -31,32 +31,33 @@ else
 	regex_tld='([a-zA-Z]{2,4}|museum|travel)'
 fi
 
-# 6. ADDRESS SPECIFICATION (http://tools.ietf.org/html/rfc822)
-#
-# addr-spec   =  local-part "@" domain        ; global address
-# local-part  =  word *("." word)             ; uninterpreted
-#                                             ; case-preserved
-# domain      =  sub-domain *("." sub-domain)
-# sub-domain  =  domain-ref / domain-literal
-# domain-ref  =  atom                         ; symbolic reference
-#
-# 6.2.3. DOMAIN TERMS
-# A domain-ref must be THE official name of a registry, network,
-# or host.
+### 6. ADDRESS SPECIFICATION (http://tools.ietf.org/html/rfc822)
+###
+### addr-spec   =  local-part "@" domain        ; global address
+### local-part  =  word *("." word)             ; uninterpreted
+###                                             ; case-preserved
+### domain      =  sub-domain *("." sub-domain)
+### sub-domain  =  domain-ref / domain-literal
+### domain-ref  =  atom                         ; symbolic reference
+###
+### 6.2.3. DOMAIN TERMS
+### A domain-ref must be THE official name of a registry, network,
+### or host.
 
-# This regexp should be used ignoring case.
+### This regexp should be used ignoring case.
 readonly regex_domain="([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)\.$regex_tld"
 
-# Regexp can be used to check and parse email address. This regexp
-# should be used ignoring case.
-# Usage example:
-# username="$(printf '%s' "$email" |sed -e "s/^$regex_email\$/\1/i")
-#   domain="$(printf '%s' "$email" |sed -e "s/^$regex_email\$/\2/i")
-#
+### Regexp can be used to check and parse email address. This regexp
+### should be used ignoring case.
+### Usage example:
+### username="$(printf '%s' "$email" |sed -e "s/^$regex_email\$/\1/i")
+###   domain="$(printf '%s' "$email" |sed -e "s/^$regex_email\$/\2/i")
+###
 readonly regex_email="([_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*)@($regex_domain)"
 
-# Checks that given option value is a valid email address.
-valid_email() {
+### Checks that given option value is a valid email address.
+valid_email()
+{
 	local email="$1"
 	printf '%s' "$email" |
 		egrep -iqs "^$regex_email\$" ||

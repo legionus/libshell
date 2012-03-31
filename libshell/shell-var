@@ -1,14 +1,15 @@
 #!/bin/sh -efu
-# This file is covered by the GNU General Public License,
-# which should be included with libshell as the file LICENSE.
-# All copyright information are listed in the COPYING.
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
 
 if [ -z "${__included_shell_var-}" ]; then
 __included_shell_var=1
 
 . shell-error
 
-shell_var_is_yes() {
+shell_var_is_yes()
+{
 	[ "$#" -eq 1 ] ||
 		fatal "Usage: shell_var_yes value"
 	case "$1" in
@@ -17,7 +18,8 @@ shell_var_is_yes() {
 	return 1
 }
 
-shell_var_is_no() {
+shell_var_is_no()
+{
 	[ "$#" -eq 1 ] ||
 		fatal "Usage: shell_var_no value"
 	case "$1" in
@@ -26,10 +28,11 @@ shell_var_is_no() {
 	return 1
 }
 
-# Strip whitespace from the beginning and end of a string
-# Usage: shell_var_trim retval "   aaa bb  aaa "; echo "[$retval]"
-# [aaa bb  aaa]
-shell_var_trim() {
+### Strip whitespace from the beginning and end of a string
+### Usage: shell_var_trim retval "   aaa bb  aaa "; echo "[$retval]"
+### [aaa bb  aaa]
+shell_var_trim()
+{
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_trim varname value"
 	local __shell_var_trim_var="$1" __shell_var_trim_ret="$2"
@@ -46,19 +49,20 @@ shell_var_trim() {
 	eval "$__shell_var_trim_var=\"\$__shell_var_trim_ret\""
 }
 
-# Remove quote symbol from string
-# Usage example:
-# for i in "\"str1\"" "'str2'" "\"str3'"; do
-#    shell_var_unquote var "$i";
-#    echo "$var";
-# done
-#
-# Result:
-# str1
-# str2
-# "str3'
-#
-shell_var_unquote() {
+### Remove quote symbol from string
+### Usage example:
+### for i in "\"str1\"" "'str2'" "\"str3'"; do
+###    shell_var_unquote var "$i";
+###    echo "$var";
+### done
+###
+### Result:
+### str1
+### str2
+### "str3'
+###
+shell_var_unquote()
+{
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_unquote varname value"
 	local __shell_var_unquote_var="$1" __shell_var_unquote_out="$2"
