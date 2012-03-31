@@ -21,6 +21,19 @@ opt_check_read()
 	printf %s "$value"
 }
 
+### Checks that given option value is an executable file.
+### Arguments: $1 is option name, $2 is option value.
+### If $2 is a executable file, outputs canonicalized file name,
+### otherwise fails.
+opt_check_exec()
+{
+	local value
+	[ -f "$2" -a -x "$2" ] &&
+	value="$(readlink -ev "$2")" ||
+		fatal "$1: $2: file not executable."
+	printf %s "$value"
+}
+
 ### Checks that given option value is a traversable directory.
 ### Arguments: $1 is option name, $2 is option value.
 ### If $2 is a readable file, outputs canonicalized directory name,
