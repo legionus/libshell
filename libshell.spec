@@ -1,8 +1,8 @@
 Name: libshell
-Version: 0.1.6
+Version: 0.1.7
 Release: alt1
 
-Summary:  A library of shell functions
+Summary: A library of shell functions
 License: GPL
 Group: Development/Other
 BuildArch: noarch
@@ -13,22 +13,50 @@ Source: %name-%version.tar
 %description
 This package contains common functions for shell projects to increase code reuse.
 
+%package single
+Summary: A library of shell functions (single file)
+Group: Development/Other
+
+%description single
+This package contains common functions for shell projects to increase code reuse
+as single file.
+
 %prep
 %setup -q
 
 %install
-%make_install DESTDIR=%buildroot
+%make_install DESTDIR=%buildroot install install-single
 
 %check
 %make check
 
 %files
 /bin/*
+%exclude /bin/shell-lib
 %_man3dir/*
 %_datadir/%name
 %doc COPYING
 
+%files single
+/bin/shell-lib
+
 %changelog
+* Sun Apr 01 2012 Alexey Gladkov <legion@altlinux.ru> 0.1.7-alt1
+- Packaged -single subpackage with all libshell functions bundled into
+  the single shell-lib file.
+- New utilities:
+  + shell-cmdline: New functions to parse /proc/cmdline.
+- shell-error changes:
+  + Add optional timestamp to messages.
+- shell-run changes:
+  + Add SCRIPT_ERROR_FATAL var to control execution interrupt
+    on error (thx Ildar Mulyukov).
+  + Fix execution order of scripts in run_scripts() (thx Ildar Mulyukov).
+- shell-args changes:
+  + Add opt_check_exec().
+- Other changes:
+  + Generate SYMS and DEPS files.
+
 * Wed Jul 27 2011 Alexey Gladkov <legion@altlinux.org> 0.1.6-alt1
 - shell-ini-config changes (ALT#25946):
   + Fix comment formatting (thx Vladislav Zavjalov);
