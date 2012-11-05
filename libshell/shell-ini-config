@@ -7,9 +7,16 @@ if [ -z "${__included_shell_ini_config-}" ]; then
 __included_shell_ini_config=1
 
 shell_ini_config_comment='#'
+shell_ini_config_prefix='	'
 
 . shell-error
 . shell-var
+
+__ini_config_print()
+{
+	local p="$1"; shift
+	printf '%s%s\n' "${p:+${shell_ini_config_prefix-}}" "$@"
+}
 
 ### Usage: ini_config_get file section var
 ini_config_get()
@@ -61,7 +68,7 @@ ini_config_set()
 				;;
 			"["*"]")
 				if [ "$sect" = 2 -a -z "$don" ]; then
-					printf '\t%s\n' "$var = $value"
+					__ini_config_print 1 "$var = $value"
 					don=1
 				fi
 				sect=1
@@ -69,7 +76,7 @@ ini_config_set()
 				;;
 			"$shell_ini_config_comment"*|'')
 				[ -n "$str" ] &&
-					printf ${sect:+'\t'}'%s\n' "$str" ||
+					__ini_config_print "$sect" "$str" ||
 					printf '\n'
 				;;
 			*)
@@ -78,18 +85,18 @@ ini_config_set()
 
 				if [ "$sect" = 2 -a "$n" = "$var" ]; then
 					[ -n "$don" ] ||
-						printf '\t%s\n' "$n = $value"
+						__ini_config_print 1 "$n = $value"
 					don=1
 					continue
 				fi
-				printf '\t%s\n' "$n = $v"
+				__ini_config_print 1 "$n = $v"
 				;;
 		esac
 
 		if [ -n "$eof" -a -z "$don" ]; then
 			[ "$sect" = 2 ] ||
 				printf '[%s]\n' "$section"
-			printf '\t%s\n' "$var = $value"
+			__ini_config_print 1 "$var = $value"
 		fi
 
 	done < "$fn" > "$fn_tmp"
@@ -113,7 +120,7 @@ __ini_config_del_comment()
 				;;
 			"$shell_ini_config_comment"*|'')
 				[ -n "$str" ] &&
-					printf ${sect:+'\t'}'%s\n' "$str" ||
+					__ini_config_print "$sect" "$str" ||
 					printf '\n'
 				;;
 			*)
@@ -122,7 +129,7 @@ __ini_config_del_comment()
 
 				[ "$sect" = 2 ] &&
 					__ini_config_action "$n" "$v" ||
-					printf '\t%s\n' "$n = $v"
+					__ini_config_print 1 "$n = $v"
 				;;
 		esac
 	done < "$fn" > "$fn_tmp"
@@ -138,7 +145,7 @@ ini_config_del()
 	__ini_config_action()
 	{
 		[ -z "$var" -o "$1" = "$var" ] ||
-			printf '\t%s\n' "$1 = $2"
+			__ini_config_print 1 "$1 = $2"
 	}
 	__ini_config_del_comment
 }
@@ -151,10 +158,10 @@ ini_config_comment()
 	__ini_config_action()
 	{
 		if [ -n "$var" -a "$1" != "$var" ]; then
-			printf '\t%s\n' "$1 = $2"
+			__ini_config_print 1 "$1 = $2"
 			return
 		fi
-		printf '\t%s\n' "$shell_ini_config_comment $1 = $2"
+		__ini_config_print 1 "$shell_ini_config_comment $1 = $2"
 	}
 	__ini_config_del_comment
 }
