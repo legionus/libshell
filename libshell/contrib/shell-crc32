@@ -1,5 +1,7 @@
 #!/bin/ash -efu
 
+. shell-string
+
 # http://ru.wikipedia.org/wiki/CRC32#CRC-32
 #
 # Name  : CRC-32
@@ -36,33 +38,23 @@ __shell_crc32_init()
 shell_crc32()
 {
 	local __shell_crc32_crc __shell_crc32_name __shell_crc32_buf
-	__shell_crc32_name="$1"; shift
-	__shell_crc32_buf="$2"; shift
+	__shell_crc32_name="$1"
+	__shell_crc32_buf="$2"
 
 	__shell_crc32()
 	{
-		local c crc i=1 j
+		local c mask crc=$((0xFFFFFFFF))
 
 		__shell_crc32_init
 		set -- ${__shell_crc32_table}
 
-		local args= mask=
-		while [ $i -lt ${#buf} ]; do
-			mask="$mask?"
-			i=$(($i+1))
-		done
+		fill_mask mask "$__shell_crc32_buf"
 
-		while [ -n "$buf" ]; do
-			args="$args '${buf%$mask}"
-			buf=${buf#?}
+		while [ -n "$__shell_crc32_buf" ]; do
+			c=$(printf '%d' "'${__shell_crc32_buf%$mask}")
+			eval "crc=\$((\$$(((($crc ^ $c) & 0xFF) + 1)) ^ (\$crc >> 0x00000008)))"
+			__shell_crc32_buf=${__shell_crc32_buf#?}
 			mask=${mask#?}
-		done
-
-		crc=$((0xFFFFFFFF))
-		for c in $(printf '%d ' $args); do
-			j=$((($crc ^ $c) & 0xFF))
-			j=$(($j+1))
-			eval "crc=\$((\${$j} ^ (\$crc >> 0x00000008)))"
 		done
 		__shell_crc32_crc=$(($crc ^ 0xFFFFFFFF))
 	}
@@ -70,4 +62,5 @@ shell_crc32()
 	eval "$__shell_crc32_name=\"\${__shell_crc32_crc}\""
 }
 
-#shell_crc32 "" "123456789"
+#str="123456789"
+#shell_crc32 "res" "$str"
