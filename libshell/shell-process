@@ -1,0 +1,133 @@
+#!/bin/sh -efu
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
+
+if [ -z "${__included_shell_process-}" ]; then
+__included_shell_process=1
+
+. shell-error
+
+### This function checks the PID from a pidfile and writes a new one.
+### Usage: daemon_writepid /path/to/pidfile [force]
+daemon_writepid()
+{
+	local pid= pidfile
+	pidfile="$1"
+
+	if [ -z "${2-}" ]; then
+		read pid < "$pidfile" ||:
+
+		if [ -n "$pid" -a -z "${pid##[0-9]*}" ]; then
+			if kill -0 "$pid"; then
+				verbose "Process with pid '$pid' still exists."
+				return 1
+			fi
+		fi
+	fi 2>/dev/null
+
+	printf '%s\n' "$$" >"$pidfile"
+}
+
+### Closes descriptors
+### Usage: daemon_close_fd [fd0 fd1 ...]
+daemon_close_fd()
+{
+	while [ $# -gt 0 ]; do
+		eval "exec $1>&-"
+		shift
+	done
+}
+
+daemon_noclose=
+daemon_nokill=
+daemon_nolock=
+daemon_err_file=
+daemon_log_file=
+daemon_pid_file=
+
+### The function is for programs wishing to detach themselves
+### from the controlling terminal and run in the background as
+### system daemons.
+###
+### This function forks and if the fork(2) succeeds, the parent
+### calls "exit 0", so that further errors are seen by the child only.
+###
+### On success daemon() returns 0 or 1 if an error occurred.
+###
+### Variables:
+### daemon_noclose   - do not close first 3-9 descriptors;
+### daemon_nokill    - do not check previous pid;
+### daemon_nolock    - do not lock the pid file;
+### daemon_err_file  - specifies error log file (default /dev/null);
+### daemon_log_file  - specifies log file (default /dev/null);
+### daemon_pid_file  - specifies pid file.
+###
+### Usage: daemon [program args]
+daemon()
+{
+	local i fd
+
+	if [ -z "${__shell_process_daemon-}" ]; then
+		local sid=
+		! type setsid >/dev/null 2>&1 ||
+			sid=setsid
+
+		### Call fork and setsid.
+		__shell_process_daemon=1 $sid "$0" ${1:+"$@"} &
+
+		exit 0
+	fi
+
+	### Close unneeded file descriptors.
+	if [ -z "${daemon_noclose-}" ]; then
+		if [ -d /proc/self/fd ]; then
+			fd="$(set +f; cd /proc/self/fd; printf '%s ' *;)"
+			fd="${fd#\* }"
+			for i in $fd; do
+				[ $i -lt 3 ] ||
+					daemon_close_fd $i
+			done
+		else
+			### All shell implementations shall support at least 0 to 9,
+			### inclusive, for use by the application.
+			daemon_close_fd 3 4 5 6 7 8 9
+		fi
+	fi
+
+	if [ -n "${daemon_pid_file-}" ]; then
+		if [ -z "${daemon_nolock-}" ]; then
+			fd="${daemon_lock_fd:-3}"
+
+			eval "exec $fd<>$daemon_pid_file"
+
+			type flock >/dev/null 2>&1 ||
+				fatal "Unable to lock pid file without 'flock' utility."
+
+			if ! flock -n $fd; then
+				verbose "Another process has locked pidfile."
+				return 1
+			fi
+		fi
+
+		### Write our pid.
+		if ! daemon_writepid "$daemon_pid_file" "${daemon_nokill-}"; then
+			verbose "Unable to write pidfile."
+			return 1
+		fi
+	fi
+
+	### Redirect std{out,err} to files or /dev/null.
+	exec 0</dev/null 1>>${daemon_log_file:-/dev/null} 2>>${daemon_err_file:-/dev/null}
+
+	### Guard against terminal signals.
+	trap : HUP INT QUIT
+
+	### Change working directory to rootfs.
+	cd /
+
+	### Set umask to 0 to clear file mode creation mask.
+	umask 0
+}
+
+fi #__included_shell_process
