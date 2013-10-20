@@ -8,11 +8,17 @@ __included_shell_error=1
 
 PROG="${PROG:-${0##*/}}"
 
+message_syslog=
 message_time=
 message_time_format=
 message()
 {
-	local prefix=
+	local arg= prefix=
+	if [ -n "$message_syslog" ]; then
+		[ ! -t 2 ] || arg=-s
+		logger $arg -t "$PROG" "$*"
+		return
+	fi
 	[ -z "$message_time" ] ||
 		prefix="$(date +"${message_time_format:-[%Y-%m-%d %T]} " 2>/dev/null)" ||:
 	printf %s\\n "${prefix}$PROG: $*" >&2
