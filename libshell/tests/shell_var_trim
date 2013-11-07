@@ -41,3 +41,11 @@ shell_var_trim_test5() { # UnitTest
 	shell_var_trim result "$string"
 	assertEquals "$string" "$result" '" test "'
 }
+
+shell_var_trim_test6() { # UnitTest
+	. ../shell-var
+
+	local result string=' 		 Comment[en]  '
+	shell_var_trim result "$string"
+	assertEquals "$string" "$result" 'Comment[en]'
+}

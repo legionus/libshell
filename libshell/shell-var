@@ -37,16 +37,11 @@ shell_var_trim()
 		fatal "Usage: shell_var_trim varname value"
 __shell_var_trim()
 {
-	local r="$1" IFS=' 	
+	local r="$1" space=' 	
 '
-	set -- $r
-	if [ "$#" -eq 0 ]; then
-		__shell_var_trimo=
-		return
-	fi
-	r="$1${r#*$1}"
-	shift $(($#-1))
-	r="${r%$1*}$1"
+	while [ -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
+	while [ -z "${r##*[$space]}" ]; do r="${r%?}"; done
+	while [ -z "${r%%[$space]*}" ]; do r="${r#?}"; done
 	__shell_var_trimo="$r"
 }
 	local __shell_var_trimo
