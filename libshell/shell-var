@@ -46,6 +46,7 @@ __shell_var_trim()
 }
 	local __shell_var_trimo
 	__shell_var_trim "$2"
+	unset -f __shell_var_trim
 	eval "$1=\"\$__shell_var_trimo\""
 }
 
@@ -77,6 +78,7 @@ __shell_var_unquote()
 }
 	local __shell_var_unquoteo
 	__shell_var_unquote "$2"
+	unset -f __shell_var_unquote
 	eval "$1=\"\$__shell_var_unquoteo\""
 }
 

@@ -32,6 +32,7 @@ __fill_mask()
 }
 	local __fill_masko
 	__fill_mask "$2" "${3:-?}"
+	unset -f __fill_mask
 	eval "$1=\$__fill_masko"
 }
 

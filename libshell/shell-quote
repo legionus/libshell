@@ -140,7 +140,7 @@ __quote_shell_args() {
 	eval "$1=\"\$__quote_shell_args_out\""
 
 	### Remove internal functions from user namespace.
-	unset __quote_shell_args __quote_shell_args_toggle
+	unset -f __quote_shell_args __quote_shell_args_toggle
 
 	return $__quote_shell_args_rc
 }

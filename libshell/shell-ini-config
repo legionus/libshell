@@ -133,7 +133,7 @@ __ini_config_del_comment()
 		esac
 	done < "$fn" > "$fn_tmp"
 	mv -f -- "$fn_tmp" "$fn"
-	unset __ini_config_action
+	unset -f __ini_config_action
 }
 
 ### Usage: ini_config_del file section [var]

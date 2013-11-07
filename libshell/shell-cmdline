@@ -72,7 +72,7 @@ cmdline_foreach()
 	[ -z "$n" ] ||
 		$h "$n" "$v" ||:
 
-	unset __is_set
+	unset -f __is_set
 }
 
 ### Find spicified variable in /proc/cmdline and store result into variable.
@@ -114,7 +114,7 @@ cmdline_get()
 		[ "$1" != "$__getn" ] || eval "$__retv=\"\$2\""
 	}
 	cmdline_foreach "$__cmdline" __getval
-	unset __getval
+	unset -f __getval
 }
 
 fi #__included_shell_cmdline
