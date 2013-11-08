@@ -3,6 +3,7 @@
 . shell-string
 
 # http://ru.wikipedia.org/wiki/CRC32#CRC-32
+# http://rosettacode.org/wiki/CRC-32
 #
 # Name  : CRC-32
 # Poly  : 0x04C11DB7    x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 
@@ -13,54 +14,42 @@
 # Check : 0xCBF43926 ("123456789")
 #
 
-__shell_crc32_table=
-__shell_crc32_init()
-{
-	[ -z "${__shell_crc32_table-}" ] ||
-		return 0;
-
-	local i=0 j crc
-
-	while [ $i -lt 256 ]; do
-		crc=$i
-		j=0
-		while [ $j -lt 8 ]; do
-			[ $(($crc & 1)) -ne 0 ] &&
-				crc=$((($crc >> 1) ^ 0xEDB88320)) ||
-				crc=$((($crc >> 1)))
-			j=$(($j+1))
-		done
-		__shell_crc32_table="$__shell_crc32_table $crc"
-		i=$(($i+1))
-	done
-}
-
 shell_crc32()
 {
-	local __shell_crc32_crc __shell_crc32_name __shell_crc32_buf
-	__shell_crc32_name="$1"
-	__shell_crc32_buf="$2"
+	local __shell_crc32_crc
 
-	__shell_crc32()
-	{
-		local c mask crc=$((0xFFFFFFFF))
+__shell_crc32()
+{
+	unset -f __shell_crc32
 
-		__shell_crc32_init
-		set -- ${__shell_crc32_table}
-
-		fill_mask mask "$__shell_crc32_buf"
-
-		while [ -n "$__shell_crc32_buf" ]; do
-			c=$(printf '%d' "'${__shell_crc32_buf%$mask}")
-			eval "crc=\$((\$$(((($crc ^ $c) & 0xFF) + 1)) ^ (\$crc >> 0x00000008)))"
-			__shell_crc32_buf=${__shell_crc32_buf#?}
-			mask=${mask#?}
+	local i n val crc=$(( 0xFFFFFFFF ))
+	while read n; do
+		val=$(( ($crc & 0xFF) ^ $n ))
+		i=0
+		while [ $i -lt 8 ]; do
+			[ $(( $val & 1 )) -ne 0 ] &&
+				val=$(( ($val >> 1) ^ 0xEDB88320 )) ||
+				val=$(( ($val >> 1) ))
+			i=$(( $i + 1 ))
 		done
-		__shell_crc32_crc=$(($crc ^ 0xFFFFFFFF))
-	}
-	__shell_crc32
-	eval "$__shell_crc32_name=\"\${__shell_crc32_crc}\""
+		crc=$(( ($crc >> 8) ^ $val ))
+	done <<-EOF
+		`
+	buf="$1"
+	fill_mask mask "$buf"
+	while [ -n "$buf" ]; do
+		printf '%u\n' "'${buf%$mask}"
+		buf=${buf#?}
+		mask=${mask#?}
+	done`
+	EOF
+	__shell_crc32_crc=$(( $crc ^ 0xFFFFFFFF ))
+}
+	__shell_crc32 "$2"
+	eval "$1=\"\$__shell_crc32_crc\""
 }
 
-#str="123456789"
-#shell_crc32 "res" "$str"
+str="123456789"
+echo "CBF43926"
+shell_crc32 "res" "$str"
+printf '%X\n' $res
