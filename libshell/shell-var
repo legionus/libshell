@@ -37,16 +37,16 @@ shell_var_trim()
 		fatal "Usage: shell_var_trim varname value"
 __shell_var_trim()
 {
+	unset -f __shell_var_trim
 	local r="$1" space=' 	
 '
-	while [ -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
-	while [ -z "${r##*[$space]}" ]; do r="${r%?}"; done
-	while [ -z "${r%%[$space]*}" ]; do r="${r#?}"; done
+	while [ -n "$r" -a -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
+	while [ -n "$r" -a -z "${r##*[$space]}" ]; do r="${r%?}"; done
+	while [ -n "$r" -a -z "${r%%[$space]*}" ]; do r="${r#?}"; done
 	__shell_var_trimo="$r"
 }
-	local __shell_var_trimo
+	local __shell_var_trimo=
 	__shell_var_trim "$2"
-	unset -f __shell_var_trim
 	eval "$1=\"\$__shell_var_trimo\""
 }
 
