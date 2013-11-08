@@ -9,8 +9,8 @@ __included_shell_process=1
 . shell-error
 
 ### This function checks the PID from a pidfile and writes a new one.
-### Usage: daemon_writepid /path/to/pidfile [force]
-daemon_writepid()
+### Usage: daemon_write_pid /path/to/pidfile [force]
+daemon_write_pid()
 {
 	local pid= pidfile
 	pidfile="$1"
@@ -111,7 +111,7 @@ daemon()
 		fi
 
 		### Write our pid.
-		if ! daemon_writepid "$daemon_pid_file" "${daemon_nokill-}"; then
+		if ! daemon_write_pid "$daemon_pid_file" "${daemon_nokill-}"; then
 			verbose "Unable to write pidfile."
 			return 1
 		fi
