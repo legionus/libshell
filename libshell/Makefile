@@ -8,11 +8,7 @@ GEN_DEPS   = $(CURDIR)/gen-deps.sh
 GEN_SYMS   = $(CURDIR)/gen-syms.sh
 GEN_SINGLE = $(CURDIR)/gen-single.sh
 
-bin_TARGETS = shell-args shell-cmdline shell-config shell-error shell-getopt \
-	shell-ini-config shell-ip-address shell-mail-address shell-quote \
-	shell-regexp shell-signal shell-unittest shell-version shell-var \
-	shell-source shell-string shell-run
-
+bin_TARGETS = $(wildcard shell-*)
 data_TARGETS = COPYING
 
 man_TARGETS = docs/libshell.man docs/shell-error.man
