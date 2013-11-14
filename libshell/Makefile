@@ -15,12 +15,12 @@ man_TARGETS = docs/libshell.man docs/shell-error.man
 
 install: install-bin install-man
 	install -d -m755 ${DESTDIR}${datadir}/${PROJECT}
-	$(GEN_DEPS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/DEPS
-	$(GEN_SYMS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/SYMS
+	PATH="$(CURDIR):$(PATH)" $(GEN_DEPS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/DEPS
+	PATH="$(CURDIR):$(PATH)" $(GEN_SYMS) ${bin_TARGETS} > ${DESTDIR}${datadir}/${PROJECT}/SYMS
 
 install-single: ${bin_TARGETS}
 	install -d -m755 ${DESTDIR}${bindir}
-	$(GEN_SINGLE) ${bin_TARGETS} > ${DESTDIR}${bindir}/shell-lib
+	PATH="$(CURDIR):$(PATH)" $(GEN_SINGLE) ${bin_TARGETS} > ${DESTDIR}${bindir}/shell-lib
 
 install-bin: ${bin_TARGETS}
 	install -d -m755 ${DESTDIR}${bindir}
