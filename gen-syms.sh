@@ -1,6 +1,6 @@
 #!/bin/sh -efu
 
-. ./shell-quote
+. shell-quote
 
 for fn; do
 	quote_sed_regexp_variable name "${fn##*/}"

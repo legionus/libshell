@@ -1,6 +1,6 @@
 #!/bin/sh -efu
 
-. ./shell-quote
+. shell-quote
 
 SH="${SH:-sh}"
 
