@@ -30,3 +30,28 @@ git_config_list_test03() { # UnitTest
 
 	assertEquals "List values failed (key '$key'): $result != $expect" "$result" "$expect"
 }
+
+git_config_list_test04() { # UnitTest
+	. ../shell-git-config
+	local result expect
+
+	result="$(git_config_list git-config/config0.ini)"
+	expect="bbb.foo=1
+aaa.bar=6
+aaa.bar=7
+ccc.bar.foo=1
+ddd.bar.foo=1
+ddd.bar.baz=2
+ddd.bar.foo=3
+ddd.bar.baz=4
+eee.fff.xxx=5
+fff.bar=xxx
+zzz
+fff.baz=xxx	zzz
+fff.foo=xxxzzz
+fff.quote= xxx  zzz
+ggg.foo=aaa    bbc
+quote.foo0= zzz "
+
+	assertEquals "List all values" "$result" "$expect"
+}

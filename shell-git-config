@@ -239,16 +239,23 @@ git_config_count()
 }
 
 ### Lists values of variable in specified config file.
-### Usage: git_config_list file name
+### Usage: git_config_list file [name]
 git_config_list()
 {
-	local __git_config_fullpath __git_config_location
+	local __git_config_fullpath= __git_config_location=
 	__git_config_handler()
 	{
-		[ "$1" != 'variable' -o "$__git_config_fullpath" != "$location" ] ||
-			printf '%s\n' "$value"
+		[ "$1" = 'variable' ] ||
+			return 0
+		if [ -n "$__git_config_location" ]; then
+			[ "$__git_config_fullpath" != "$location" ] ||
+				printf '%s\n' "$value"
+		else
+			printf '%s=%s\n' "$location" "$value"
+		fi
 	}
-	__git_config_fullpath "$2"
+	[ -z "${2-}" ] ||
+		__git_config_fullpath "$2"
 	__git_config_parser "$1"
 }
 
