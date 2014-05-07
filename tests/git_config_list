@@ -1,0 +1,32 @@
+#!/bin/ash -efu
+
+git_config_list_test01() { # UnitTest
+	. ../shell-git-config
+	local result expect key="aaa.bar"
+
+	result="$(git_config_list git-config/config0.ini $key)"
+	expect="6
+7"
+	assertEquals "List values failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_list_test02() { # UnitTest
+	. ../shell-git-config
+	local result expect key="aaa.bbb.ccc"
+
+	result="$(git_config_list git-config/config1.ini $key)"
+	expect="1
+3
+5"
+	assertEquals "List values failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_list_test03() { # UnitTest
+	. ../shell-git-config
+	local result expect key="missing.section.key"
+
+	result="$(git_config_list git-config/config1.ini $key)"
+	expect=""
+
+	assertEquals "List values failed (key '$key'): $result != $expect" "$result" "$expect"
+}

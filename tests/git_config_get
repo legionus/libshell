@@ -1,0 +1,120 @@
+#!/bin/ash -efu
+
+git_config_get_test001() { # UnitTest
+	. ../shell-git-config
+	local result expect="1" key="bbb.foo"
+
+	git_config_get result git-config/config0.ini $key
+	assertEquals "Simple get failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test002() { # UnitTest
+	. ../shell-git-config
+	local result expect="1" key="ccc.bar.foo"
+
+	git_config_get result git-config/config0.ini $key
+	assertEquals "Simple get failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test003() { # UnitTest
+	. ../shell-git-config
+	local result expect="4" key="ddd.bar.baz"
+
+	git_config_get result git-config/config0.ini $key
+	assertEquals "Simple get failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test004() { # UnitTest
+	. ../shell-git-config
+	local result expect="5" key="eee.fff.xxx"
+
+	git_config_get result git-config/config0.ini $key
+	assertEquals "Simple get failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test005() { # UnitTest
+	. ../shell-git-config
+	local result expect="7" key="aaa.bar"
+
+	git_config_get result git-config/config0.ini $key
+	assertEquals "Simple get failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test006() { # UnitTest
+	. ../shell-git-config
+	local result expect="5" key="aaa.bbb.ccc"
+
+	git_config_get result git-config/config1.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test007() { # UnitTest
+	. ../shell-git-config
+	local result expect="2" key="ddd.eee.fff"
+
+	git_config_get result git-config/config1.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test008() { # UnitTest
+	. ../shell-git-config
+	local result expect="" key="missing.section.key"
+
+	git_config_get result git-config/config1.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test009() { # UnitTest
+	. ../shell-git-config
+	local result expect key="fff.bar"
+
+	git_config_get result git-config/config0.ini $key
+	expect="xxx
+zzz"
+	assertEquals "Check new line (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test010() { # UnitTest
+	. ../shell-git-config
+	local result expect key="fff.baz"
+
+	git_config_get result git-config/config0.ini $key
+	expect="xxx	zzz"
+	assertEquals "Check tab (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test011() { # UnitTest
+	. ../shell-git-config
+	local result expect key="fff.foo"
+
+	git_config_get result git-config/config0.ini $key
+	expect="xxx$(printf '\b\b\b')zzz"
+	assertEquals "Check backspace (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test012() { # UnitTest
+	. ../shell-git-config
+	local result expect key="fff.quote"
+
+	git_config_get result git-config/config0.ini $key
+	expect=" xxx  zzz"
+	assertEquals "Check double quote (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test013() { # UnitTest
+	. ../shell-git-config
+	local result expect key="ggg.foo"
+
+	git_config_get result git-config/config0.ini $key
+	expect="aaa    bbc"
+	assertEquals "Check multiline (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test014() { # UnitTest
+	. ../shell-git-config
+	local result expect key="quote.foo0"
+
+	git_config_get result git-config/config0.ini $key
+	expect=" zzz "
+	assertEquals "Check multiline (key '$key'): $result != $expect" "$result" "$expect"
+}

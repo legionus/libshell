@@ -1,0 +1,84 @@
+#!/bin/ash -efu
+
+git_config_unset_test01() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa]
+	bbb = 1
+[ccc]
+	ddd = 1
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa]
+[ccc]
+	ddd = 1
+EOF
+	git_config_unset git-config/result.ini aaa.bbb
+
+	assertTrue 'Remove value' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_unset_test02() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa]
+	bbb = 1
+	bbb = 2
+[ccc]
+	ddd = 1
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa]
+[ccc]
+	ddd = 1
+EOF
+	git_config_unset git-config/result.ini aaa.bbb
+
+	assertTrue 'Remove all values' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_unset_test03() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa]
+	bbb = 1
+	bbb = 2
+[ccc]
+	ddd = 1
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa]
+	bbb = 2
+[ccc]
+	ddd = 1
+EOF
+	git_config_unset git-config/result.ini aaa.bbb 1
+
+	assertTrue 'Remove single value' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_unset_test04() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa]
+	bbb = xxx\nzzz
+[ccc]
+	ddd = 1
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa]
+[ccc]
+	ddd = 1
+EOF
+	git_config_unset git-config/result.ini aaa.bbb 'xxx\nzzz'
+
+	assertTrue 'Remove value with new line' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}

@@ -1,0 +1,41 @@
+#!/bin/ash -efu
+
+git_config_count_test1() { # UnitTest
+	. ../shell-git-config
+	local result expect="1" key="bbb.foo"
+
+	git_config_count result git-config/config0.ini $key
+	assertEquals "Count variables failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_count_test2() { # UnitTest
+	. ../shell-git-config
+	local result expect="2" key="aaa.bar"
+
+	git_config_count result git-config/config0.ini $key
+	assertEquals "Count variables failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_count_test3() { # UnitTest
+	. ../shell-git-config
+	local result expect="2" key="ddd.bar.baz"
+
+	git_config_count result git-config/config0.ini $key
+	assertEquals "Count variables failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_count_test4() { # UnitTest
+	. ../shell-git-config
+	local result expect="3" key="aaa.bbb.ccc"
+
+	git_config_count result git-config/config1.ini $key
+	assertEquals "Count variables failed (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_count_test5() { # UnitTest
+	. ../shell-git-config
+	local result expect="0" key="missing.section.key"
+
+	git_config_count result git-config/config1.ini $key
+	assertEquals "Count variables failed (key '$key'): $result != $expect" "$result" "$expect"
+}

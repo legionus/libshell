@@ -1,0 +1,237 @@
+#!/bin/ash -efu
+
+git_config_set_test001() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+EOF
+	git_config_set git-config/result.ini core.penguin "little blue"
+	assertTrue 'initial' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test002() { # UnitTest
+	. ../shell-git-config
+
+#	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	Movie = BadPhysics
+EOF
+	git_config_set git-config/result.ini Core.Movie BadPhysics
+	assertTrue 'mixed case' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test003() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	Movie = BadPhysics
+[Cores]
+	WhatEver = Second
+EOF
+	git_config_set git-config/result.ini Cores.WhatEver Second
+	assertTrue 'similar section' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test004() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	Movie = BadPhysics
+	UPPERCASE = true
+[Cores]
+	WhatEver = Second
+EOF
+	git_config_set git-config/result.ini CORE.UPPERCASE true
+	assertTrue 'set uppercase' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test005() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+	aaa = 1
+	bbb = 123
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	aaa = 4
+	bbb = 123
+EOF
+	git_config_set git-config/result.ini core.aaa 4
+	assertTrue 'Change variable 1' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test006() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+	aaa = 1
+	bbb = 2
+
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	aaa = 4
+	bbb = 2
+EOF
+	git_config_set git-config/result.ini core.aaa 4
+	assertTrue 'Change variable 2' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test007() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+	Aaa = 1
+	aAa = 2
+	aaA = 3
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	aaa = 4
+EOF
+	git_config_set git-config/result.ini core.aaa 4
+	assertTrue 'replace all' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test008() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[aaa]
+	bbb = 123
+EOF
+	git_config_set git-config/result.ini aaa.bbb 123
+	assertTrue 'Add new value #1' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test009() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[aaa "bbb"]
+	ccc = 123
+EOF
+	git_config_set git-config/result.ini aaa.bbb.ccc 123
+	assertTrue 'Add new value #2' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test010() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[aaa "bbb.ccc"]
+	ddd = 123
+EOF
+	git_config_set git-config/result.ini aaa.bbb.ccc.ddd 123
+	assertTrue 'Add new value #3' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test011() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[aaa "AAA BBB CCC"]
+	ddd = 123
+EOF
+	git_config_set git-config/result.ini "aaa.AAA BBB CCC.ddd" 123
+	assertTrue 'Add new value #4' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test012() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[ALL "LETTERS"]
+	CASE = upper
+EOF
+	git_config_set git-config/result.ini ALL.LETTERS.CASE upper
+	assertTrue 'Add new value #5' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test013() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[aaa "bbb"]
+	ccc = 1
+	ddd = 2
+[xxx "zzz"]
+	eee = 3
+EOF
+	git_config_set git-config/result.ini aaa.bbb.ccc 1
+	git_config_set git-config/result.ini aaa.bbb.ddd 2
+	git_config_set git-config/result.ini xxx.zzz.eee 3
+	assertTrue 'Add new value #6' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test014() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa "bbb"]
+	ccc = xxx\nzzz
+	ddd = 2
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa "bbb"]
+	ccc = xxx\nzzz\nooo
+	ddd = 2
+EOF
+	git_config_set git-config/result.ini aaa.bbb.ccc 'xxx\nzzz\nooo'
+	assertTrue 'Change value with new line' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_set_test015() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[aaa "bbb"]
+	ccc = 1
+[include]
+	path = git-config/config1.bar.ini
+	path = git-config/config1.foo.ini
+EOF
+	cat > git-config/expect.ini <<EOF
+[aaa "bbb"]
+	ccc = 9
+[include]
+	path = git-config/config1.bar.ini
+	path = git-config/config1.foo.ini
+EOF
+	git_config_set git-config/result.ini aaa.bbb.ccc 9
+	assertTrue 'Check git-config bug' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
