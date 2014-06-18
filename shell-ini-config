@@ -51,6 +51,41 @@ ini_config_get()
 	done < "$fn"
 }
 
+# Usage: ini_config_is_set file section var
+ini_config_is_set()
+{
+	local fn section var sect= str eof= n v
+	fn="$1" section="$2" var="$3"
+
+	while [ -z "$eof" ]; do
+		read -r str || eof=1
+
+		case "$str" in
+			"["*"]")
+				# Reset section variable on section change
+				sect=
+				[ "$str" != "[$section]" ] ||
+					sect=1
+				;;
+			"$shell_ini_config_comment"*|'')
+				;;
+			*)
+				if [ -n "$sect" ]; then
+					shell_var_trim n "${str%%=*}"
+
+					if [ "$n" = "$var" ]; then
+						# Return success, since we found match.
+						return 0
+					fi
+				fi
+				;;
+		esac
+	done < "$fn"
+
+	# We did not find match, so return failure.
+	return 1
+}
+
 ### Usage: ini_config_set file section var value
 ini_config_set()
 {
