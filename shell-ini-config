@@ -29,6 +29,8 @@ ini_config_get()
 
 		case "$str" in
 			"["*"]")
+				# Reset section variable on section change
+				sect=
 				[ "$str" != "[$section]" ] ||
 					sect=1
 				;;
