@@ -28,6 +28,8 @@ for s in \
 	cmdline_get \
 	;
 do
+	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||
+		continue
 	. "./$s"
 	registerTests "./$s"
 done
