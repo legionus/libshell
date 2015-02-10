@@ -1,0 +1,9 @@
+[libdefaults]
+	dns_lookup_kdc = false
+	dns_lookup_realm = false
+	forwardable = true
+	default_realm = SCHOOL.ALT
+[realms]
+	SCHOOL.ALT = {
+	kdc = SCHOOL.ALT
+	}

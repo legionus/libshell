@@ -56,3 +56,14 @@ ini_config_set_test5() { # UnitTest
 	result="$(ini_config_get ini-config/t5.ini sect1 opt)"
 	assertEquals "$result" "$result" "$expect"
 }
+
+ini_config_set_test6() { # UnitTest
+	. ../shell-ini-config
+	cp -f ini-config/krb5.conf ini-config/t6.ini
+
+	ini_config_set ini-config/t6.ini libdefaults default_realm SCHOOL.ALT
+
+	local rc=0
+	cmp -s ini-config/t6.ini ini-config/krb5.conf.expect || rc=$?
+	assertTrue $rc
+}

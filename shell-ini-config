@@ -125,7 +125,11 @@ ini_config_set()
 					don=1
 					continue
 				fi
-				__ini_config_print 1 "$n = $v"
+				if [ -z "${str##*=*}" ]; then
+					__ini_config_print 1 "$n = $v"
+				else
+					__ini_config_print 1 "$n"
+				fi
 				;;
 		esac
 
