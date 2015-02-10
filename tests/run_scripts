@@ -1,0 +1,19 @@
+#!/bin/sh
+
+run_scripts_test1() { # UnitTest
+	. ../shell-run
+
+	local expect='a b.sh d '
+	local result="$(set +f; run_scripts ./shell-run)"
+
+	assertEquals "simple run" "$result" "$expect"
+}
+
+run_scripts_test2() { # UnitTest
+	. ../shell-run
+
+	local expect='a b.sh d '
+	local result="$(set -f; run_scripts ./shell-run)"
+
+	assertEquals "disable pathname expansion" "$result" "$expect"
+}

@@ -26,6 +26,7 @@ for s in \
 	shell_var_unquote shell_var_trim \
 	fill_mask \
 	cmdline_get \
+	run_scripts \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||
