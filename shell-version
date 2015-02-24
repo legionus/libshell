@@ -7,7 +7,7 @@ if [ -z "${__included_shell_version-}" ]; then
 __included_shell_version=1
 
 libshell_vmajor=0
-libshell_vminor=2
+libshell_vminor=3
 libshell_vpatch=0
 
 libshell_version=3
