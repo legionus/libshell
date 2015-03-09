@@ -208,6 +208,21 @@ __git_config_parser()
 	__git_config_handler 'section-end'
 }
 
+### Checks whether there is a specified variable in the configuration.
+### Usage: git_config_location_exists file name
+git_config_location_exists()
+{
+	local __git_config_location_exists=1 __git_config_fullpath __git_config_location
+	__git_config_handler()
+	{
+		[ "$__git_config_fullpath" != "$location" ] ||
+			__git_config_location_exists=0
+	}
+	__git_config_fullpath "$2"
+	__git_config_parser "$1"
+	return $__git_config_location_exists
+}
+
 ### Gets variable from specified config file and store result into variable.
 ### Usage: git_config_get retname file name
 git_config_get()
