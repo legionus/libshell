@@ -1,0 +1,82 @@
+#!/bin/ash -efu
+
+git_config_append_test001() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+EOF
+	git_config_append git-config/result.ini core.penguin "little blue"
+	assertTrue 'initial' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_append_test002() { # UnitTest
+	. ../shell-git-config
+
+	:   > git-config/result.ini
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	penguin = big red
+EOF
+	git_config_append git-config/result.ini core.penguin "little blue"
+	git_config_append git-config/result.ini core.penguin "big red"
+	assertTrue 'append to empty config' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_append_test003() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	penguin = big red
+EOF
+	git_config_append git-config/result.ini core.penguin "little blue"
+	git_config_append git-config/result.ini core.penguin "big red"
+	assertTrue 'append to empty section' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_append_test004() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+	penguin = little blue
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	penguin = big red
+EOF
+	git_config_append git-config/result.ini core.penguin "big red"
+	assertTrue 'append another value' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
+
+git_config_append_test005() { # UnitTest
+	. ../shell-git-config
+
+	cat > git-config/result.ini <<EOF
+[core]
+	penguin = little blue
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	penguin = little blue
+	penguin = big red
+	penguin = little blue
+EOF
+	git_config_append git-config/result.ini core.penguin "little blue"
+	git_config_append git-config/result.ini core.penguin "big red"
+	assertTrue 'append another duplicate value' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}

@@ -274,6 +274,56 @@ git_config_list()
 	__git_config_parser "$1"
 }
 
+### Append another value with same name into config file.
+### Usage: git_config_append file name value
+git_config_append()
+{
+	local GIT_CONFIG_INCLUDE= GIT_CONFIG_GET_RAW=1
+	local __git_config_section __git_config_name __git_config_subsection __git_config_fullpath __git_config_location
+	local __git_config_nvalue="$3"
+	local __git_config_state=0 fn
+
+	[ -f "$1" ] || :> "$1"
+
+	__git_config_split "$2"
+
+	__git_config_handler()
+	{
+		case "$1" in
+			comment)
+				printf '%s\n' "$line"
+				;;
+			variable)
+				printf '\t%s = %s\n' "$name" "$value"
+				if [ "$__git_config_fullpath" = "$location" -a $__git_config_state != 1 ]; then
+					printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
+					__git_config_state=1
+				fi
+				;;
+			section-start)
+				printf '[%s]\n' "$section${subsection:+ \"$subsection\"}"
+				;;
+			section-end)
+				if [ "$__git_config_location" = "$location" -a $__git_config_state != 1 ]; then
+					printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
+					__git_config_state=1
+				fi
+				;;
+		esac
+	}
+	fn="$(mktemp "$1.XXXXXX")"
+	__git_config_parser "$1" > "$fn"
+
+	if [ $__git_config_state -eq 0 ]; then
+		printf '[%s]\n\t%s = %s\n' \
+			"$__git_config_section${__git_config_subsection:+ \"$__git_config_subsection\"}" \
+			"$__git_config_name" "$__git_config_nvalue" >> "$1"
+		rm -f -- "$fn"
+	else
+		mv -f -- "$fn" "$1"
+	fi
+}
+
 ### Set or add value into config file.
 ### Usage: git_config_set file name value
 git_config_set()
