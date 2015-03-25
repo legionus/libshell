@@ -274,6 +274,19 @@ git_config_list()
 	__git_config_parser "$1"
 }
 
+### Lists all names and variables in tab separated form.
+### Usage: git_config_parse file
+git_config_parse()
+{
+	__git_config_handler()
+	{
+		[ "$1" = 'variable' ] ||
+			return 0
+		printf '%s\t%s\n' "$location" "$value"
+	}
+	__git_config_parser "$1"
+}
+
 ### Append another value with same name into config file.
 ### Usage: git_config_append file name value
 git_config_append()
