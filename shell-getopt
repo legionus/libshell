@@ -125,18 +125,20 @@ getoptex()
 		esac
 	}
 
-	local optlist="${1#;}" value=
+	local optlist="${1#;}" param= value=
 	shift $OPTIND
+
+	param="$1"
 
 	[ "$#" -lt 2 ] ||
 		value="#$2"
 
 	OPTTYP=
-	### test whether $1 is an option.
-	if [ "$1" = '--' ]; then
+	### test whether $param is an option.
+	if [ "$param" = '--' ]; then
 		OPTTYP='--'
 		OPTIND=$(($OPTIND+1))
-	elif [ "$1" != '-' -a "$1" != "${1#-}" ]; then
+	elif [ "$param" != '-' -a "$param" != "${param#-}" ]; then
 		OPTIND=$(($OPTIND+1))
 
 		local cmd argtype
@@ -151,7 +153,7 @@ getoptex()
 			[ "${#OPTOPT}" -gt 1 ] ||
 				cmd=short
 
-			getoptex_option_$cmd "$1" "$value" ||
+			getoptex_option_$cmd "$param" "$value" ||
 				return $(($?-1))
 		done
 		OPTOPT='?'
@@ -159,11 +161,11 @@ getoptex()
 
 		if [ -n "${GETOPT_ALLOW_UNKNOWN-}" ]; then
 			local q_arg
-			quote_shell_variable q_arg "$1"
+			quote_shell_variable q_arg "$param"
 			OPTUKN="${OPTUKN-} \"$q_arg\""
 			return 0
 		fi
-		message "unrecognized option '$1'"
+		message "unrecognized option '$param'"
 		return 2
 	fi
 	OPTOPT='?'
