@@ -10,7 +10,7 @@ libshell_vmajor=0
 libshell_vminor=3
 libshell_vpatch=0
 
-libshell_version=3
+libshell_version=4
 
 __export_compatibility_string_quote_remove=1
 

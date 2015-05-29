@@ -76,25 +76,17 @@ getoptex()
 	}
 	getoptex_option_long()
 	{
-		local arg="$1" v p
-		for p in '--' ${GETOPT_ALLOW_ALTERNATIVE:+'-'}; do
-			if [ -n "${GETOPT_ALLOW_ABBREV-}" ]; then
-				arg="${1%%=*}" v="${1#*=}" o="$p$OPTOPT"
-				if [ -z "${o##$arg*}" ]; then
-					[ "$arg" != "$v" ] &&
-						arg="$o=$v" ||
-						arg="$o"
-					unset o v
-				fi
-			fi
-			case "$arg" in
-				$p$OPTOPT=*)
+		local p
+		for p in -- ${GETOPT_ALLOW_ALTERNATIVE:+-}; do
+			p="$p$OPTOPT"
+			case "$1" in
+				$p=*)
 					[ -n "$OPTTYP" ] ||
 						{ getoptex_badarg; return 3; }
-					OPTARG="${arg#$p$OPTOPT=}"
+					OPTARG="${1#$p=}"
 					return 1
 					;;
-				$p$OPTOPT)
+				$p)
 					getoptex_argument "$2" ||
 						return 3
 					return 1
@@ -124,11 +116,51 @@ getoptex()
 				;;
 		esac
 	}
+	getoptex_option_abbrev()
+	{
+		[ "$1" != '--' ] ||
+			return 0
+
+		local opt o i=0 variants= l= v= n="${1%%=*}"
+
+		[ -n "${1##*=*}" ] || v="${1#*=}"
+		shift
+
+		for opt; do
+			opt="${opt%[;.:]}"
+			[ "${#opt}" -gt 1 ] ||
+				continue
+			for o in -- ${GETOPT_ALLOW_ALTERNATIVE:+-}; do
+				o="$o$opt"
+				[ -z "${o##$n*}" ] ||
+					continue
+				variants="$variants '--$opt'"
+				l="--$opt"
+				i=$(($i+1))
+			done
+		done
+
+		if [ "$i" -eq 1 ]; then
+			param="$l${v:+=$v}"
+		elif [ "$i" -gt 1 ]; then
+			message "option '$n${v:+=$v}' is ambiguous; possibilities:$variants"
+			return 1
+		fi
+	}
 
 	local optlist="${1#;}" param= value=
 	shift $OPTIND
 
 	param="$1"
+
+	if [ -n "${GETOPT_ALLOW_ABBREV-}" ]; then
+		if ! getoptex_option_abbrev "$param" $optlist && [ -z "${GETOPT_ALLOW_UNKNOWN-}" ]; then
+			OPTIND=$(($OPTIND+1))
+			OPTOPT='?'
+			OPTARG=
+			return 2
+		fi
+	fi
 
 	[ "$#" -lt 2 ] ||
 		value="#$2"

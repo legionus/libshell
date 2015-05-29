@@ -78,8 +78,7 @@ getopt_test009() { # UnitTest
 	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
 	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	(assertEquals "$result" "$result" "$expect") ||:
-	shouldSkip
+	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test010() { # UnitTest
