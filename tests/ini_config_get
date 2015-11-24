@@ -20,3 +20,11 @@ ini_config_get_test3() { # UnitTest
 	result="$(ini_config_get ini-config/z.ini sect opt)"
 	assertEquals "$result" "$result" "$expect"
 }
+
+ini_config_get_test4() { # UnitTest
+	. ../shell-ini-config
+	local rc=0 result expect="$PROG: No such file or directory: ini-config/not-exist"
+	result="$(ini_config_get ini-config/not-exist sect opt 2>&1)" || rc=$?
+	assertEquals "Wrong return code: rc=$rc" "$rc" "1"
+	assertEquals "$result" "$result" "$expect"
+}

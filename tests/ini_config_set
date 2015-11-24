@@ -67,3 +67,11 @@ ini_config_set_test6() { # UnitTest
 	cmp -s ini-config/t6.ini ini-config/krb5.conf.expect || rc=$?
 	assertTrue $rc
 }
+
+ini_config_set_test7() { # UnitTest
+	. ../shell-ini-config
+	local rc=0 result expect="$PROG: No such file or directory: ini-config/not-exist"
+	result="$(ini_config_set ini-config/not-exist sect1 opt "xxx" 2>&1)" || rc=$?
+	assertEquals "Wrong return code: rc=$rc" "$rc" "1"
+	assertEquals "$result" "$result" "$expect"
+}

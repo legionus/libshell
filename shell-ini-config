@@ -24,6 +24,11 @@ ini_config_get()
 	local fn section var sect= str eof= n v
 	fn="$1" section="$2" var="$3"
 
+	if [ ! -e "$fn" ]; then
+		message "No such file or directory: $fn"
+		return 1
+	fi
+
 	while [ -z "$eof" ]; do
 		read -r str || eof=1
 
@@ -56,6 +61,11 @@ ini_config_is_set()
 {
 	local fn section var sect= str eof= n v
 	fn="$1" section="$2" var="$3"
+
+	if [ ! -e "$fn" ]; then
+		message "No such file or directory: $fn"
+		return 1
+	fi
 
 	while [ -z "$eof" ]; do
 		read -r str || eof=1
@@ -92,6 +102,12 @@ ini_config_set()
 	local fn fn_tmp section var value sect= don= str eof= n v
 
 	fn="$1" section="$2" var="$3" value="$4"
+
+	if [ ! -e "$fn" ]; then
+		message "No such file or directory: $fn"
+		return 1
+	fi
+
 	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
 	while [ -z "$eof" ]; do
@@ -182,6 +198,11 @@ ini_config_del()
 {
 	local fn="$1" section="$2" var="${3-}"
 
+	if [ ! -e "$fn" ]; then
+		message "No such file or directory: $fn"
+		return 1
+	fi
+
 	__ini_config_action()
 	{
 		[ -z "$var" -o "$1" = "$var" ] ||
@@ -194,6 +215,11 @@ ini_config_del()
 ini_config_comment()
 {
 	local fn="$1" section="$2" var="${3-}"
+
+	if [ ! -e "$fn" ]; then
+		message "No such file or directory: $fn"
+		return 1
+	fi
 
 	__ini_config_action()
 	{
