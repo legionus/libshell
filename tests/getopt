@@ -148,3 +148,27 @@ getopt_test017() { # UnitTest
 	result=`for i in 1 2 3; do getopt -n TEST -o 'a,b' -- -ab; done 2>&1`
 	assertEquals "$result" "$result" "$expect"
 }
+
+getopt_test018() { # UnitTest
+	LANG=C
+	expect=`{ getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	. ../shell-getopt
+	result=`{ getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	assertEquals "$result" "$result" "$expect"
+}
+
+getopt_test019() { # UnitTest
+	LANG=C
+	expect=`{ getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	. ../shell-getopt
+	result=`{ getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	assertEquals "$result" "$result" "$expect"
+}
+
+getopt_test020() { # UnitTest
+	LANG=C
+	expect=`{ getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	. ../shell-getopt
+	result=`{ getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	assertEquals "$result" "$result" "$expect"
+}

@@ -134,9 +134,16 @@ getoptex()
 				o="$o$opt"
 				[ -z "${o##$n*}" ] ||
 					continue
-				variants="$variants '--$opt'"
 				l="--$opt"
-				i=$(($i+1))
+				if [ "$o" = "$n" ]; then
+					# Full match was found, so all other variants should be ignored.
+					variants=
+					i=1
+					break 2
+				else
+					variants="$variants '--$opt'"
+					i=$(($i+1))
+				fi
 			done
 		done
 
