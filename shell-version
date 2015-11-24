@@ -8,7 +8,7 @@ __included_shell_version=1
 
 libshell_vmajor=0
 libshell_vminor=4
-libshell_vpatch=0
+libshell_vpatch=1
 
 libshell_version=4
 
