@@ -156,6 +156,7 @@ ini_config_set()
 		fi
 
 	done < "$fn" > "$fn_tmp"
+	chmod --reference="$fn" "$fn_tmp"
 	mv -f -- "$fn_tmp" "$fn"
 }
 
@@ -189,6 +190,7 @@ __ini_config_del_comment()
 				;;
 		esac
 	done < "$fn" > "$fn_tmp"
+	chmod --reference="$fn" "$fn_tmp"
 	mv -f -- "$fn_tmp" "$fn"
 	unset -f __ini_config_action
 }
