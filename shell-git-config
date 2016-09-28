@@ -1,4 +1,4 @@
-#!/bin/ash -efu
+#!/bin/sh -efu
 ### This file is covered by the GNU General Public License,
 ### which should be included with libshell as the file LICENSE.
 ### All copyright information are listed in the COPYING.
