@@ -16,7 +16,7 @@ GETOPT_ALLOW_UNKNOWN=
 ### Long options may be abbreviated, as long as the abbreviation is not ambiguous.
 GETOPT_ALLOW_ABBREV=1
 
-### Allow long options to start with a single ‘-’. See (getopt -a).
+### Allow long options to start with a single `-'. See (getopt -a).
 GETOPT_ALLOW_ALTERNATIVE=
 
 OPTERR=1
