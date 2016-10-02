@@ -27,6 +27,7 @@ for s in \
 	fill_mask \
 	cmdline_get \
 	run_scripts \
+	terminfo_init color_message color_text \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||

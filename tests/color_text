@@ -1,0 +1,25 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+color_text_test1() { # UnitTest
+	. ../shell-terminfo
+	expect="$(cat terminfo-data/test1-term-linux)"
+	result="$(
+		export TERM=linux;
+		terminfo_init force;
+		color_text ' Test message ' 'fg white bg blue' || echo rc=$?
+	)"
+	assertEquals "Use foreground and background color (TERM=linux)" "$result" "$expect"
+}
+
+color_text_test2() { # UnitTest
+	. ../shell-terminfo
+	expect=" Test message "
+	result="$(
+		export TERM=dumb;
+		terminfo_init force;
+		color_text ' Test message ' 'fg white bg blue' || echo rc=$?
+	)"
+	assertEquals "Use foreground and background color (TERM=dumb)" "$result" "$expect"
+}

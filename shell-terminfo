@@ -1,0 +1,202 @@
+#!/bin/sh -efu
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
+
+if [ -z "${__included_shell_terminfo-}" ]; then
+__included_shell_terminfo=1
+
+. shell-error
+
+COLUMNS=80
+LINES=25
+
+color_black=7
+color_blue=7
+color_green=7
+color_cyan=7
+color_red=7
+color_magenta=7
+color_yellow=7
+color_white=7
+
+__terminfo_setup_caps()
+{
+	set \
+		setbg:setab \
+		setbg:setb \
+		setfg:setaf \
+		setfg:setf \
+		bold:bold \
+		sitm:sitm \
+		smul:smul \
+		rev:rev \
+		hpa:hpa \
+		vpa:vpa \
+		ritm:ritm \
+		rmul:rmul \
+		op:op \
+		sgr0:sgr0 \
+	;
+	local cap_pair var cap
+
+	for cap_pair; do
+		var="${cap_pair%:*}"
+		eval "__terminfo_cap_$var=''"
+	done
+
+	for cap_pair; do
+		var="${cap_pair%:*}"
+		cap="${cap_pair#*:}"
+		eval "
+		__terminfo_cap_$var=\"\${__terminfo_cap_$var-}\";
+		! tput $cap >/dev/null 2>&1 ||
+			__terminfo_cap_$var='$cap';
+		[ -n \"\$__terminfo_cap_$var\" ] ||
+			verbose \"Capability '$cap' is not defined for this terminal.\""
+	done
+}
+
+__terminfo_setup_colors()
+{
+	local order name i=0
+
+	[ "$__terminfo_cap_setfg" = 'setf' ] &&
+		order='black blue green cyan red magenta yellow white' ||
+		order='black red green yellow blue magenta cyan white'
+
+	for name in $order; do
+		eval "color_$name=$i"
+		i=$(($i + 1))
+	done
+}
+
+### Usage: terminfo_init [force]
+terminfo_init()
+{
+	[ -z "${__terminfo_init-}" -o "${1-}" = force ] ||
+		return 0
+
+	type tput >/dev/null 2>&1 ||
+		fatal "Unable to find \`tput' utility."
+
+	[ -n "${TERM-}" ] || TERM=dumb
+	export TERM
+
+	local cols rows
+	cols="$(tput cols)"  && export COLUMNS="$cols" || return
+	rows="$(tput lines)" && export LINES="$rows"   || return
+
+	__terminfo_setup_caps
+	__terminfo_setup_colors
+
+	__terminfo_init=1
+}
+
+### Usage: terminfo_color_pattern <begin|end> pattern
+###
+### Pattern format: [[type] [modificator] color]
+###
+### type        := {foreground|background} or {fg|bg}
+###	modificator := {bold|italic|underline|reverse} or {b|i|u|rev}
+### color       := {black|blue|green|cyan|red|magenta|yellow|white}
+terminfo_color_pattern()
+{
+	local c ctype='fg' color
+	local color_bg= color_fg= bold= italic= uline= reverse=
+
+	for c in $2; do
+		case "$c" in
+			fg|foreground)
+				ctype='fg'
+				;;
+			bg|background)
+				ctype='bg'
+				;;
+			rev|reverse)
+				reverse=1
+				;;
+			b|bold)
+				bold=1
+				;;
+			i|italic)
+				italic=1
+				;;
+			u|underline)
+				uline=1
+				;;
+			black|blue|green|cyan|red|magenta|yellow|white)
+				eval "[ -z \"\${__terminfo_cap_set$ctype-}\" ] || color_$ctype=\"\$color_$c\""
+				;;
+			*)
+				fatal "Unknown color: $c"
+				;;
+		esac
+	done
+
+	case "$1" in
+		b|begin)
+			tput -S <<EOF
+${reverse:+$__terminfo_cap_rev
+}${bold:+$__terminfo_cap_bold
+}${italic:+$__terminfo_cap_sitm
+}${uline:+$__terminfo_cap_smul
+}${color_fg:+$__terminfo_cap_setfg $color_fg
+}${color_bg:+$__terminfo_cap_setbg $color_bg
+}
+EOF
+			;;
+		e|end)
+			tput -S <<EOF
+${italic:+$__terminfo_cap_ritm
+}${uline:+$__terminfo_cap_rmul
+}${__terminfo_cap_op:+$__terminfo_cap_op
+}${__terminfo_cap_sgr0:+$__terminfo_cap_sgr0
+}
+EOF
+			;;
+		*)
+			fatal "Unknown type: $1"
+			;;
+	esac
+}
+
+### Usage: terminfo_col number
+terminfo_col()
+{
+	terminfo_init
+	if [ -n "${COLUMNS-}" -a "$1" -ge "${COLUMNS:-0}" ]; then
+		message "value must be less than $COLUMNS"
+		return 1
+	fi
+	[ -n "${__terminfo_cap_hpa-}" ] ||
+		message "Capability 'hpa' is not defined for this terminal."
+	tput "$__terminfo_cap_hpa" "$1"
+}
+
+### Usage: terminfo_row number
+terminfo_row()
+{
+	terminfo_init
+	[ -n "${__terminfo_cap_vpa-}" ] ||
+		message "Capability 'vpa' is not defined for this terminal."
+	tput "$__terminfo_cap_vpa" "$1"
+}
+
+### Usage: color_text text [pattern]
+color_text()
+{
+	terminfo_init
+	terminfo_color_pattern b "$2"
+	printf '%s' "$1"
+	terminfo_color_pattern e "$2"
+}
+
+### Usage: color_message text [pattern]
+color_message()
+{
+	color_text "$@" || return
+	printf '\n'
+}
+
+fi #__included_shell_terminfo

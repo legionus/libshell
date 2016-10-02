@@ -1,0 +1,10 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+terminfo_init_test1() { # UnitTest
+	 . ../shell-terminfo;
+	expect="$(printf '%s\n%s\n' 'tput: unknown terminal "invalid"' 'rc=3')"
+	result="$(export TERM=invalid; terminfo_init force 2>&1 && echo rc=0 || echo rc=$?)"
+	assertEquals "$result" "$result" "$expect"
+}
