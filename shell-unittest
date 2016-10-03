@@ -11,6 +11,9 @@ __included_shell_unittest=1
 ### Only perform these tests.
 TESTCASES="${TESTCASES-}"
 
+### Use color messages to show status
+unittest_use_color="${unittest_use_color-}"
+
 ### Append tests condition to comment message if test failed.
 unittest_show_condition="${unittest_show_condition-}"
 
@@ -204,10 +207,21 @@ assertNotNull()
 ### Display status message after each test.
 messageTest()
 {
+	__show()
+	{
+		unset -f __show
+		local colors="$1"; shift
+		if [ -z "$unittest_use_color" ]; then
+			"$@"
+			return 0
+		fi
+		color_text "$("$@")" "$colors"
+		return 0
+	}
 	case "$3" in
-		0) printf '[done]' ;;
-		1) printf '[FAIL]' ;;
-		2) printf '[skip]' ;;
+		0) __show 'green'  printf '[done]' ;;
+		1) __show 'red'    printf '[FAIL]' ;;
+		2) __show 'yellow' printf '[skip]' ;;
 		*) printf '[status=%s]' $3 ;;
 	esac
 	printf ' (%s) %s\n' "$1" "$2"
@@ -255,6 +269,8 @@ runUnitTests()
 	{
 		"$@" || fatal "$1() fail rc=$?"
 	}
+	[ -z "$unittest_use_color" ] || . shell-terminfo
+
 	run_or_exit setUpTests
 
 	local IFS=' 	
