@@ -3,6 +3,9 @@ GEN_SYMS   = $(CURDIR)/gen-syms.sh
 GEN_SINGLE = $(CURDIR)/gen-single.sh
 GEN_VERS   = $(CURDIR)/gen-version.sh
 
+# github.com/legionus/md2man
+MD2MAN ?= md2man
+
 PROJECT = libshell
 VERSION = $(shell $(GEN_VERS))
 
@@ -15,9 +18,10 @@ capability_TARGETS = shell-regexp
 bin_TARGETS = $(filter-out shell-lib,$(wildcard shell-*))
 data_TARGETS = COPYING
 
-man_TARGETS = docs/libshell.man docs/shell-error.man
+docs_TARGETS = docs/libshell.md $(shell ls -1 docs/shell-*.md)
+man_TARGETS = $(docs_TARGETS:.md=.3)
 
-all: ${bin_TARGETS} ${capability_TARGETS} DEPS SYMS
+all: ${bin_TARGETS} ${man_TARGETS} ${capability_TARGETS} DEPS SYMS
 
 DEPS:
 	PATH="$(CURDIR):$(PATH)" $(GEN_DEPS) ${bin_TARGETS} > $@
@@ -30,6 +34,9 @@ shell-lib: ${bin_TARGETS}
 
 shell-regexp: shell-quote
 	ln -s $^ $@
+
+%.3: %.md
+	@[ -z "$(MD2MAN)" ] || $(MD2MAN) -output $@ $<
 
 install: install-bin install-man install-data
 
@@ -46,11 +53,10 @@ install-bin: ${bin_TARGETS}
 	cp -a $^ ${DESTDIR}${bindir}/
 
 install-man: ${man_TARGETS}
-	install -d -m755 ${DESTDIR}${man3dir}
-	for i in $^; do \
-		d="$${i%.man}.3"; d="$${d##*/}"; \
-		install -m644 $$i ${DESTDIR}${man3dir}/$$d; \
-	done
+	if [ -n "$(MD2MAN)" ]; then \
+	  install -d -m755 ${DESTDIR}${man3dir}; \
+	  install -m644 $^ ${DESTDIR}${man3dir}; \
+	fi
 
 $(PROJECT)-$(VERSION).tar.xz:
 	tar --transform='s,^,$(PROJECT)-$(VERSION)/,' -Jcf $@ \
@@ -69,4 +75,4 @@ check:
 	@cd tests; ./runtests
 
 clean:
-	$(RM) -- $(capability_TARGETS) shell-lib DEPS SYMS
+	$(RM) -- $(man_TARGETS) $(capability_TARGETS) shell-lib DEPS SYMS
