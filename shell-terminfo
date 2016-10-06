@@ -187,9 +187,9 @@ terminfo_row()
 color_text()
 {
 	terminfo_init
-	terminfo_color_pattern b "$2"
+	terminfo_color_pattern b "$2" || return
 	printf '%s' "$1"
-	terminfo_color_pattern e "$2"
+	terminfo_color_pattern e "$2" || return
 }
 
 ### Usage: color_message text [pattern]
