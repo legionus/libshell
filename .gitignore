@@ -2,3 +2,6 @@ DEPS
 SYMS
 shell-lib
 shell-regexp
+*.3
+tests/git-config/*.ini
+tests/ini-config/*.ini
