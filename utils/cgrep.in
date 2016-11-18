@@ -1,0 +1,159 @@
+#!/bin/ash -efu
+#
+# Copyright (C) 2008-2016  Alexey Gladkov <legion@altlinux.org>
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+
+. shell-quote
+. shell-args
+. shell-getopt
+. shell-terminfo
+
+only_matches=1
+extend=
+
+sed_patterns=
+sed_icase=
+sed_matches=g
+
+show_help() {
+	cat <<-EOF
+	Usage: $PROG [options] PATTERN [--] [FILE...]
+	   or: $PROG [options] -e PATTERN [-e PATTERN1...] [--] [FILE...]
+
+	Pattern format:
+
+	PATTERN := '/GREP-PATTERN/ [[TYPE] MODIFICATOR COLOR]...'
+
+	You can use any character instead of '/'.
+
+	TYPE    := {foreground|background} or {fg|bg}
+
+	COLOR   := {gray|black|blue|green|cyan|red|magenta|yellow|white}
+
+	MODIFICATORS := {bold|italic|underline|reverse} or {b|i|u|rev}
+
+	Options:
+	  -e, --pattern=PATTERN   use PATTERN as the pattern;
+	  -f, --file=FILE         obtain patterns from FILE, one per line;
+	  -i, --ignore-case       ignore case distinctions in the PATTERN;
+	  -a, --all-lines         don't suppress unmatched lines;
+	  -o, --one-match         highlight only first match of PATTERN;
+	  -E, --regexp-extended   use extended regular expressions
+	                          in the PATTERN;
+	  -v, --verbose           print a message for each action;
+	  -V, --version           print program version and exit;
+	  -h, --help              show this text and exit.
+
+	Report bugs to http://bugzilla.altlinux.org/
+
+	EOF
+	exit
+}
+
+show_version() {
+	cat <<EOF
+$PROG version @VERSION@
+Written by Alexey Gladkov <legion@altlinux.org>
+
+Copyright (C) 2008-2016  Alexey Gladkov <legion@altlinux.org>
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+EOF
+	exit
+}
+
+get_delim() {
+	local l="$1" m=
+	while [ ${#m} -lt $((${#l}-1)) ]; do
+		m="$m?"
+	done
+	delim="${l%$m}"
+}
+
+parse_pattern() {
+	local delim= pattern="$1" replace=
+
+	get_delim "$pattern"
+
+	replace=$(color_text '&' "${pattern##*$delim}")
+
+	pattern="${pattern#$delim}"
+	pattern="${pattern%$delim*}"
+
+	quote_shell_variable pattern "$pattern"
+
+	sed_patterns="$sed_patterns -e \"s${delim}${pattern}${delim}${replace}${delim}${sed_matches}${sed_icase}${only_matches:+p}\""
+}
+
+read_file() {
+	local l
+	while read -r l; do
+		case "$l" in
+			''|'#'*) continue ;;
+		esac
+		parse_pattern "$l"
+	done < "$1"
+}
+
+TEMP=`getopt -n $PROG -o e:,a,f:,i,o,E,v,V,h -l pattern:,file:,ignore-case,all-lines,one-match,extended-regexp,verbose,version,help -- "$@"` ||
+	show_usage
+eval set -- "$TEMP"
+
+while :; do
+	case "$1" in
+		-e|--pattern) shift
+			parse_pattern "$1"
+			;;
+		-f|--file) shift
+			fn="$(opt_check_read file "$1")"
+			read_file "$fn"
+			;;
+		-i|--ignore-case) sed_icase=i
+			;;
+		-a|--all-lines) only_matches=
+			;;
+		-o|--one-match) sed_matches=
+			;;
+		-E|--extended-regexp) extend=1
+			;;
+		-v|--verbose) verbose=-v
+			;;
+		-V|--version) show_version
+			;;
+		-h|--help) show_help
+			;;
+		--) shift; break
+			;;
+		*) fatal "Unrecognized option: $1"
+			;;
+	esac
+	shift
+done
+
+terminfo_init
+
+if [ -z "$sed_patterns" ]; then
+	if [ "$#" -gt 0 ]; then
+		parse_pattern "$1"
+		shift
+	else
+		show_usage
+	fi
+fi
+
+eval exec sed ${extend:+-r} ${only_matches:+-n} $sed_patterns ${1:+"$@"} \
+	${COLOR_VIEWER:+|$COLOR_VIEWER}

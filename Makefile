@@ -14,6 +14,8 @@ datadir ?= /usr/share
 man3dir ?= ${datadir}/man/man3
 bindir  ?= /bin
 
+SUBDIRS = utils
+
 capability_TARGETS = shell-regexp
 bin_TARGETS = $(filter-out shell-lib,$(wildcard shell-*))
 data_TARGETS = COPYING
@@ -21,7 +23,9 @@ data_TARGETS = COPYING
 docs_TARGETS = docs/libshell.md $(shell ls -1 docs/shell-*.md)
 man_TARGETS = $(docs_TARGETS:.md=.3)
 
-all: ${bin_TARGETS} ${man_TARGETS} ${capability_TARGETS} DEPS SYMS
+.PHONY: $(SUBDIRS)
+
+all: ${bin_TARGETS} ${man_TARGETS} ${capability_TARGETS} DEPS SYMS $(SUBDIRS)
 
 DEPS:
 	PATH="$(CURDIR):$(PATH)" $(GEN_DEPS) ${bin_TARGETS} > $@
@@ -38,7 +42,7 @@ shell-regexp: shell-quote
 %.3: %.md
 	@[ -z "$(MD2MAN)" ] || $(MD2MAN) -output $@ $<
 
-install: install-bin install-man install-data
+install: install-bin install-man install-data $(SUBDIRS)
 
 install-data: DEPS SYMS
 	install -d -m755 ${DESTDIR}${datadir}/${PROJECT}
@@ -58,6 +62,9 @@ install-man: ${man_TARGETS}
 	  install -m644 $^ ${DESTDIR}${man3dir}; \
 	fi
 
+$(SUBDIRS):
+	$(MAKE) $(MFLAGS) -C "$@" $(MAKECMDGOALS)
+
 $(PROJECT)-$(VERSION).tar.xz:
 	tar --transform='s,^,$(PROJECT)-$(VERSION)/,' -Jcf $@ \
 	    shell-* gen-* contrib tests docs LICENSE COPYING Makefile
@@ -74,5 +81,5 @@ release: $(PROJECT)-$(VERSION).tar.sign
 check:
 	@cd tests; ./runtests
 
-clean:
+clean: $(SUBDIRS)
 	$(RM) -- $(man_TARGETS) $(capability_TARGETS) shell-lib DEPS SYMS
