@@ -15,3 +15,35 @@ ini_config_del_test1() { # UnitTest
 
 	assertTrue $rc
 }
+
+ini_config_del_test2() { # UnitTest
+	. ../shell-ini-config
+
+	cp -f -- ini-config/test2.ini ini-config/ini_config_del-t2.ini
+
+	ini_config_del ini-config/ini_config_del-t2.ini mysection
+
+	local rc=0
+	cmp -s ini-config/ini_config_del-t2.ini ini-config/ini_config_del-t2.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_del-t2.ini
+
+	assertTrue $rc
+}
+
+ini_config_del_test3() { # UnitTest
+	. ../shell-ini-config
+
+	cp -f -- ini-config/test3.ini ini-config/ini_config_del-t3.ini
+
+	ini_config_del ini-config/ini_config_del-t3.ini mysection
+
+	local rc=0
+	cmp -s ini-config/ini_config_del-t3.ini ini-config/ini_config_del-t3.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_del-t3.ini
+
+	assertTrue $rc
+}

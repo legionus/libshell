@@ -182,7 +182,7 @@ __ini_config_del_comment()
 			"$shell_ini_config_comment"*|'')
 				[ -n "$tstr" ] &&
 					__ini_config_print '' "$str" ||
-					printf '\n'
+					{ [ -n "$eof" ] || printf '\n'; }
 				;;
 			*)
 				shell_var_trim n "${tstr%%=*}"
