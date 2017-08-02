@@ -1,0 +1,17 @@
+#!/bin/ash -efu
+
+ini_config_del_test1() { # UnitTest
+	. ../shell-ini-config
+
+	cp -f -- ini-config/z.ini ini-config/ini_config_del-t1.ini
+
+	ini_config_del ini-config/ini_config_del-t1.ini sect1
+
+	local rc=0
+	cmp -s ini-config/ini_config_del-t1.ini ini-config/ini_config_del-t1.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_del-t1.ini
+
+	assertTrue $rc
+}

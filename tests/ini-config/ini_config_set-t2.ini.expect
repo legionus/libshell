@@ -1,0 +1,13 @@
+[global]
+	# My user
+	user = $1 \n\1 "Bbb"
+	email = foo@bar
+
+[sect1]
+	opt = OPT
+	opt1 = OPT1
+	opt = OPT
+
+# Blah Blah
+[sect]
+	opt = "ZZZ XXX"

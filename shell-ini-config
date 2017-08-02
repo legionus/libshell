@@ -99,7 +99,7 @@ ini_config_is_set()
 ### Usage: ini_config_set file section var value
 ini_config_set()
 {
-	local fn fn_tmp section var value sect= don= str eof= n v
+	local fn fn_tmp section var value sect= don= str tstr eof= n v
 
 	fn="$1" section="$2" var="$3" value="$4"
 
@@ -111,12 +111,14 @@ ini_config_set()
 	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
 	while [ -z "$eof" ]; do
-		read -r str || eof=1
+		IFS='' read -r str || eof=1
 
-		case "$str" in
+		shell_var_trim tstr "$str"
+
+		case "$tstr" in
 			"[$section]")
 				sect=2
-				printf '%s\n' "$str"
+				printf '%s\n' "$tstr"
 				;;
 			"["*"]")
 				if [ "$sect" = 2 -a -z "$don" ]; then
@@ -124,16 +126,16 @@ ini_config_set()
 					don=1
 				fi
 				sect=1
-				printf '%s\n' "$str"
+				printf '%s\n' "$tstr"
 				;;
 			"$shell_ini_config_comment"*|'')
-				[ -n "$str" ] &&
-					__ini_config_print "$sect" "$str" ||
+				[ -n "$tstr" ] &&
+					__ini_config_print '' "$str" ||
 					{ [ -n "$eof" ] || printf '\n'; }
 				;;
 			*)
-				shell_var_trim n "${str%%=*}"
-				shell_var_trim v "${str#*=}"
+				shell_var_trim n "${tstr%%=*}"
+				shell_var_trim v "${tstr#*=}"
 
 				if [ "$sect" = 2 -a "$n" = "$var" ]; then
 					[ -n "$don" ] ||
@@ -141,7 +143,7 @@ ini_config_set()
 					don=1
 					continue
 				fi
-				if [ -z "${str##*=*}" ]; then
+				if [ -z "${tstr##*=*}" ]; then
 					__ini_config_print 1 "$n = $v"
 				else
 					__ini_config_print 1 "$n"
@@ -162,27 +164,29 @@ ini_config_set()
 
 __ini_config_del_comment()
 {
-	local fn_tmp sect= str eof= n v
+	local fn_tmp sect= str tstr eof= n v
 	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
 	while [ -z "$eof" ]; do
-		read -r str || eof=1
+		IFS='' read -r str || eof=1
 
-		case "$str" in
+		shell_var_trim tstr "$str"
+
+		case "$tstr" in
 			"["*"]")
 				sect=1
-				[ "$str" != "[$section]" ] ||
+				[ "$tstr" != "[$section]" ] ||
 					sect=2
-				printf '%s\n' "$str"
+				printf '%s\n' "$tstr"
 				;;
 			"$shell_ini_config_comment"*|'')
-				[ -n "$str" ] &&
-					__ini_config_print "$sect" "$str" ||
+				[ -n "$tstr" ] &&
+					__ini_config_print '' "$str" ||
 					printf '\n'
 				;;
 			*)
-				shell_var_trim n "${str%%=*}"
-				shell_var_trim v "${str#*=}"
+				shell_var_trim n "${tstr%%=*}"
+				shell_var_trim v "${tstr#*=}"
 
 				[ "$sect" = 2 ] &&
 					__ini_config_action "$n" "$v" ||

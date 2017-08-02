@@ -2,69 +2,103 @@
 
 ini_config_set_test1() { # UnitTest
 	. ../shell-ini-config
-	local result expect="Aaa Bbb"
-	cp -f ini-config/z.ini ini-config/t1.ini
+	local value="Aaa Bbb"
 
-	ini_config_set ini-config/t1.ini global user "$expect"
+	cp -f ini-config/z.ini ini-config/ini_config_set-t1.ini
 
-	result="$(ini_config_get ini-config/t1.ini global user)"
-	assertEquals "$result" "$result" "$expect"
+	ini_config_set ini-config/ini_config_set-t1.ini global user "$value"
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t1.ini ini-config/ini_config_set-t1.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t1.ini
+
+	assertTrue $rc
 }
 
 ini_config_set_test2() { # UnitTest
 	. ../shell-ini-config
-	local result expect='$1 \n\1 "Bbb"'
-	cp -f ini-config/z.ini ini-config/t2.ini
+	local value='$1 \n\1 "Bbb"'
 
-	ini_config_set ini-config/t2.ini global user "$expect"
+	cp -f ini-config/z.ini ini-config/ini_config_set-t2.ini
 
-	result="$(ini_config_get ini-config/t2.ini global user)"
-	assertEquals "$result" "$result" "$expect"
+	ini_config_set ini-config/ini_config_set-t2.ini global user "$value"
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t2.ini ini-config/ini_config_set-t2.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t2.ini
+
+	assertTrue $rc
 }
 
 ini_config_set_test3() { # UnitTest
 	. ../shell-ini-config
-	local result expect='XXX'
-	cp -f ini-config/z.ini ini-config/t3.ini
+	local value='XXX'
 
-	ini_config_del ini-config/t3.ini global user
-	ini_config_set ini-config/t3.ini global user "$expect"
+	cp -f ini-config/z.ini ini-config/ini_config_set-t3.ini
 
-	result="$(ini_config_get ini-config/t3.ini global user)"
-	assertEquals "$result" "$result" "$expect"
+	ini_config_del ini-config/ini_config_set-t3.ini global user
+	ini_config_set ini-config/ini_config_set-t3.ini global user "$value"
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t3.ini ini-config/ini_config_set-t3.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t3.ini
+
+	assertTrue $rc
 }
 
 ini_config_set_test4() { # UnitTest
 	. ../shell-ini-config
-	local result expect='XXX'
-	cp -f ini-config/z.ini ini-config/t4.ini
+	local value='XXX'
 
-	ini_config_comment ini-config/t4.ini global user
-	ini_config_set ini-config/t4.ini global user "$expect"
+	cp -f ini-config/z.ini ini-config/ini_config_set-t4.ini
 
-	result="$(ini_config_get ini-config/t4.ini global user)"
-	assertEquals "$result" "$result" "$expect"
+	ini_config_comment ini-config/ini_config_set-t4.ini global user
+	ini_config_set ini-config/ini_config_set-t4.ini global user "$value"
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t4.ini ini-config/ini_config_set-t4.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t4.ini
+
+	assertTrue $rc
 }
 
 ini_config_set_test5() { # UnitTest
 	. ../shell-ini-config
-	local result expect='ZZZ'
-	cp -f ini-config/z.ini ini-config/t5.ini
+	local value='ZZZ'
 
-	ini_config_set ini-config/t5.ini sect1 opt "$expect"
+	cp -f ini-config/z.ini ini-config/ini_config_set-t5.ini
 
-	result="$(ini_config_get ini-config/t5.ini sect1 opt)"
-	assertEquals "$result" "$result" "$expect"
+	ini_config_set ini-config/ini_config_set-t5.ini sect1 opt "$value"
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t5.ini ini-config/ini_config_set-t5.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t5.ini
+
+	assertTrue $rc
 }
 
 ini_config_set_test6() { # UnitTest
 	. ../shell-ini-config
-	cp -f ini-config/krb5.conf ini-config/t6.ini
+	cp -f ini-config/krb5.conf ini-config/ini_config_set-t6.ini
 
-	ini_config_set ini-config/t6.ini libdefaults default_realm SCHOOL.ALT
+	ini_config_set ini-config/ini_config_set-t6.ini libdefaults default_realm SCHOOL.ALT
 
 	local rc=0
-	cmp -s ini-config/t6.ini ini-config/krb5.conf.expect || rc=$?
+	cmp -s ini-config/ini_config_set-t6.ini ini-config/ini_config_set-t6.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t6.ini
+
 	assertTrue $rc
 }
 

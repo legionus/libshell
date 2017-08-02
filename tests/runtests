@@ -23,7 +23,7 @@ for s in \
 	getopt signal \
 	fatal message verbose \
 	quote_shell_args \
-	ini_config_get ini_config_set \
+	ini_config_get ini_config_set ini_config_del \
 	git_config_get git_config_count git_config_list git_config_set git_config_unset git_config_append \
 	shell_var_unquote shell_var_trim \
 	fill_mask \
