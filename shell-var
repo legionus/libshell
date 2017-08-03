@@ -8,6 +8,12 @@ __included_shell_var=1
 
 . shell-error
 
+shell_var_is_number()
+{
+	[ -n "${1##0*}" ] && [ -n "${1##*[!0-9]*}" ] && [ "$1" -gt 0 ] 2>/dev/null ||
+		return 1
+}
+
 shell_var_is_yes()
 {
 	[ "$#" -eq 1 ] ||

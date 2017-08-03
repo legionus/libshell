@@ -7,6 +7,7 @@ if [ -z "${__included_shell_args-}" ]; then
 __included_shell_args=1
 
 . shell-error
+. shell-var
 
 ### Checks that given option value is a readable file.
 ### Arguments: $1 is option name, $2 is option value.
@@ -52,8 +53,7 @@ opt_check_dir()
 ### If $2 is a positive decimal number, outputs it, otherwise fails.
 opt_check_number()
 {
-	[ -n "${2##0*}" -a -n "${2##*[!0-9]*}" ] &&
-	[ "$2" -gt 0 ] 2>/dev/null ||
+	shell_var_is_number "$2" ||
 		fatal "$1: $2: invalid number."
 	printf %s "$2"
 }

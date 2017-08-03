@@ -6,7 +6,7 @@
 
 # NAME #
 
-shell_var_is_no, shell_var_is_yes, shell_var_trim, shell_var_unquote - functions
+shell_var_is_no, shell_var_is_yes, shell_var_is_number, shell_var_trim, shell_var_unquote - functions
 to trim spaces in the value of the variable
 
 # SYNOPSIS #
@@ -15,6 +15,7 @@ to trim spaces in the value of the variable
 - shell_var_unquote varname value
 - shell_var_is_no value
 - shell_var_is_yes value
+- shell_var_is_number
 
 # DESCRIPTION #
 
@@ -45,10 +46,28 @@ str2
 ```
 
 ## shell_var_is_no ##
-Functions checks whether the variable means "no".
+Function checks whether the variable means "no".
 
 ## shell_var_is_yes ##
-Functions checks whether the variable means "yes".
+Function checks whether the variable means "yes".
+
+## shell_var_is_number ##
+Function checks whether the variable is positive number.
+
+Example:
+```bash
+shell_var_is_number '123' && echo OK || echo NOP
+shell_var_is_number '420' && echo OK || echo NOP
+shell_var_is_number 'a42' && echo OK || echo NOP
+shell_var_is_number '2 0' && echo OK || echo NOP
+```
+Output:
+```
+OK
+OK
+NOP
+NOP
+```
 
 # ENVIRONMENT #
 
