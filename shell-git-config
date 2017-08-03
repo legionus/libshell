@@ -13,6 +13,17 @@ __included_shell_git_config=1
 GIT_CONFIG_GET_RAW=
 GIT_CONFIG_INCLUDE=1
 
+__git_config_git_topdir()
+{
+	local __p="$2"
+	while [ -n "$__p" ]; do
+		[ ! -d "$__p/.git" ] ||
+			break
+		__p="${__p%/*}"
+	done
+	eval "$1=\"\$__p\""
+}
+
 __git_config_lc()
 {
 	local __lc="$2"
@@ -150,21 +161,68 @@ __git_config_parser()
 		location="$section_lower.${subsection:+$subsection.}$name_lower"
 		__git_config_handler 'variable'
 	}
-	__git_config_parse_include()
+	__git_config_expend_path()
 	{
-		[ "$location" = 'include.path' ] ||
-			return 0
+		local __i="$2"
+		[ -n "${__i##./*}" ] || [ "$fn" = "${fn%/*}" ] ||
+			__i="${fn%/*}/${__i#./}"
 
-		local i="$1"
+		[ -n "${__i##\~/*}" ] ||
+			__i="$HOME/${__i#\~/}"
 
-		[ -n "${i##\~/*}" ] ||
-			i="$HOME/${i#\~/}"
-
-		[ -n "${i##\~*}" ] ||
+		[ -n "${__i##\~*}" ] ||
 			fatal "expression isn't supported at line $nline in $fn"
+
+		eval "$1=\"\$__i\""
+	}
+	__git_config_parse_include_or_if()
+	{
+		local i= gitdir= pattern=
+
+		[ -z "${2-}" ] ||
+			case "$2" in
+				'gitdir:'*)
+					gitdir="${GIT_DIR-}"
+
+					if [ -z "$gitdir" ]; then
+						__git_config_git_topdir gitdir "${fn%/*}"
+						[ -z "$gitdir" ] ||
+							gitdir="$gitdir/.git"
+					fi
+
+					__git_config_expend_path pattern "${2#gitdir:}"
+
+					[ -n "${pattern##*/}" ] && [ -n "${pattern##*/\*\*}" ] ||
+						pattern="${pattern%/*}/*"
+
+					[ -n "${pattern##\*\*/*}" ] ||
+						pattern="*/${pattern#*/}"
+
+					[ -z "${pattern##/*}" ] || [ -z "${pattern##\**}" ] ||
+						pattern="*/$pattern"
+
+					[ -z "${gitdir##$pattern}" ] ||
+						return 0
+					;;
+				*)
+					fatal "condition is not supported: $2"
+					;;
+			esac
+
+		__git_config_expend_path i "$1"
 
 		[ ! -e "$i" ] ||
 			__git_config_parser "$i"
+	}
+	__git_config_parse_include()
+	{
+		[ "$location" != 'include.path' ] ||
+			__git_config_parse_include_or_if "$1"
+	}
+	__git_config_parse_includeif()
+	{
+		[ -n "${location##includeif.*.path}" ] || [ -z "$subsection" ] ||
+			__git_config_parse_include_or_if "$1" "$subsection"
 	}
 
 	oline=
@@ -196,8 +254,10 @@ __git_config_parser()
 			*)
 				__git_config_parse_variable "$line"
 
-				[ -z "$GIT_CONFIG_INCLUDE" ] ||
+				if [ -n "$GIT_CONFIG_INCLUDE" ]; then
 					__git_config_parse_include "$value"
+					__git_config_parse_includeif "$value"
+				fi
 				;;
 		esac
 	done < "$fn"

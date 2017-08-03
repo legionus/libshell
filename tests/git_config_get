@@ -118,3 +118,71 @@ git_config_get_test014() { # UnitTest
 	expect=" zzz "
 	assertEquals "Check multiline (key '$key'): $result != $expect" "$result" "$expect"
 }
+
+git_config_get_test015() { # UnitTest
+	. ../shell-git-config
+	local result expect="5" key="aaa.bbb.ccc"
+
+	git_config_get result git-config/config2.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test016() { # UnitTest
+	. ../shell-git-config
+	local result expect="5" key="aaa.bbb.ccc"
+
+	local GIT_DIR="/path/to/group1/.git"
+
+	git_config_get result git-config/config3.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test017() { # UnitTest
+	. ../shell-git-config
+	local result expect="5" key="aaa.bbb.ccc"
+
+	local GIT_DIR="/path/to/group1/.git"
+
+	git_config_get result git-config/config4.ini $key
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
+
+git_config_get_test018() { # UnitTest
+	. ../shell-git-config
+
+	local GIT_DIR result expect key
+
+	GIT_DIR="/path/to/group1/.git"
+
+	key="aaa.p1.ccc"
+	expect="1"
+
+	git_config_get result git-config/config5.ini "$key"
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+
+	key="aaa.p2.ccc"
+	expect="2"
+
+	git_config_get result git-config/config5.ini "$key"
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+
+	key="aaa.p3.ccc"
+	expect="3"
+
+	git_config_get result git-config/config5.ini "$key"
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+
+	GIT_DIR="/any/path/to/group1/.git"
+
+	key="aaa.p4.ccc"
+	expect="4"
+
+	git_config_get result git-config/config5.ini "$key"
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+
+	key="aaa.p5.ccc"
+	expect="5"
+
+	git_config_get result git-config/config5.ini "$key"
+	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
+}
