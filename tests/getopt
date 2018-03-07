@@ -83,11 +83,10 @@ getopt_test009() { # UnitTest
 
 getopt_test010() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
-	(assertEquals "$result" "$result" "$expect") ||:
-	shouldSkip
+	result=`{ getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test011() { # UnitTest
