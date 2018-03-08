@@ -75,8 +75,13 @@ getopt_test008() { # UnitTest
 
 getopt_test009() { # UnitTest
 	LANG=C
-	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;"
+	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	[ "$result" = "$expect" ] ||
+		expect="TEST: option '-c=AAA' is ambiguous; possibilities: '-caa' '-cba';--;"
+	assertEquals "unexpected output from $(getopt --version): $result" "$result" "$expect"
 	. ../shell-getopt
+	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;"
 	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
