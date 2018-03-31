@@ -141,6 +141,9 @@ getoptex()
 					i=1
 					break 2
 				else
+					#local d='--'
+					#[ -z "${GETOPT_ALLOW_ALTERNATIVE-}" ] || d='-'
+					#variants="$variants '$d$opt'"
 					variants="$variants '--$opt'"
 					i=$(($i+1))
 				fi
