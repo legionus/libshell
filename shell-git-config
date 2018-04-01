@@ -111,8 +111,8 @@ __git_config_value()
 		fatal "bad config file line $nline in $fn"
 }
 
-__git_config_handler() { :; }
-__git_config_parser()
+git_config_handler() { :; }
+git_config_parse_file()
 {
 	local fn="$1" name value section= subsection= section_lower= name_lower= location= line oline nline=0 eof=
 
@@ -122,7 +122,7 @@ __git_config_parser()
 
 		if [ -n "$section" ]; then
 			location="$section_lower${subsection:+.$subsection}"
-			__git_config_handler 'section-end'
+			git_config_handler 'section-end'
 		fi
 
 		section="$line"
@@ -141,7 +141,7 @@ __git_config_parser()
 		__git_config_lc section_lower "$section"
 
 		location="$section_lower${subsection:+.$subsection}"
-		__git_config_handler 'section-start'
+		git_config_handler 'section-start'
 	}
 	__git_config_parse_variable()
 	{
@@ -159,7 +159,7 @@ __git_config_parser()
 		__git_config_lc name_lower "$name"
 
 		location="$section_lower.${subsection:+$subsection.}$name_lower"
-		__git_config_handler 'variable'
+		git_config_handler 'variable'
 	}
 	__git_config_expend_path()
 	{
@@ -212,7 +212,7 @@ __git_config_parser()
 		__git_config_expend_path i "$1"
 
 		[ ! -e "$i" ] ||
-			__git_config_parser "$i"
+			git_config_parse_file "$i"
 	}
 	__git_config_parse_include()
 	{
@@ -241,7 +241,7 @@ __git_config_parser()
 				oline="$line"
 				;;
 			'#'*|';'*)
-				__git_config_handler 'comment'
+				git_config_handler 'comment'
 				;;
 			'['*']'[' 	']*[!' 	']*)
 				fatal "expression isn't supported at line $nline in $fn"
@@ -265,7 +265,7 @@ __git_config_parser()
 	[ -n "$section" ] ||
 		return 0
 	location="$section_lower${subsection:+.$subsection}"
-	__git_config_handler 'section-end'
+	git_config_handler 'section-end'
 }
 
 ### Checks whether there is a specified variable in the configuration.
@@ -273,13 +273,13 @@ __git_config_parser()
 git_config_location_exists()
 {
 	local __git_config_location_exists=1 __git_config_fullpath __git_config_location
-	__git_config_handler()
+	git_config_handler()
 	{
 		[ "$__git_config_fullpath" != "$location" ] ||
 			__git_config_location_exists=0
 	}
 	__git_config_fullpath "$2"
-	__git_config_parser "$1"
+	git_config_parse_file "$1"
 	return $__git_config_location_exists
 }
 
@@ -288,13 +288,13 @@ git_config_location_exists()
 git_config_get()
 {
 	local __git_config_v= __git_config_fullpath __git_config_location
-	__git_config_handler()
+	git_config_handler()
 	{
 		[ "$1" != 'variable' -o "$__git_config_fullpath" != "$location" ] ||
 			__git_config_v="$value"
 	}
 	__git_config_fullpath "$3"
-	__git_config_parser "$2"
+	git_config_parse_file "$2"
 	eval "$1=\"\$__git_config_v\""
 }
 
@@ -303,13 +303,13 @@ git_config_get()
 git_config_count()
 {
 	local __git_config_v=0 __git_config_fullpath __git_config_location
-	__git_config_handler()
+	git_config_handler()
 	{
 		[ "$1" != 'variable' -o "$__git_config_fullpath" != "$location" ] ||
 			__git_config_v=$(($__git_config_v + 1))
 	}
 	__git_config_fullpath "$3"
-	__git_config_parser "$2"
+	git_config_parse_file "$2"
 	eval "$1=\"\$__git_config_v\""
 }
 
@@ -318,7 +318,7 @@ git_config_count()
 git_config_list()
 {
 	local __git_config_fullpath= __git_config_location=
-	__git_config_handler()
+	git_config_handler()
 	{
 		[ "$1" = 'variable' ] ||
 			return 0
@@ -331,20 +331,20 @@ git_config_list()
 	}
 	[ -z "${2-}" ] ||
 		__git_config_fullpath "$2"
-	__git_config_parser "$1"
+	git_config_parse_file "$1"
 }
 
 ### Lists all names and variables in tab separated form.
 ### Usage: git_config_parse file
 git_config_parse()
 {
-	__git_config_handler()
+	git_config_handler()
 	{
 		[ "$1" = 'variable' ] ||
 			return 0
 		printf '%s\t%s\n' "$location" "$value"
 	}
-	__git_config_parser "$1"
+	git_config_parse_file "$1"
 }
 
 ### Append another value with same name into config file.
@@ -360,7 +360,7 @@ git_config_append()
 
 	__git_config_split "$2"
 
-	__git_config_handler()
+	git_config_handler()
 	{
 		case "$1" in
 			comment)
@@ -385,7 +385,7 @@ git_config_append()
 		esac
 	}
 	fn="$(mktemp "$1.XXXXXX")"
-	__git_config_parser "$1" > "$fn"
+	git_config_parse_file "$1" > "$fn"
 
 	if [ $__git_config_state -eq 0 ]; then
 		printf '[%s]\n\t%s = %s\n' \
@@ -411,7 +411,7 @@ git_config_set()
 	__git_config_split "$2"
 	git_config_get __git_config_ovalue "$1" "$2"
 
-	__git_config_handler()
+	git_config_handler()
 	{
 		case "$1" in
 			comment)
@@ -439,7 +439,7 @@ git_config_set()
 		esac
 	}
 	fn="$(mktemp "$1.XXXXXX")"
-	__git_config_parser "$1" > "$fn"
+	git_config_parse_file "$1" > "$fn"
 
 	if [ $__git_config_state -eq 0 ]; then
 		printf '[%s]\n\t%s = %s\n' \
@@ -462,7 +462,7 @@ git_config_unset()
 	[ -f "$1" ] || :> "$1"
 	__git_config_split "$2"
 
-	__git_config_handler()
+	git_config_handler()
 	{
 		case "$1" in
 			comment)
@@ -482,7 +482,7 @@ git_config_unset()
 		esac
 	}
 	fn="$(mktemp "$1.XXXXXX")"
-	__git_config_parser "$1" > "$fn"
+	git_config_parse_file "$1" > "$fn"
 	mv -f -- "$fn" "$1"
 }
 
