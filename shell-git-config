@@ -477,7 +477,8 @@ git_config_unset()
 				fi
 				;;
 			section-start)
-				printf '[%s]\n' "$section${subsection:+ \"$subsection\"}"
+				[ "$__git_config_fullpath" = "$location" ] ||
+					printf '[%s]\n' "$section${subsection:+ \"$subsection\"}"
 				;;
 		esac
 	}
