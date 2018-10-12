@@ -10,9 +10,9 @@ normalize() {
 
 getopt_test001() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ getopt -n TEST -o -- ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ getopt -n TEST -o -- ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
