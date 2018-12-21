@@ -10,136 +10,136 @@ normalize() {
 
 getopt_test001() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o -- ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o -- || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o -- ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o -- || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test002() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o ' ' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o ' ' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o ' ' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o ' ' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test003() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '' -l ' ' -- ZZZ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '' -l ' ' -- ZZZ || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '' -l ' ' -- ZZZ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '' -l ' ' -- ZZZ || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 
 getopt_test004() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -- -abc -a -b -c ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -- -abc -a -b -c || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -- -abc -a -b -c ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -- -abc -a -b -c || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test005() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -abc --caa 'AAA' --cba='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test006() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cb 'AAA' --c='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test007() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- --cbz 'AAA' --c='BBB' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test008() { # UnitTest
 	LANG=C
-	expect=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -cb 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test009() { # UnitTest
 	LANG=C
-	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;"
-	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;rc=1;"
+	result=`{ rc=0; getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	[ "$result" = "$expect" ] ||
-		expect="TEST: option '-c=AAA' is ambiguous; possibilities: '-caa' '-cba';--;"
+		expect="TEST: option '-c=AAA' is ambiguous; possibilities: '-caa' '-cba';--;rc=1;"
 	assertEquals "unexpected output from $(getopt --version): $result" "$result" "$expect"
 	. ../shell-getopt
-	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;"
-	result=`{ getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' ; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect="TEST: option '-c=AAA' is ambiguous; possibilities: '--caa' '--cba';--;rc=1;"
+	result=`{ rc=0; getopt -a -n TEST -o 'a,b,c' -l 'caa:,cba:' -- -c='AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test010() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c:' -l 'caa:,cba:' -- -c='AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test011() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'abcd:,cbce:' -- --abcx 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test012() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a:,b,c' -- -abc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a:,b,c' -- -abc 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a:,b,c' -- -abc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a:,b,c' -- -abc 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test013() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a::,b,c' -- -a -bc 'AAA' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test014() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o 'a,b,c' -l 'caa:,cba:' -- 'BBB' 'XXX ZZZ' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test015() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '+a,b,c' -l 'caa:,cba:' -- --caa='AAA' 'BBB' --zzz -x || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 
 getopt_test016() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC'; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '-a,b,c' -l 'caa:,cba:' -- 'AAA' --caa='BBB' 'CCC' || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
@@ -155,24 +155,24 @@ getopt_test017() { # UnitTest
 
 getopt_test018() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '' -l 'tag:,tag-message:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test019() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
 
 getopt_test020() { # UnitTest
 	LANG=C
-	expect=`{ getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	expect=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	. ../shell-getopt
-	result=`{ getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx; echo rc=$?; } 2>&1 |normalize |tr '\n' ';'`
+	result=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
