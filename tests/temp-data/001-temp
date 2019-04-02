@@ -1,0 +1,14 @@
+#!/bin/sh -efu
+
+. ../shell-temp
+
+PROG=TEST
+
+export LC_ALL=C
+export LANG=C
+
+create_temporary workdir0 -d -p "$PWD/temp-data/1 2 3"
+create_temporary workdir1
+
+echo "$workdir0"
+echo "$workdir1"

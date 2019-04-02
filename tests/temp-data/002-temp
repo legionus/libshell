@@ -1,0 +1,14 @@
+#!/bin/sh -efu
+
+. ../shell-temp
+
+PROG=TEST
+
+export LC_ALL=C
+export LANG=C
+
+exit_handler() { echo "DONE $*"; }
+
+create_temporary workdir0 -d -p "$PWD/temp-data/1 2 3"
+set_cleanup_handler exit_handler
+echo "$workdir0"

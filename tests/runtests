@@ -30,6 +30,7 @@ for s in \
 	cmdline_get \
 	run_scripts \
 	terminfo_init color_message color_text \
+	create_temporary \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||

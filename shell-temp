@@ -1,0 +1,37 @@
+#!/bin/sh -efu
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
+
+if [ -z "${__included_shell_temp-}" ]; then
+__included_shell_temp=1
+
+. shell-error
+. shell-quote
+. shell-signal
+
+__shell_clean_temp=
+__shell_clean_temp()
+{
+	local args=
+	quote_shell_args args "$__shell_clean_temp"
+	eval "set -- $args"
+	while [ "$#" != 0 ]; do
+		rm $verbose -rf -- "$1"
+		shift
+	done
+}
+
+create_temporary()
+{
+	local __create_temporary_out __create_temporary_var="$1"
+	shift
+	[ "$#" != 0 ] || set -- -dt
+	__create_temporary_out="$(mktemp "$@" "$PROG.XXXXXXXXX")"
+	[ -n "$__shell_clean_temp" ] ||
+		signal_handler __shell_clean_temp EXIT HUP PIPE INT QUIT TERM
+	__shell_clean_temp="$__shell_clean_temp \"$__create_temporary_out\""
+	eval "$__create_temporary_var=\"$__create_temporary_out\""
+}
+
+fi #__included_shell_temp

@@ -1,0 +1,44 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+create_temporary_test1() { # UnitTest
+	local out result
+	out="$(./temp-data/001-temp)"
+
+	result="$(printf '%s\n' "$out" |
+		while read -r d; do
+			if [ -e "$d" ]; then
+				printf '"%s" exists;\n' "$d"
+				exit 1
+			fi
+		done ||
+			exit 1
+	)"
+	assertEquals "$result" "$result" ""
+}
+
+create_temporary_test2() { # UnitTest
+	local out result n
+	out="$(./temp-data/002-temp)"
+
+	n=0
+	result="$(printf '%s\n' "$out" |
+		while read -r d; do
+			if [ "$n:$d" = "1:DONE 0" ]; then
+				exit 0
+			fi
+			if [ "$n" != 0 ]; then
+				printf 'wrong line number: %s\n' "$n"
+				exit 1
+			fi
+			if [ -e "$d" ]; then
+				printf '"%s" exists;\n' "$d"
+				exit 1
+			fi
+			n=$(($n+1))
+		done ||
+			exit 1
+	)"
+	assertEquals "$out" "$result" ""
+}
