@@ -1,4 +1,5 @@
 #!/bin/sh -efu
 . ../shell-signal
-signal_handler 'echo EXIT-$?' TERM EXIT HUP;
-signal_handler 'echo EXIT-$?' TERM EXIT HUP;
+signal_handler 'echo EXIT0-$?' TERM EXIT HUP;
+signal_handler 'echo EXIT1-$?' TERM EXIT HUP;
+exit 42

@@ -9,7 +9,29 @@ __included_shell_signal=1
 . shell-error
 . shell-quote
 
-__shell_signal_handlers=
+__shell_signal_rc()
+{
+	return $1
+}
+
+__shell_signal_eval_rc()
+{
+	if __shell_signal_rc "$1"; then
+		eval "$2"
+	else
+		eval "$2"
+	fi
+}
+
+__shell_signal_handler()
+{
+    set -- "$?" "$1"
+    while eval '[ $(($# - 2)) -lt "${__shell_signal_'$2':-0}" ]'; do
+        eval 'set -- "$@" "$__shell_signal_'$2'_'$(($# - 2))'"'
+    done
+    eval 'shift 2; while [ $# -gt 0 ]; do __shell_signal_eval_rc '$1' "$1" ||:; shift; done; return '$1
+}
+
 ### Set handler code whan any of the specified signals are received.
 ### Return code of handler function will be ignored. Special handlers is
 ### SIG_IGN and SIG_DFL (See signal(2)).
@@ -20,26 +42,33 @@ __shell_signal_handlers=
 ### signal_handler SIG_DFL     TERM EXIT HUP
 signal_handler()
 {
-	local action real_action sign
+	local action sign n=0
 	action="$1"; shift
 
 	for sign; do
 		sign="${sign#SIG}"
 		case "$action" in
 			SIG_IGN)
-				eval "unset __signal_handlers_$sign"
-				real_action=:
+				while eval "[ $n -lt \${__shell_signal_$sign:-0} ]"; do
+					eval "unset __shell_signal_${sign}_$n"
+					n=$(($n + 1))
+				done
+				eval "unset __shell_signal_$sign"
 				trap : "$sign"
 				;;
 			SIG_DFL)
-				eval "unset __signal_handlers_$sign"
-				real_action=-
+				while eval "[ $n -lt \${__shell_signal_$sign:-0} ]"; do
+					eval "unset __shell_signal_${sign}_$n"
+					n=$(($n + 1))
+				done
+				eval "unset __shell_signal_$sign"
 				trap - "$sign"
 				;;
 			*)
-				eval "handler=\"\${__signal_handlers_$sign-} \$action;\""
-				trap "$handler" "$sign"
-				eval "__signal_handlers_$sign=\"\$handler\""
+				eval "n=\${__shell_signal_$sign:-0}"
+				eval "__shell_signal_${sign}_$n=\"\$action\""
+				eval "__shell_signal_${sign}=\$((\$n + 1))"
+				trap "__shell_signal_handler $sign" "$sign"
 				;;
 		esac
 	done

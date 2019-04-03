@@ -20,8 +20,8 @@ signal_test2() { # UnitTest
 }
 
 signal_test3() { # UnitTest
-	expect="EXIT-0
-EXIT-0"
+	expect="EXIT0-42
+EXIT1-42"
 	result=$(./signal-data/003-signal)
 	assertEquals "$result" "$result" "$expect"
 }

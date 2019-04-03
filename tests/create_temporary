@@ -3,8 +3,10 @@
 PROG='TEST'
 
 create_temporary_test1() { # UnitTest
-	local out result
-	out="$(./temp-data/001-temp)"
+	local out result rc=0
+	out="$(./temp-data/001-temp)" || rc=$?
+
+	assertEquals "rc=$rc" "$rc" "0"
 
 	result="$(printf '%s\n' "$out" |
 		while read -r d; do
@@ -19,13 +21,15 @@ create_temporary_test1() { # UnitTest
 }
 
 create_temporary_test2() { # UnitTest
-	local out result n
-	out="$(./temp-data/002-temp)"
+	local out result n rc=0
+	out="$(./temp-data/002-temp)" || rc=$?
+
+	assertEquals "rc=$rc" "$rc" "42"
 
 	n=0
 	result="$(printf '%s\n' "$out" |
 		while read -r d; do
-			if [ "$n:$d" = "1:DONE 0" ]; then
+			if [ "$n:$d" = "1:DONE 42" ]; then
 				exit 0
 			fi
 			if [ "$n" != 0 ]; then
