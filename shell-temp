@@ -7,18 +7,18 @@ if [ -z "${__included_shell_temp-}" ]; then
 __included_shell_temp=1
 
 . shell-error
-. shell-quote
 . shell-signal
 
-__shell_clean_temp=
+verbose=1
+
+__shell_clean_temp=0
 __shell_clean_temp()
 {
-	local args=
-	quote_shell_args args "$__shell_clean_temp"
-	eval "set -- $args"
-	while [ "$#" != 0 ]; do
-		rm $verbose -rf -- "$1"
-		shift
+	local i=0 temp=
+	while [ $i -lt ${__shell_clean_temp:-0} ]; do
+		eval "temp=\"\$__shell_clean_temp_$i\""
+		rm $verbose -rf -- "$temp"
+		i=$(($i + 1))
 	done
 }
 
@@ -28,10 +28,11 @@ create_temporary()
 	shift
 	[ "$#" != 0 ] || set -- -dt
 	__create_temporary_out="$(mktemp "$@" "$PROG.XXXXXXXXX")"
-	[ -n "$__shell_clean_temp" ] ||
+	eval "__shell_clean_temp_$__shell_clean_temp=\"\$__create_temporary_out\""
+	[ "$__shell_clean_temp" != 0 ] ||
 		signal_handler __shell_clean_temp EXIT HUP PIPE INT QUIT TERM
-	__shell_clean_temp="$__shell_clean_temp \"$__create_temporary_out\""
-	eval "$__create_temporary_var=\"$__create_temporary_out\""
+	__shell_clean_temp=$(($__shell_clean_temp + 1))
+	eval "$__create_temporary_var=\"\$__create_temporary_out\""
 }
 
 fi #__included_shell_temp

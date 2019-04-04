@@ -8,8 +8,18 @@ PROG=TEST
 export LC_ALL=C
 export LANG=C
 
+exit_handler() {
+	trap - EXIT
+	echo "DONE $1"
+	exit $1
+}
+
 create_temporary workdir0 -d -p "$PWD/temp-data/1 2 3"
-create_temporary workdir1
+create_temporary workdir1 -d -p "$PWD/temp-data/1 \"2 3\" 4"
+
+set_cleanup_handler exit_handler
 
 echo "$workdir0"
 echo "$workdir1"
+
+exit 42
