@@ -9,8 +9,6 @@ __included_shell_temp=1
 . shell-error
 . shell-signal
 
-verbose=1
-
 __shell_clean_temp=0
 __shell_clean_temp()
 {
