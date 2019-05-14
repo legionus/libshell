@@ -8,7 +8,8 @@
 
 git_config_append, git_config_count, git_config_get, git_config_list,
 git_config_location_exists, git_config_parse, git_config_set,
-git_config_unset - collection of functions to work with a git-like config files
+git_config_unset, git_config_env, git_config_get_var, git_config_get_section - collection
+of functions to work with a git-like config files
 
 # SYNOPSIS #
 
@@ -20,6 +21,9 @@ git_config_unset - collection of functions to work with a git-like config files
 - git_config_parse file
 - git_config_set file name value
 - git_config_unset file name [value]
+- git_config_env file
+- git_config_get_var retname section subsection name [{first|last|all=DELIM}]
+- git_config_get_subsections section
 
 # DESCRIPTION #
 The syntax of the configuration file corresponds to the ***git-config (1)***.
@@ -53,6 +57,15 @@ Function sets or adds **value** into config **file** with given **name**.
 
 ## git_config_unset ##
 Function removes variable by **name** and optionally by **value**.
+
+## git_config_env ##
+Function parses config **file** and store it as shell variables to improve future access to values.
+
+## git_config_get_var ##
+Function stores value of config value into the **retname** variable.
+
+## git_config_get_subsections ##
+Function walkthrough all subsections in **section** and call **git_config_get_subsections_handler** function.
 
 # ENVIRONMENT #
 

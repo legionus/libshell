@@ -487,4 +487,153 @@ git_config_unset()
 	mv -f -- "$fn" "$1"
 }
 
-fi #__included_shell_git_config
+### Usage: __var_append arrname name value
+__var_append()
+{
+	local n
+	eval "n=\${$1:-0}"
+	eval "${1}_${n}_n=\"\$2\""
+	eval "${1}_${n}_v=\"\$3\""
+	eval "$1=$(($n+1))"
+}
+
+### Usage: __arr_append retindex arrname value
+__arr_append()
+{
+	local n
+	eval "n=\${$2:-0}"
+	eval "${2}_${n}=\"\$3\""
+	eval "$2=$(($n+1))"
+	eval "$1=$n"
+}
+
+### Usage: __arr_find retindex arrname value
+__arr_find()
+{
+	local i=0 n= v=
+	eval "$1="
+	eval "n=\${$2:-0}"
+	while [ "$i" -lt "$n" ]; do
+		eval "v=\"\${${2}_${i}}\""
+		if [ "$v" = "$3" ]; then
+			eval "$1=$i"
+			return
+		fi
+		i=$(($i+1))
+	done
+}
+
+### Parses git-config-like file and store the result in memory for future use.
+### Usage: git_config_env file
+git_config_env()
+{
+	local idx= sidx=
+	git_config_handler()
+	{
+		case "$1" in
+			section-start)
+				case "$section_lower" in
+					include|includeif) return ;;
+				esac
+				__arr_find idx s "$section_lower"
+				[ -n "$idx" ] ||
+					__arr_append idx s "$section_lower"
+
+				if [ -n "$subsection" ]; then
+					__arr_find sidx "ss_$idx" "$subsection"
+					[ -n "$sidx" ] ||
+						__arr_append sidx "ss_$idx" "$subsection"
+				else
+					eval "ss_$idx=\${ss_$idx:-0}"
+					sidx=
+				fi
+				;;
+			variable)
+				[ -n "$idx" ] ||
+					fatal "variable outside of section"
+				__var_append "v_${idx}${sidx:+_$sidx}_x" "$name_lower" "$value"
+				;;
+		esac
+	}
+	git_config_parse_file "$1"
+}
+
+### Stores git-config variable into variable 'ret'.
+### Usage: git_config_get_var ret section subsection name [{first|last|all=DELIM}]
+git_config_get_var()
+{
+	local __git_config_get_var_ret="$1" __git_config_get_var_v=
+	__git_config_get_var()
+	{
+		local n= v= i=0 idx= sidx=
+
+		__arr_find idx s "$2"
+		[ "${#idx}" != 0 ] ||
+			return 0
+
+		if [ "${#3}" != 0 ]; then
+			eval "n=\"\$ss_$idx\""
+			[ "${#n}" != 0 ] && [ "$n" != 0 ] &&
+				__arr_find sidx "ss_$idx" "$3" ||
+				return 0
+		fi
+
+		eval "n=\"\${v_$idx${sidx:+_$sidx}_x:-0}\""
+
+		while [ "$i" -lt "$n" ]; do
+			eval "v=\"\$v_$idx${sidx:+_$sidx}_x_${i}_n\""
+			if [ "$v" = "$4" ]; then
+				eval "v=\"\$v_$idx${sidx:+_$sidx}_x_${i}_v\""
+				case "${5-}" in
+					first)
+						eval "__git_config_get_var_v=\"\$v\""
+						return
+						;;
+					all=*)
+						eval "__git_config_get_var_v=\"\${__git_config_get_var_v:+\${__git_config_get_var_v}${5#all=}}\$v\""
+						;;
+					''|last)
+						eval "__git_config_get_var_v=\"\$v\""
+						;;
+				esac
+			fi
+			i=$(($i+1))
+		done
+	}
+	__git_config_get_var "$@"
+	eval "$__git_config_get_var_ret=\"\$__get_var_v\""
+}
+
+### Usage: git_config_get_subsections section
+git_config_get_subsections_handler() { :; }
+git_config_get_subsections()
+{
+	local __git_config_get_subsections_idx=
+	__git_config_get_subsections_idx()
+	{
+		local n= v= i=0
+
+		eval "n=\${s:-0}"
+		while [ "$i" -lt "$n" ]; do
+			eval "v=\"\${s_${i}}\""
+			if [ "$v" = "$1" ]; then
+				__git_config_get_subsections_idx=$i
+				return 0
+			fi
+			i=$(($i+1))
+		done
+		return 1
+	}
+	__git_config_get_subsections_idx "$1" || return 0
+	__git_config_get_subsections_idx()
+	{
+		__git_config_get_subsections_idx=0
+		while [ "$__git_config_get_subsections_idx" -lt "$2" ]; do
+			eval "git_config_get_subsections_handler \"\${ss_${1}_${__git_config_get_subsections_idx}}\""
+			__git_config_get_subsections_idx=$(($__git_config_get_subsections_idx+1))
+		done
+	}
+	eval "__git_config_get_subsections_idx \"$__git_config_get_subsections_idx\" \"\$ss_$__git_config_get_subsections_idx\""
+}
+
+fi # __included_shell_git_config
