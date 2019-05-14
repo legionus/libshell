@@ -20,6 +20,7 @@ __shell_clean_temp()
 	done
 }
 
+### Usage: create_temporary ret [mktemp options]
 create_temporary()
 {
 	local __create_temporary_out __create_temporary_var="$1"
