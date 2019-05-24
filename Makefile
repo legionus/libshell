@@ -3,8 +3,8 @@ GEN_SYMS   = $(CURDIR)/gen-syms.sh
 GEN_SINGLE = $(CURDIR)/gen-single.sh
 GEN_VERS   = $(CURDIR)/gen-version.sh
 
-# github.com/legionus/md2man
-MD2MAN ?= md2man
+# https://git.sr.ht/~sircmpwn/scdoc
+SCDOC ?= scdoc
 
 PROJECT = libshell
 VERSION = $(shell $(GEN_VERS))
@@ -40,7 +40,9 @@ shell-regexp: shell-quote
 	ln -s $^ $@
 
 %.3: %.md
-	@[ -z "$(MD2MAN)" ] || $(MD2MAN) -output $@ $<
+	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
+
+man: ${man_TARGETS}
 
 install: install-bin install-man install-data $(SUBDIRS)
 
@@ -57,7 +59,7 @@ install-bin: ${bin_TARGETS}
 	cp -a $^ ${DESTDIR}${bindir}/
 
 install-man: ${man_TARGETS}
-	if [ -n "$(MD2MAN)" ]; then \
+	if [ -n "$(SCDOC)" ]; then \
 	  install -d -m755 ${DESTDIR}${man3dir}; \
 	  install -m644 $^ ${DESTDIR}${man3dir}; \
 	fi

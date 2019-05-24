@@ -1,22 +1,18 @@
-% SHELL-PROCESS
-% 3
-% October 2016
-% libshell
-% Linux Programmer's Manual
+shell-process(3)
 
-# NAME #
+# NAME
 
 daemon, daemon_close_fd, daemon_write_pid
 
-# SYNOPSIS #
+# SYNOPSIS
 
 - daemon [program args]
 - daemon_close_fd [fd0 fd1 ...]
 - daemon_write_pid /path/to/pidfile [force]
 
-# DESCRIPTION #
+# DESCRIPTION
 
-## daemon ##
+## daemon
 Function helps programs wishing to detach themselves from the controlling terminal and run
 in the background as system daemons.
 
@@ -27,28 +23,28 @@ On success daemon() returns 0 or 1 if an error occurred.
 
 Variables:
 
-**daemon_noclose**  - do not close first 3-9 descriptors;
+*daemon_noclose*  - do not close first 3-9 descriptors;
 
-**daemon_nokill**   - do not check previous pid;
+*daemon_nokill*   - do not check previous pid;
 
-**daemon_nolock**   - do not lock the pid file;
+*daemon_nolock*   - do not lock the pid file;
 
-**daemon_err_file** - specifies error log file (default /dev/null);
+*daemon_err_file* - specifies error log file (default /dev/null);
 
-**daemon_log_file** - specifies log file (default /dev/null);
+*daemon_log_file* - specifies log file (default /dev/null);
 
-**daemon_pid_file** - specifies pid file.
+*daemon_pid_file* - specifies pid file.
 
-## daemon_close_fd ##
+## daemon_close_fd
 Function closes all open descriptors or the selected one.
 
-## daemon_write_pid ##
+## daemon_write_pid
 Function checks the PID from a pidfile and writes a new one.
 
-# AUTHOR #
-Authors and contributors of the programs included in the **libshell** package are listed
+# AUTHOR
+Authors and contributors of the programs included in the *libshell* package are listed
 in the COPYING file.
 
-# BUGS #
+# BUGS
 Report bugs to the authors.
 

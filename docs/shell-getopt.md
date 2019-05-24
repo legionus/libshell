@@ -1,14 +1,10 @@
-% SHELL-GETOPT
-% 3
-% October 2016
-% libshell
-% Linux Programmer's Manual
+shell-getopt(3)
 
-# NAME #
+# NAME
 
 getopt, getoptex, getopts, getsubopt - parses command options (enhanced)
 
-# SYNOPSIS #
+# SYNOPSIS
 
 - getopt optstring parameters
 - getopt [options] [--] optstring parameters
@@ -17,17 +13,17 @@ getopt, getoptex, getopts, getsubopt - parses command options (enhanced)
 - getopts optstring name [args]
 - getoptex optstring name [args]
 
-# DESCRIPTION #
+# DESCRIPTION
 Collection of functions to parse commend line options.
 
-## getopt ##
+## getopt
 This function is used to parse command line options and to check for legal options.
-Shell implementation of ***getopt (1)*** utility from the util-linux package. This
-function is written to be as compatible as possible with ***getopt (1)*** utility. Usually
-you can just replace ***getopt (1)*** without any modifications by this function.
+Shell implementation of *getopt (1)* utility from the util-linux package. This
+function is written to be as compatible as possible with *getopt (1)* utility. Usually
+you can just replace *getopt (1)* without any modifications by this function.
 
 Example:
-```bash
+```
 TEMP=`getopt -n "$PROG" -o "v:,V,h" -l "verbose:,version,help" -- "$@"` || show_usage
 eval set -- "$TEMP"
 
@@ -46,21 +42,21 @@ while :; do
 done
 ```
 
-## getsubopt ##
-Function parses suboption arguments from a string. This is a shell-implementation of ***getsubopt (3)***.
+## getsubopt
+Function parses suboption arguments from a string. This is a shell-implementation of *getsubopt (3)*.
 
 Example:
-```bash
+```
 while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz'; do
     echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 done
 ```
 
-## getopts ##
-Shell implementation of ***getopts (1)*** utility. It's a built-in utility in some shells.
+## getopts
+Shell implementation of *getopts (1)* utility. It's a built-in utility in some shells.
 
 Example:
-```bash
+```
 echo "Using getopt to parse arguments:"
 
 while getopts "abcd:e." "$@"; do
@@ -75,11 +71,11 @@ for arg in "$@"; do
 done
 ```
 
-## getoptex ##
-This function is the same as **getopts**, but supports long options.
+## getoptex
+This function is the same as *getopts*, but supports long options.
 
 Example:
-```bash
+```
 echo Using getoptex to parse arguments:
 
 while getoptex "a; b; c; d: e. opt1 opt2 opt3 opt4: opt5." "$@"; do
@@ -94,21 +90,21 @@ for arg in "$@"; do
 done
 ```
 
-# ENVIRONMENT #
+# ENVIRONMENT
 
-**GETOPT_ALLOW_UNKNOWN** - Ignore unknown options.
+*GETOPT_ALLOW_UNKNOWN* - Ignore unknown options.
 
-**GETOPT_ALLOW_ABBREV** - Long options may be abbreviated, as long as the abbreviation is not ambiguous.
+*GETOPT_ALLOW_ABBREV* - Long options may be abbreviated, as long as the abbreviation is not ambiguous.
 
-**GETOPT_ALLOW_ALTERNATIVE** - Allow long options to start with a single `-'. See (getopt -a).
+*GETOPT_ALLOW_ALTERNATIVE* - Allow long options to start with a single `-'. See (getopt -a).
 
-**GETOPT_POSIXLY_CORRECT** - If the is set, all remaining parameters are interpreted as non-option
+*GETOPT_POSIXLY_CORRECT* - If the is set, all remaining parameters are interpreted as non-option
 parameters as soon as the first non-option parameter is found.
 
-# AUTHOR #
-Authors and contributors of the programs included in the **libshell** package are listed
+# AUTHOR
+Authors and contributors of the programs included in the *libshell* package are listed
 in the COPYING file.
 
-# BUGS #
+# BUGS
 Report bugs to the authors.
 

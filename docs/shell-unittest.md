@@ -1,16 +1,12 @@
-% SHELL-UNITTEST
-% 3
-% October 2016
-% libshell
-% Linux Programmer's Manual
+shell-unittest(3)
 
-# NAME #
+# NAME
 
 appendTests, assertEquals, assertFalse, assertNotEquals, assertNotNull, assertNotSame,
 assertNull, assertSame, assertTrue, messageTest, registerTests, runUnitTests, setUp,
 setUpTests, shouldSkip, showSummary, tearDown, tearDownTests
 
-# SYNOPSIS #
+# SYNOPSIS
 
 - appendTests funcion_name
 - registerTests [/tests-file]
@@ -33,92 +29,92 @@ setUpTests, shouldSkip, showSummary, tearDown, tearDownTests
 - tearDown
 - tearDownTests
 
-# DESCRIPTION #
+# DESCRIPTION
 Unit testing framework for shell. The module was supposed to be compatible with [xUnit](https://en.wikipedia.org/wiki/XUnit).
 
-## appendTests ##
+## appendTests
 Function registers new testing function.
 
-## registerTests ##
+## registerTests
 Function automatically registeres test functions with 'UnitTest' comment.
 The name of current shell script will be used if argument is not present.
 
 Example:
-```bash
+```
 my_testcase_function() # UnitTest
 {
 	blah blah blah ...
 }
 ```
 
-## assertEquals ##
+## assertEquals
 Asserts that two arguments are equal to one another.
 (called in testing function)
 
-## assertFalse ##
+## assertFalse
 Asserts that a given shell test condition (or integer) is false.
 (called in testing function)
 
-## assertNotEquals ##
+## assertNotEquals
 Asserts that two arguments are not equal to one another.
 (called in testing function)
 
-## assertNotNull ##
+## assertNotNull
 Asserts that argument is not empty string.
 (called in testing function)
 
-## assertNotSame ##
+## assertNotSame
 Asserts that two arguments are not same.
 (called in testing function)
 
-## assertNull ##
+## assertNull
 Asserts that argument is a zero-length string.
 (called in testing function)
 
-## assertSame ##
+## assertSame
 Asserts that two arguments are same.
 (called in testing function)
 
-## assertTrue ##
+## assertTrue
 Asserts that a given shell test condition (or integer) is true.
 (called in testing function)
 
-## shouldSkip ##
+## shouldSkip
 Skip test (called in testing function)
 
-## messageTest ##
+## messageTest
 Function displays status message after each test.
 
-## setUp ##
+## setUp
 Function would be called before each test is run.
 
-## setUpTests ##
+## setUpTests
 Function would be called before all test is run.
 
-## showSummary ##
+## showSummary
 Function displays summary statistic: how many tests passed and how many failed.
 
-## tearDown ##
+## tearDown
 Function would be called after each test is run.
 
-## tearDownTests ##
+## tearDownTests
 Function would be called after all test is run.
 
-## runUnitTests ##
+## runUnitTests
 Function calls tests one by one and calls the function described above.
 
-# ENVIRONMENT #
+# ENVIRONMENT
 
-**TESTCASES** - Only perform listed tests.
+*TESTCASES* - Only perform listed tests.
 
-**unittest_use_color** - Use color messages to show status.
+*unittest_use_color* - Use color messages to show status.
 
-**unittest_show_condition** - Append tests condition to comment message if test failed.
+*unittest_show_condition* - Append tests condition to comment message if test failed.
 
-# AUTHOR #
-Authors and contributors of the programs included in the **libshell** package are listed
+# AUTHOR
+Authors and contributors of the programs included in the *libshell* package are listed
 in the COPYING file.
 
-# BUGS #
+# BUGS
 Report bugs to the authors.
 
