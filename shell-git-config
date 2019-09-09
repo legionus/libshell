@@ -601,7 +601,7 @@ git_config_get_var()
 		done
 	}
 	__git_config_get_var "$@"
-	eval "$__git_config_get_var_ret=\"\$__get_var_v\""
+	eval "$__git_config_get_var_ret=\"\$__git_config_get_var_v\""
 }
 
 ### Usage: git_config_get_subsections section
