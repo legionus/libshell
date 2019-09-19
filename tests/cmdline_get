@@ -1,12 +1,12 @@
 #!/bin/ash -efu
 
-CMDLINE='ro rw= root=LABEL=ROOT resume=/dev/sda1 panic=30 foo.bar="zzz xxx" BOOT_IMAGE=/bad/param BOOT-IMAGE=/boot/vmlinuz'
+cmdline_get_CMDLINE='ro rw= root=LABEL=ROOT resume=/dev/sda1 panic=30 foo.bar="zzz xxx" BOOT_IMAGE=/bad/param BOOT-IMAGE=/boot/vmlinuz'
 
 cmdline_get_test1() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'resume' "$CMDLINE"
+	cmdline_get 'result' 'resume' "$cmdline_get_CMDLINE"
 	assertEquals "resume=[$result]" "$result" '/dev/sda1'
 }
 
@@ -14,7 +14,7 @@ cmdline_get_test2() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'ro' "$CMDLINE"
+	cmdline_get 'result' 'ro' "$cmdline_get_CMDLINE"
 	assertEquals "ro=[$result]" "$result" '1'
 }
 
@@ -22,7 +22,7 @@ cmdline_get_test3() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'rw' "$CMDLINE"
+	cmdline_get 'result' 'rw' "$cmdline_get_CMDLINE"
 	assertEquals "rw=[$result]" "$result" ''
 }
 
@@ -30,7 +30,7 @@ cmdline_get_test4() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'root' "$CMDLINE"
+	cmdline_get 'result' 'root' "$cmdline_get_CMDLINE"
 	assertEquals "root=[$result]" "$result" 'LABEL=ROOT'
 }
 
@@ -38,7 +38,7 @@ cmdline_get_test5() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'foo.bar' "$CMDLINE"
+	cmdline_get 'result' 'foo.bar' "$cmdline_get_CMDLINE"
 	assertEquals "foo.bar=[$result]" "$result" 'zzz xxx'
 }
 
@@ -46,7 +46,7 @@ cmdline_get_test6() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'BOOT-IMAGE' "$CMDLINE"
+	cmdline_get 'result' 'BOOT-IMAGE' "$cmdline_get_CMDLINE"
 	assertEquals "BOOT-IMAGE=[$result]" "$result" '/boot/vmlinuz'
 }
 
@@ -54,6 +54,6 @@ cmdline_get_test7() { # UnitTest
 	. ../shell-cmdline
 
 	local result
-	cmdline_get 'result' 'BOOT_IMAGE' "$CMDLINE"
+	cmdline_get 'result' 'BOOT_IMAGE' "$cmdline_get_CMDLINE"
 	assertEquals "BOOT_IMAGE=[$result]" "$result" '/boot/vmlinuz'
 }

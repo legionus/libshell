@@ -1,0 +1,83 @@
+#!/bin/ash -efu
+
+cmdline_foreach_CMDLINE="init=/virt/init rootflags=trans=virtio,version=9p2000.L rw rootfstype=9p"
+
+cmdline_foreach_test1() { # UnitTest
+	. ../shell-cmdline
+
+	local result='' flag=''
+
+	_get_value() {
+		[ "$1" = 'init' ] || return 0
+		result="$2"
+		flag="$3"
+	}
+
+	cmdline_foreach "$cmdline_foreach_CMDLINE" _get_value
+	assertEquals "init=[$result]" "$result" '/virt/init'
+	assertEquals "flag=[$flag]" "$flag" ''
+}
+
+cmdline_foreach_test2() { # UnitTest
+	. ../shell-cmdline
+
+	local result='' flag=''
+
+	_get_value() {
+		[ "$1" = 'rw' ] || return 0
+		result="$2"
+		flag="$3"
+	}
+
+	cmdline_foreach "$cmdline_foreach_CMDLINE" _get_value
+	assertEquals "rw=[$result]" "$result" '1'
+	assertEquals "flag=[$flag]" "$flag" '1'
+}
+
+cmdline_foreach_test3() { # UnitTest
+	. ../shell-cmdline
+
+	local result='' flag=''
+
+	_get_value() {
+		[ "$1" = 'rootflags' ] || return 0
+		result="$2"
+		flag="$3"
+	}
+
+	cmdline_foreach "$cmdline_foreach_CMDLINE" _get_value
+	assertEquals "rootflags=[$result]" "$result" 'trans=virtio,version=9p2000.L'
+	assertEquals "flag=[$flag]" "$flag" ''
+}
+
+cmdline_foreach_test4() { # UnitTest
+	. ../shell-cmdline
+
+	local result='' flag=''
+
+	_get_value() {
+		[ "$1" = 'rootfstype' ] || return 0
+		result="$2"
+		flag="$3"
+	}
+
+	cmdline_foreach "$cmdline_foreach_CMDLINE" _get_value
+	assertEquals "rootfstype=[$result]" "$result" '9p'
+	assertEquals "flag=[$flag]" "$flag" ''
+}
+
+cmdline_foreach_test5() { # UnitTest
+	. ../shell-cmdline
+
+	local result='' flag=''
+
+	_get_value() {
+		[ "$1" = 'ro' ] || return 0
+		result="$2"
+		flag="$3"
+	}
+
+	cmdline_foreach "$cmdline_foreach_CMDLINE ro" _get_value
+	assertEquals "ro=[$result]" "$result" '1'
+	assertEquals "flag=[$flag]" "$flag" '1'
+}

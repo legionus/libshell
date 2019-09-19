@@ -27,7 +27,7 @@ cmdline_foreach()
 	local EQUAL=$((0x04))
 	local QUOTE=$((0x10))
 
-	local n= v=
+	local n= v= f=1
 
 	while [ -n "$l" ]; do
 		c="${l%$m}"
@@ -42,11 +42,12 @@ cmdline_foreach()
 				if __is_set $state $QUOTE; then
 					v="$v$c"
 				else
+					f=
 					__is_set $state $EQUAL ||
-						v=1
-					$h "$n" "$v" ||
+						{ v=1; f=1; }
+					$h "$n" "$v" "$f" ||
 						break
-					n= v=
+					n='' v='' f=''
 					state=$((0x00))
 				fi
 				;;
@@ -69,8 +70,12 @@ cmdline_foreach()
 		m="${m#?}"
 	done
 
-	[ -z "$n" ] ||
-		$h "$n" "$v" ||:
+	if [ -n "$n" ]; then
+		f=
+		__is_set $state $EQUAL ||
+			{ v=1; f=1; }
+		$h "$n" "$v" "$f" ||:
+	fi
 
 	unset -f __is_set
 }
