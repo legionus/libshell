@@ -82,6 +82,20 @@ release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
 	@cd tests; ./runtests
+	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'   docs/shell-* |sort -uo $(CURDIR)/.shell-funcs-documented
+	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' shell-* |sort -uo $(CURDIR)/.shell-funcs
+	@comm -13 $(CURDIR)/.shell-funcs-documented $(CURDIR)/.shell-funcs > $(CURDIR)/.shell-funcs-not-documented
+	@rc=0; \
+	if [ "$$(wc -l < $(CURDIR)/.shell-funcs-not-documented)" != "0" ]; then \
+	    echo >&2 "ERROR: some functions are not documented:"; \
+	    cat $(CURDIR)/.shell-funcs-not-documented; \
+	    rc=1; \
+	fi; \
+	rm -f -- \
+	    $(CURDIR)/.shell-funcs-documented \
+	    $(CURDIR)/.shell-funcs-not-documented \
+	    $(CURDIR)/.shell-funcs; \
+	exit $$rc;
 
 verify:
 	@for f in shell-*; do \

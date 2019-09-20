@@ -55,6 +55,9 @@ quote_shell_args args "$var_args"
 eval "set -- $args"
 ```
 
+## string_quote_remove
+Obsolete function. You shouldn't use it.
+
 # AUTHOR
 Authors and contributors of the programs included in the *libshell* package are listed
 in the COPYING file.

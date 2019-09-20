@@ -42,6 +42,12 @@ this function can display error message.
 Function to parse common arguments (*quiet*, *verbose*, *version*, *help*). Using this
 function requires the definition of additional functions: *show_help*, *show_version*.
 
+## show_help
+This stub function must be created by the user.
+
+## print_version
+This stub function must be created by the user.
+
 # ENVIRONMENT
 
 *getopt_common_opts*     - short (one-character) *getopt (1)* options to parse common arguments ("q,v,V,h").

@@ -608,6 +608,7 @@ git_config_get_var()
 	eval "$__git_config_get_var_ret=\"\$__git_config_get_var_v\""
 }
 
+### Usage: git_config_foreach [name] [custom_handler]
 git_config_foreach_handler()
 {
 	printf '%s=%s\n' "$1" "$2"

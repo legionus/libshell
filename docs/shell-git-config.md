@@ -4,8 +4,8 @@ shell-git-config(3)
 
 git_config_append, git_config_count, git_config_get, git_config_list,
 git_config_location_exists, git_config_parse, git_config_set,
-git_config_unset, git_config_env, git_config_get_var, git_config_get_section - collection
-of functions to work with a git-like config files
+git_config_unset, git_config_env, git_config_foreach, git_config_get_var,
+git_config_get_subsections - collection of functions to work with a git-like config files
 
 # SYNOPSIS
 
@@ -15,9 +15,11 @@ of functions to work with a git-like config files
 - git_config_list file [name]
 - git_config_location_exists file name
 - git_config_parse file
+- git_config_parse_file file
 - git_config_set file name value
 - git_config_unset file name [value]
 - git_config_env file
+- git_config_foreach [name] [custom_handler]
 - git_config_get_var retname section subsection name [{first|last|all=DELIM}]
 - git_config_get_subsections section
 
@@ -48,6 +50,12 @@ Function checks whether there is a specified variable in the configuration.
 ## git_config_parse
 Function lists all names and variables in tab separated form.
 
+## git_config_parse_file
+Parses the git-like config file and calls *git_config_handler* for every value.
+
+## git_config_handler
+Default handler for *git_config_parse_file*.
+
 ## git_config_set
 Function sets or adds *value* into config *file* with given *name*.
 
@@ -56,12 +64,28 @@ Function removes variable by *name* and optionally by *value*.
 
 ## git_config_env
 Function parses config *file* and store it as shell variables to improve future access to values.
+This is another way to get values from the config. It requires more memory since it places the config
+parameters in shell variables. This can be useful if you often access config variables.
+
+## git_config_foreach
+Lists of variables speciRequires file parsing function.fied in the config.
+Uses the result of parsing a file by the *git_config_env*.
+
+## git_config_foreach_handler
+Default handler for *git_config_foreach*.
+This function may be overridden.
 
 ## git_config_get_var
 Function stores value of config value into the *retname* variable.
+Uses the result of parsing a file by the *git_config_env*.
 
 ## git_config_get_subsections
 Function walkthrough all subsections in *section* and call *git_config_get_subsections_handler* function.
+Uses the result of parsing a file by the *git_config_env*.
+
+## git_config_get_subsections_handler
+Default handler for *git_config_get_subsections*.
+This function may be overridden.
 
 # ENVIRONMENT
 
