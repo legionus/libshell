@@ -82,7 +82,16 @@ tar: $(PROJECT)-$(VERSION).tar.xz
 release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
-	@cd tests; ./runtests
+	@cd tests; \
+	for sh in /bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh; do \
+	    [ -x "$$sh" ] || continue; \
+	    echo "Checking with $$sh"; \
+	    if ! "$$sh" -efu ./runtests; then \
+	        echo "Tests failed with $$sh"; \
+	        echo; \
+	        exit 1; \
+	    fi; \
+	done
 	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mddocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
 	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}    |sort -uo "$(CURDIR)/.shell-funcs"
 	@comm -13 \

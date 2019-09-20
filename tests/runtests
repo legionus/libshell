@@ -4,6 +4,7 @@ srcdir="$(readlink -ev ..)"
 export PATH="$srcdir:$PATH"
 
 unittest_use_color=1
+unittest_hide_successful=1
 
 . ../shell-unittest
 
