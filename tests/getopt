@@ -176,3 +176,11 @@ getopt_test020() { # UnitTest
 	result=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- ZZZ --tag=xxx || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
 	assertEquals "$result" "$result" "$expect"
 }
+
+getopt_test021() { # UnitTest
+	LANG=C
+	expect=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- "Z Z" --tag="x x" || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
+	. ../shell-getopt
+	result=`{ rc=0; getopt -n TEST -o '' -l 'tag-message:,tag:,tag-subject:' -- "Z Z" --tag="x x" || rc=$?; echo rc=$rc; } 2>&1 |normalize |tr '\n' ';'`
+	assertEquals "$result" "$result" "$expect"
+}

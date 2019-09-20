@@ -16,7 +16,7 @@ run_if_executable()
 {
 	local v f
 	f="$1"; shift
-	! __shell_source_find v "$f" || [ ! -x "$v" ] || "$v" "$@"
+	! __shell_source_find v "$f" || [ ! -x "$v" ] || "$v" ${1:+"$@"}
 }
 
 ### Run scripts from directory.
@@ -35,7 +35,7 @@ run_scripts()
 			[ -n "${f##$p}" ] ||
 				continue 2
 		done
-		run_if_executable "$f" "$@" || rc=1
+		run_if_executable "$f" ${1:+"$@"} || rc=1
 		[ "$SCRIPT_ERROR_FATAL" = true ] &&
 			[ $rc -gt 0 ] && return $rc
 	done

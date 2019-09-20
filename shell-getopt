@@ -249,7 +249,7 @@ getopts()
 		fi
 	done
 	shift
-	getoptex "$r" "$@" ||
+	getoptex "$r" ${1:+"$@"} ||
 		return $?
 }
 
@@ -345,7 +345,7 @@ getopt()
 	local PROG='getopt' OPTIND=1 OPTERR=1 prg='' opts='' lopts='' quiet_output='' alt='' order='' rc
 	local GETOPT_POSIXLY_CORRECT
 
-	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
+	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' ${1:+"$@"} && rc=0 || rc=$?; do
 		case "$rc" in
 			2) __getopt_usage; return 2 ;;
 			1) break ;;
@@ -371,7 +371,7 @@ getopt()
 	done
 
 	shift $(($OPTIND-1))
-	set -- "$@"
+	set -- ${1:+"$@"}
 
 	if [ -z "${opts##+*}" ]; then
 		opts="${opts#+}"
@@ -416,12 +416,12 @@ getopt()
 	}
 
 	PROG="$prg"
-	while getoptex "$opts" "$@" && rc=0 || rc=$?; do
+	while getoptex "$opts" ${1:+"$@"} && rc=0 || rc=$?; do
 		case "$rc" in
 			1)
 				[ $# -ge $OPTIND ] && [ -z "${GETOPT_POSIXLY_CORRECT-}" ] ||
 					break
-				__getopt_out_arg "$@"
+				__getopt_out_arg ${1:+"$@"}
 				OPTIND=$(($OPTIND+1))
 				[ "$OPTTYP" != '--' ] ||
 					break
@@ -440,15 +440,15 @@ getopt()
 		pfx='-'
 		[ "${#OPTOPT}" -eq 1 ] ||
 			pfx='--'
-		# shellcheck disable=SC2016
-		# Disable `Expressions don't expand in single quotes, use double quotes for that`
-		# because single quotes are used inside double quotes.
-		out="${out%% -- *} $pfx$OPTOPT${OPTTYP:+ '$OPTARG'} -- ${out#* -- }"
+		# shellcheck disable=SC2027
+		# Disable `The surrounding quotes actually unquote this`
+		# because $OPTARG actually quoted.
+		out="${out%% -- *} $pfx$OPTOPT${OPTTYP:+ "'"$OPTARG"'"} -- ${out#* -- }"
 	done
 
 	local q_arg
 	shift $(($OPTIND-1))
-	set -- "$@"
+	set -- ${1:+"$@"}
 	while [ "$#" -gt 0 ]; do
 		quote_shell_variable q_arg "$1"
 		out="${out%% -- *} -- ${out#* -- } \"$q_arg\""

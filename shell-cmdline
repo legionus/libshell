@@ -22,10 +22,10 @@ cmdline_foreach()
 
 	fill_mask m "$l"
 
-	local state=$((0x00))
-	local VALUE=$((0x02))
-	local EQUAL=$((0x04))
-	local QUOTE=$((0x10))
+	local state=$((0))
+	local VALUE=$((2))
+	local EQUAL=$((4))
+	local QUOTE=$((16))
 
 	local n='' v='' f=1
 
@@ -48,7 +48,7 @@ cmdline_foreach()
 					$h "$n" "$v" "$f" ||
 						break
 					n='' v='' f=''
-					state=$((0x00))
+					state=$((0))
 				fi
 				;;
 			'=')

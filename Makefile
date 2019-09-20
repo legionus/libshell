@@ -83,7 +83,7 @@ release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
 	@cd tests; \
-	for sh in /bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh; do \
+	for sh in /bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/pdksh; do \
 	    [ -x "$$sh" ] || continue; \
 	    echo "Checking with $$sh"; \
 	    if ! "$$sh" -efu ./runtests; then \
@@ -106,6 +106,7 @@ check:
 	    rc=1; \
 	else \
 	    echo "All functions are documented."; \
+	    echo; \
 	fi; \
 	rm -f -- \
 	    "$(CURDIR)/.shell-funcs-documented" \
