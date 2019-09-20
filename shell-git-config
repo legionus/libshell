@@ -527,6 +527,7 @@ __arr_find()
 ### Usage: git_config_env file
 git_config_env()
 {
+	s=0
 	local idx= sidx=
 	git_config_handler()
 	{
@@ -602,6 +603,48 @@ git_config_get_var()
 	}
 	__git_config_get_var "$@"
 	eval "$__git_config_get_var_ret=\"\$__git_config_get_var_v\""
+}
+
+git_config_foreach_handler()
+{
+	printf '%s=%s\n' "$1" "$2"
+}
+git_config_foreach()
+{
+	local __git_config_foreach_name="${1-}"
+	local __git_config_foreach_handler="${2:-git_config_foreach_handler}"
+
+	__arr_foreach()
+	{
+		local i=0 x=0 n='' v=''
+		eval "set -- \"\${$1:-0}\" \"\$@\""
+		while [ "$i" -lt "$1" ]; do
+			eval "n=\"\${${2}_${i}_n}\""
+			eval "v=\"\${${2}_${i}_v}\""
+			if [ -z "$__git_config_foreach_name" ] || [ "$__git_config_foreach_name" = "${3:+$3.}$n" ]; then
+				"$__git_config_foreach_handler" "${3:+$3.}$n" "$v"
+			fi
+			i=$(($i+1))
+		done
+	}
+
+	local i=0 j=0 ss section subsection
+
+	while [ "$i" -lt "${s:-0}" ]; do
+		eval "section=\"\$s_${i}\""
+		__arr_foreach "v_${i}_x" "$section"
+
+		eval "ss=\"\${ss_${i}:-0}\""
+
+		j=0
+		while [ "$j" -lt "$ss" ]; do
+			eval "subsection=\"\$ss_${i}_${j}\""
+			__arr_foreach "v_${i}_${j}_x" "$section.$subsection"
+			j=$(($j+1))
+		done
+
+		i=$(($i+1))
+	done
 }
 
 ### Usage: git_config_get_subsections section
