@@ -21,7 +21,7 @@ run_if_executable()
 
 ### Run scripts from directory.
 ### Usage: run_scripts <dir> [args]
-RUN_SCRIPTS_EXCLUDE='*.rpm* *.swp *,v *~ *.\#'
+RUN_SCRIPTS_EXCLUDE='*.rpm* *.swp *,v *~ *.#'
 SCRIPT_ERROR_FATAL=${SCRIPT_ERROR_FATAL:-false}
 run_scripts()
 {
