@@ -67,7 +67,7 @@ __git_config_fullpath()
 
 __git_config_value()
 {
-	local dq= bq= c= m= l="$1"
+	local dq='' bq='' c='' m='' l="$1"
 	fill_mask m "$l"
 
 	value=
@@ -96,6 +96,9 @@ __git_config_value()
 			b|n|t)
 				if [ -n "$bq" ]; then
 					bq=
+					# shellcheck disable=SC2059
+					# Disable `Don't use variables in the printf format string`
+					# because we actually want to interpret data as a format string.
 					c="$(printf "\\$c#")"
 					c="${c%#}"
 				fi
@@ -114,7 +117,7 @@ __git_config_value()
 git_config_handler() { :; }
 git_config_parse_file()
 {
-	local fn="$1" name value section= subsection= section_lower= name_lower= location= line oline nline=0 eof=
+	local fn="$1" name value section='' subsection='' section_lower='' name_lower='' location='' line oline nline=0 eof=''
 
 	__git_config_parse_section()
 	{
@@ -177,7 +180,7 @@ git_config_parse_file()
 	}
 	__git_config_parse_include_or_if()
 	{
-		local i= gitdir= pattern=
+		local i='' gitdir='' pattern=''
 
 		[ -z "${2-}" ] ||
 			case "$2" in
@@ -287,10 +290,10 @@ git_config_location_exists()
 ### Usage: git_config_get retname file name
 git_config_get()
 {
-	local __git_config_v= __git_config_fullpath __git_config_location
+	local __git_config_v='' __git_config_fullpath __git_config_location
 	git_config_handler()
 	{
-		[ "$1" != 'variable' -o "$__git_config_fullpath" != "$location" ] ||
+		[ "$1" != 'variable' ] || [ "$__git_config_fullpath" != "$location" ] ||
 			__git_config_v="$value"
 	}
 	__git_config_fullpath "$3"
@@ -305,7 +308,7 @@ git_config_count()
 	local __git_config_v=0 __git_config_fullpath __git_config_location
 	git_config_handler()
 	{
-		[ "$1" != 'variable' -o "$__git_config_fullpath" != "$location" ] ||
+		[ "$1" != 'variable' ] || [ "$__git_config_fullpath" != "$location" ] ||
 			__git_config_v=$(($__git_config_v + 1))
 	}
 	__git_config_fullpath "$3"
@@ -317,7 +320,7 @@ git_config_count()
 ### Usage: git_config_list file [name]
 git_config_list()
 {
-	local __git_config_fullpath= __git_config_location=
+	local __git_config_fullpath='' __git_config_location=''
 	git_config_handler()
 	{
 		[ "$1" = 'variable' ] ||
@@ -351,7 +354,7 @@ git_config_parse()
 ### Usage: git_config_append file name value
 git_config_append()
 {
-	local GIT_CONFIG_INCLUDE= GIT_CONFIG_GET_RAW=1
+	local GIT_CONFIG_INCLUDE='' GIT_CONFIG_GET_RAW=1
 	local __git_config_section __git_config_name __git_config_subsection __git_config_fullpath __git_config_location
 	local __git_config_nvalue="$3"
 	local __git_config_state=0 fn
@@ -368,7 +371,7 @@ git_config_append()
 				;;
 			variable)
 				printf '\t%s = %s\n' "$name" "$value"
-				if [ "$__git_config_fullpath" = "$location" -a $__git_config_state != 1 ]; then
+				if [ "$__git_config_fullpath" = "$location" ] && [ $__git_config_state != 1 ]; then
 					printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
 					__git_config_state=1
 				fi
@@ -377,7 +380,7 @@ git_config_append()
 				printf '[%s]\n' "$section${subsection:+ \"$subsection\"}"
 				;;
 			section-end)
-				if [ "$__git_config_location" = "$location" -a $__git_config_state != 1 ]; then
+				if [ "$__git_config_location" = "$location" ] && [ $__git_config_state != 1 ]; then
 					printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
 					__git_config_state=1
 				fi
@@ -401,9 +404,9 @@ git_config_append()
 ### Usage: git_config_set file name value
 git_config_set()
 {
-	local GIT_CONFIG_INCLUDE= GIT_CONFIG_GET_RAW=1
+	local GIT_CONFIG_INCLUDE='' GIT_CONFIG_GET_RAW=1
 	local __git_config_section __git_config_name __git_config_subsection __git_config_fullpath __git_config_location
-	local __git_config_nvalue="$3" __git_config_ovalue=
+	local __git_config_nvalue="$3" __git_config_ovalue=''
 	local __git_config_state=0 fn
 
 	[ -f "$1" ] || :> "$1"
@@ -418,7 +421,7 @@ git_config_set()
 				printf '%s\n' "$line"
 				;;
 			variable)
-				if [ "$__git_config_fullpath" = "$location" -a -n "$__git_config_ovalue" ]; then
+				if [ "$__git_config_fullpath" = "$location" ] && [ -n "$__git_config_ovalue" ]; then
 					if [ "$__git_config_ovalue" = "$value" ]; then
 						printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
 						__git_config_state=1
@@ -431,7 +434,7 @@ git_config_set()
 				printf '[%s]\n' "$section${subsection:+ \"$subsection\"}"
 				;;
 			section-end)
-				if [ "$__git_config_location" = "$location" -a $__git_config_state != 1 ]; then
+				if [ "$__git_config_location" = "$location" ] && [ $__git_config_state != 1 ]; then
 					printf '\t%s = %s\n' "$__git_config_name" "$__git_config_nvalue"
 					__git_config_state=1
 				fi
@@ -454,7 +457,7 @@ git_config_set()
 ### Usage: git_config_unset file name [value]
 git_config_unset()
 {
-	local GIT_CONFIG_INCLUDE= GIT_CONFIG_GET_RAW=1
+	local GIT_CONFIG_INCLUDE='' GIT_CONFIG_GET_RAW=1
 	local __git_config_section __git_config_name __git_config_subsection __git_config_fullpath __git_config_location
 	local __git_config_ovalue="${3-}"
 	local fn
@@ -470,7 +473,7 @@ git_config_unset()
 				;;
 			variable)
 				if [ "$__git_config_fullpath" = "$location" ]; then
-					[ -z "$__git_config_ovalue" -o "$__git_config_ovalue" = "$value" ] ||
+					[ -z "$__git_config_ovalue" ] || [ "$__git_config_ovalue" = "$value" ] ||
 						printf '\t%s = %s\n' "$name" "$value"
 				else
 					printf '\t%s = %s\n' "$name" "$value"
@@ -510,7 +513,7 @@ __arr_append()
 ### Usage: __arr_find retindex arrname value
 __arr_find()
 {
-	local i=0 n= v=
+	local i=0 n='' v=''
 	eval "$1="
 	eval "n=\${$2:-0}"
 	while [ "$i" -lt "$n" ]; do
@@ -528,7 +531,7 @@ __arr_find()
 git_config_env()
 {
 	s=0
-	local idx= sidx=
+	local idx='' sidx=''
 	git_config_handler()
 	{
 		case "$1" in
@@ -563,10 +566,10 @@ git_config_env()
 ### Usage: git_config_get_var ret section subsection name [{first|last|all=DELIM}]
 git_config_get_var()
 {
-	local __git_config_get_var_ret="$1" __git_config_get_var_v=
+	local __git_config_get_var_ret="$1" __git_config_get_var_v=''
 	__git_config_get_var()
 	{
-		local n= v= i=0 idx= sidx=
+		local n='' v='' i=0 idx='' sidx=''
 
 		__arr_find idx s "$2"
 		[ "${#idx}" != 0 ] ||
@@ -654,7 +657,7 @@ git_config_get_subsections()
 	local __git_config_get_subsections_idx=
 	__git_config_get_subsections_idx()
 	{
-		local n= v= i=0
+		local n='' v='' i=0
 
 		eval "n=\${s:-0}"
 		while [ "$i" -lt "$n" ]; do

@@ -72,9 +72,10 @@ __terminfo_setup_colors()
 }
 
 ### Usage: terminfo_init [force]
+# shellcheck disable=SC2120
 terminfo_init()
 {
-	[ -z "${__terminfo_init-}" -o "${1-}" = force ] ||
+	[ -z "${__terminfo_init-}" ] || [ "${1-}" = force ] ||
 		return 0
 
 	type tput >/dev/null 2>&1 ||
@@ -103,7 +104,7 @@ terminfo_init()
 terminfo_color_pattern()
 {
 	local c ctype='fg' color
-	local color_bg= color_fg= bold= italic= uline= reverse=
+	local color_bg='' color_fg='' bold='' italic='' uline='' reverse=''
 
 	for c in $2; do
 		case "$c" in
@@ -164,8 +165,9 @@ EOF
 ### Usage: terminfo_col number
 terminfo_col()
 {
+	# shellcheck disable=SC2119
 	terminfo_init
-	if [ -n "${COLUMNS-}" -a "$1" -ge "${COLUMNS:-0}" ]; then
+	if [ -n "${COLUMNS-}" ] && [ "$1" -ge "${COLUMNS:-0}" ]; then
 		message "value must be less than $COLUMNS"
 		return 1
 	fi
@@ -177,6 +179,7 @@ terminfo_col()
 ### Usage: terminfo_row number
 terminfo_row()
 {
+	# shellcheck disable=SC2119
 	terminfo_init
 	[ -n "${__terminfo_cap_vpa-}" ] ||
 		message "Capability 'vpa' is not defined for this terminal."
@@ -186,6 +189,7 @@ terminfo_row()
 ### Usage: color_text text [pattern]
 color_text()
 {
+	# shellcheck disable=SC2119
 	terminfo_init
 	terminfo_color_pattern b "$2" || return
 	printf '%s' "$1"

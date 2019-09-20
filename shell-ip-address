@@ -42,7 +42,7 @@ valid_ipv4()
 	byte="${ipaddr##*.}"
 	ipaddr="${ipaddr%.$byte}"
 
-	[ "$byte" -gt 0 -a "$byte" -lt 255 ] 2>/dev/null ||
+	[ "$byte" -gt 0 ] && [ "$byte" -lt 255 ] 2>/dev/null ||
 			return 1
 
 	while [ $i -lt 3 ]; do
@@ -53,14 +53,14 @@ valid_ipv4()
 
 		ipaddr="${ipaddr%.$byte}"
 
-		[ "$byte" -ge 0 -a "$byte" -lt 255 ] 2>/dev/null ||
+		[ "$byte" -ge 0 ] && [ "$byte" -lt 255 ] 2>/dev/null ||
 			return 1
 
 		i=$(($i+1))
 	done
 
-	[ $i -eq 2 -a \
-	  "$byte" -ne 127 -a "$byte" -gt 0 -a "$byte" -lt 224 ] 2>/dev/null ||
+	[ $i -eq 2 ] &&
+		[ "$byte" -ne 127 ] && [ "$byte" -gt 0 ] && [ "$byte" -lt 224 ] 2>/dev/null ||
 		return 1
 }
 
@@ -74,7 +74,7 @@ __ipv4_hex()
 
 	local i=0
 	for b; do
-		[ "$b" -ge 0 -a "$b" -le 255 ] 2>/dev/null ||
+		[ "$b" -ge 0 ] && [ "$b" -le 255 ] 2>/dev/null ||
 			return 2
 		i=$(($i + 1))
 	done
@@ -100,7 +100,7 @@ ipv4_ip_subnet()
 	net="${1-}"; shift
 	prefix="${net##*/}"
 
-	[ -n "$prefix" -a "$prefix" -ge 0 ] 2>/dev/null ||
+	[ -n "$prefix" ] && [ "$prefix" -ge 0 ] 2>/dev/null ||
 		return 2
 
 	local hex_addr hex_net hex_mask p
@@ -128,7 +128,7 @@ ipv4_mask2prefix()
 	hex_mask="$(__ipv4_hex "${1-}")" ||
 		return 2
 
-	local p i=0 prefix=
+	local p i=0 prefix=''
 
 	p=$((~$hex_mask & 0xFFFFFFFF))
 
@@ -138,7 +138,7 @@ ipv4_mask2prefix()
 	done
 	prefix=$((32 - $i))
 
-	[ "$prefix" -ge 0 -a "$prefix" -le 32 ] ||
+	[ "$prefix" -ge 0 ] && [ "$prefix" -le 32 ] ||
 		return 1
 	echo "$prefix"
 }
@@ -155,7 +155,7 @@ ipv4_prefix2mask()
 	local len
 	len="${1-}"
 
-	[ "$len" -ge 0 -a "$len" -le 32 ] 2>/dev/null ||
+	[ "$len" -ge 0 ] && [ "$len" -le 32 ] 2>/dev/null ||
 		return 1
 
 	local position=$((0xFFFFFFFF))

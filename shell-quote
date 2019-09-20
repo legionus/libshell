@@ -72,9 +72,9 @@ quote_shell_args()
 {
 ### This is an internal function to avoid the use of ugly namespace.
 __quote_shell_args() {
-	local m= r= c= l="$1"
+	local m='' r='' c='' l="$1"
 	### backslash/double/single quote mode
-	local bq= dq= sq=
+	local bq='' dq='' sq=''
 
 	__quote_shell_args_toggle() {
 		### toggle $1 value
@@ -134,7 +134,7 @@ __quote_shell_args() {
 		{ message "unmatched character ($bq$dq$sq) found"; return 1; }
 	__quote_shell_args_out="$r"
 }
-	local __quote_shell_args_out= __quote_shell_args_rc=0
+	local __quote_shell_args_out='' __quote_shell_args_rc=0
 	__quote_shell_args "$2" ||
 		__quote_shell_args_rc=1
 	eval "$1=\"\$__quote_shell_args_out\""

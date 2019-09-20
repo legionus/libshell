@@ -60,7 +60,7 @@ valid_email()
 {
 	local email="$1"
 	printf '%s' "$email" |
-		egrep -iqs "^$regex_email\$" ||
+		grep -E -iqs "^$regex_email\$" ||
 		return 1
 }
 

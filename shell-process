@@ -12,13 +12,13 @@ __included_shell_process=1
 ### Usage: daemon_write_pid /path/to/pidfile [force]
 daemon_write_pid()
 {
-	local pid= pidfile
+	local pid='' pidfile
 	pidfile="$1"
 
 	if [ -z "${2-}" ]; then
-		read pid < "$pidfile" ||:
+		read -r pid < "$pidfile" ||:
 
-		if [ -n "$pid" -a -z "${pid##[0-9]*}" ]; then
+		if [ -n "$pid" ] && [ -z "${pid##[0-9]*}" ]; then
 			if kill -0 "$pid"; then
 				verbose "Process with pid '$pid' still exists."
 				return 1
@@ -82,6 +82,9 @@ daemon()
 	### Close unneeded file descriptors.
 	if [ -z "${daemon_noclose-}" ]; then
 		if [ -d /proc/self/fd ]; then
+			# shellcheck disable=SC2035
+			# Disable `Use ./*glob* or -- *glob* so names with dashes won't become options`
+			# because printf does not regard the arguments as options.
 			fd="$(set +f; cd /proc/self/fd; printf '%s ' *;)"
 			fd="${fd#\* }"
 			for i in $fd; do

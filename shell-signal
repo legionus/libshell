@@ -68,6 +68,9 @@ signal_handler()
 				eval "n=\${__shell_signal_$sign:-0}"
 				eval "__shell_signal_${sign}_$n=\"\$action\""
 				eval "__shell_signal_${sign}=\$((\$n + 1))"
+				# shellcheck disable=SC2064
+				# Disable `Use single quotes, otherwise this expands now rather than when signalled.`
+				# because $sign should be expanded.
 				trap "__shell_signal_handler $sign" "$sign"
 				;;
 		esac

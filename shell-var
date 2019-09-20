@@ -46,9 +46,9 @@ __shell_var_trim()
 	unset -f __shell_var_trim
 	local r="$1" space=' 	
 '
-	while [ -n "$r" -a -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
-	while [ -n "$r" -a -z "${r##*[$space]}" ]; do r="${r%?}"; done
-	while [ -n "$r" -a -z "${r%%[$space]*}" ]; do r="${r#?}"; done
+	while [ -n "$r" ] && [ -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
+	while [ -n "$r" ] && [ -z "${r##*[$space]}" ]; do r="${r%?}"; done
+	while [ -n "$r" ] && [ -z "${r%%[$space]*}" ]; do r="${r#?}"; done
 	__shell_var_trimo="$r"
 }
 	local __shell_var_trimo=

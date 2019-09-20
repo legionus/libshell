@@ -68,7 +68,7 @@ getoptex()
 		### the routine no longer takes options as an argument thus breaking error #
 		### detection. 2004-04-04 by raphael at oninet dot pt #
 
-		[ -n "$OPTARG" -a -n "${OPTARG%%-*}" ] ||
+		[ -n "$OPTARG" ] && [ -n "${OPTARG%%-*}" ] ||
 			{ getoptex_badarg; return 1; }
 
 		OPTARG="${1#[#]}"
@@ -121,7 +121,7 @@ getoptex()
 		[ "$1" != '--' ] ||
 			return 0
 
-		local opt o i=0 variants= l= v= n="${1%%=*}"
+		local opt o i=0 variants='' l='' v='' n="${1%%=*}"
 
 		[ -n "${1##*=*}" ] || v="${1#*=}"
 		shift
@@ -158,7 +158,7 @@ getoptex()
 		fi
 	}
 
-	local optlist="${1#;}" param= value=
+	local optlist="${1#;}" param='' value=''
 	shift $OPTIND
 
 	param="$1"
@@ -180,7 +180,7 @@ getoptex()
 	if [ "$param" = '--' ]; then
 		OPTTYP='--'
 		OPTIND=$(($OPTIND+1))
-	elif [ "$param" != '-' -a "$param" != "${param#-}" ]; then
+	elif [ "$param" != '-' ] && [ "$param" != "${param#-}" ]; then
 		OPTIND=$(($OPTIND+1))
 
 		local cmd argtype
@@ -275,6 +275,9 @@ getsubopt()
 			l="${l#?}"
 			m="${m#?}"
 
+			# shellcheck disable=SC2102
+			# Disable this `Ranges can only match single chars (mentioned due to duplicates)`
+			# because some shells treat escaped characters differently.
 			case "$ch" in
 				,) ch=' --' ;;
 				[\\\\\`\$\"\ ]) ch="\\$ch" ;;
@@ -339,7 +342,7 @@ getopt()
 		EOF
 	}
 
-	local PROG='getopt' OPTIND=1 OPTERR=1 prg= opts= lopts= quiet_output= alt= order= rc
+	local PROG='getopt' OPTIND=1 OPTERR=1 prg='' opts='' lopts='' quiet_output='' alt='' order='' rc
 	local GETOPT_POSIXLY_CORRECT
 
 	while getoptex 'a alternative h help l: longoptions: n: name: o: options: q quiet Q quiet-output s shell T test u unquoted V version' "$@" && rc=0 || rc=$?; do
@@ -378,7 +381,7 @@ getopt()
 		order=1
 	fi
 	if [ -z "$opts" ]; then
-		if [ "$#" -gt 1 -a "${1#-}" = "$1" -a "$1" != '--' ]; then
+		if [ "$#" -gt 1 ] && [ "${1#-}" = "$1" ] && [ "$1" != '--' ]; then
 			opts="$1"
 			shift
 		else
@@ -396,7 +399,7 @@ getopt()
 		esac
 	done
 
-	local OPTIND=1 OPTOFS= GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
+	local OPTIND=1 OPTOFS='' GETOPT_ALLOW_ALTERNATIVE="${alt:+1}"
 	local ret=0 out=' -- '
 
 	! printenv POSIXLY_CORRECT >/dev/null 2>&1 ||
@@ -416,7 +419,7 @@ getopt()
 	while getoptex "$opts" "$@" && rc=0 || rc=$?; do
 		case "$rc" in
 			1)
-				[ $# -ge $OPTIND -a -z "${GETOPT_POSIXLY_CORRECT-}" ] ||
+				[ $# -ge $OPTIND ] && [ -z "${GETOPT_POSIXLY_CORRECT-}" ] ||
 					break
 				__getopt_out_arg "$@"
 				OPTIND=$(($OPTIND+1))
@@ -437,6 +440,9 @@ getopt()
 		pfx='-'
 		[ "${#OPTOPT}" -eq 1 ] ||
 			pfx='--'
+		# shellcheck disable=SC2016
+		# Disable `Expressions don't expand in single quotes, use double quotes for that`
+		# because single quotes are used inside double quotes.
 		out="${out%% -- *} $pfx$OPTOPT${OPTTYP:+ '$OPTARG'} -- ${out#* -- }"
 	done
 

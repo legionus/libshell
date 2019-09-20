@@ -21,7 +21,7 @@ __ini_config_print()
 ### Usage: ini_config_get file section var
 ini_config_get()
 {
-	local fn section var sect= str eof= n v
+	local fn section var sect='' str eof='' n v
 	fn="$1" section="$2" var="$3"
 
 	if [ ! -e "$fn" ]; then
@@ -59,7 +59,7 @@ ini_config_get()
 # Usage: ini_config_is_set file section var
 ini_config_is_set()
 {
-	local fn section var sect= str eof= n v
+	local fn section var sect='' str eof='' n v
 	fn="$1" section="$2" var="$3"
 
 	if [ ! -e "$fn" ]; then
@@ -99,7 +99,7 @@ ini_config_is_set()
 ### Usage: ini_config_set file section var value
 ini_config_set()
 {
-	local fn fn_tmp section var value sect= don= str tstr eof= n v
+	local fn fn_tmp section var value sect='' don='' str tstr eof='' n v
 
 	fn="$1" section="$2" var="$3" value="$4"
 
@@ -121,7 +121,7 @@ ini_config_set()
 				printf '%s\n' "$tstr"
 				;;
 			"["*"]")
-				if [ "$sect" = 2 -a -z "$don" ]; then
+				if [ "$sect" = 2 ] && [ -z "$don" ]; then
 					__ini_config_print 1 "$var = $value"
 					don=1
 				fi
@@ -137,7 +137,7 @@ ini_config_set()
 				shell_var_trim n "${tstr%%=*}"
 				shell_var_trim v "${tstr#*=}"
 
-				if [ "$sect" = 2 -a "$n" = "$var" ]; then
+				if [ "$sect" = 2 ] && [ "$n" = "$var" ]; then
 					[ -n "$don" ] ||
 						__ini_config_print 1 "$n = $value"
 					don=1
@@ -151,7 +151,7 @@ ini_config_set()
 				;;
 		esac
 
-		if [ -n "$eof" -a -z "$don" ]; then
+		if [ -n "$eof" ] && [ -z "$don" ]; then
 			[ "$sect" = 2 ] ||
 				printf '[%s]\n' "$section"
 			__ini_config_print 1 "$var = $value"
@@ -164,7 +164,7 @@ ini_config_set()
 
 __ini_config_del_comment()
 {
-	local fn_tmp sect= str tstr eof= n v
+	local fn_tmp sect='' str tstr eof='' n v
 	fn_tmp="$(mktemp "$fn.XXXXXX")"
 
 	while [ -z "$eof" ]; do
@@ -211,7 +211,7 @@ ini_config_del()
 
 	__ini_config_action()
 	{
-		[ -z "$var" -o "$1" = "$var" ] ||
+		[ -z "$var" ] || [ "$1" = "$var" ] ||
 			__ini_config_print 1 "$1 = $2"
 	}
 	__ini_config_del_comment
@@ -229,7 +229,7 @@ ini_config_comment()
 
 	__ini_config_action()
 	{
-		if [ -n "$var" -a "$1" != "$var" ]; then
+		if [ -n "$var" ] && [ "$1" != "$var" ]; then
 			__ini_config_print 1 "$1 = $2"
 			return
 		fi

@@ -11,7 +11,7 @@ __included_shell_cmdline=1
 ### Run handler for each variable in /proc/cmdline.
 cmdline_foreach()
 {
-	local l h c= m=
+	local l h c='' m=''
 
 	l="$1"; shift
 	h="$1"; shift
@@ -27,7 +27,7 @@ cmdline_foreach()
 	local EQUAL=$((0x04))
 	local QUOTE=$((0x10))
 
-	local n= v= f=1
+	local n='' v='' f=1
 
 	while [ -n "$l" ]; do
 		c="${l%$m}"
@@ -96,7 +96,7 @@ cmdline_get()
 	__retv="$1"; shift
 	__getn="$1"; shift
 	if [ "$#" -eq 0 ]; then
-		read __cmdline < /proc/cmdline
+		read -r __cmdline < /proc/cmdline
 	else
 		__cmdline="$1"
 	fi

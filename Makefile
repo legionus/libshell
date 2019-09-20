@@ -83,5 +83,12 @@ release: $(PROJECT)-$(VERSION).tar.sign
 check:
 	@cd tests; ./runtests
 
+verify:
+	@for f in shell-*; do \
+	    ftype=$$(file -b "$$f"); \
+	    [ -n "$${ftype##*shell script*}" ] || \
+	    shellcheck -s dash -e SC1090,SC1091,SC2004,SC2015,SC2034,SC2086,SC2154 "$$f"; \
+	done
+
 clean: $(SUBDIRS)
 	$(RM) -- $(man_TARGETS) $(capability_TARGETS) shell-lib DEPS SYMS

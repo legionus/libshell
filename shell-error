@@ -13,7 +13,7 @@ message_time=
 message_time_format=
 message()
 {
-	local arg= prefix=
+	local arg='' prefix=''
 	if [ -n "$message_syslog" ]; then
 		[ ! -t 2 ] || arg=-s
 		logger $arg -t "$PROG" "$*"
