@@ -20,7 +20,8 @@ capability_TARGETS = shell-regexp
 bin_TARGETS = $(filter-out shell-lib,$(wildcard shell-*))
 data_TARGETS = COPYING
 
-docs_TARGETS = docs/libshell.md $(shell ls -1 docs/shell-*.md)
+mddocs_TARGETS = $(wildcard docs/shell-*.md)
+docs_TARGETS = docs/libshell.md $(mddocs_TARGETS)
 man_TARGETS = $(docs_TARGETS:.md=.3)
 
 .PHONY: $(SUBDIRS)
@@ -37,7 +38,7 @@ shell-lib: ${bin_TARGETS}
 	PATH="$(CURDIR):$(PATH)" $(GEN_SINGLE) ${bin_TARGETS} > $@
 
 shell-regexp: shell-quote
-	ln -s $^ $@
+	ln -s -- $^ $@
 
 %.3: %.md
 	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
@@ -82,27 +83,34 @@ release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
 	@cd tests; ./runtests
-	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'   docs/shell-* |sort -uo $(CURDIR)/.shell-funcs-documented
-	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' shell-* |sort -uo $(CURDIR)/.shell-funcs
-	@comm -13 $(CURDIR)/.shell-funcs-documented $(CURDIR)/.shell-funcs > $(CURDIR)/.shell-funcs-not-documented
-	@rc=0; \
-	if [ "$$(wc -l < $(CURDIR)/.shell-funcs-not-documented)" != "0" ]; then \
+	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mddocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
+	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}    |sort -uo "$(CURDIR)/.shell-funcs"
+	@comm -13 \
+	    "$(CURDIR)/.shell-funcs-documented" \
+	    "$(CURDIR)/.shell-funcs" \
+	        > "$(CURDIR)/.shell-funcs-not-documented"; \
+	rc=0; \
+	if [ "$$(wc -l < "$(CURDIR)/.shell-funcs-not-documented")" != "0" ]; then \
 	    echo >&2 "ERROR: some functions are not documented:"; \
-	    cat $(CURDIR)/.shell-funcs-not-documented; \
+	    cat "$(CURDIR)/.shell-funcs-not-documented"; \
+	    echo; \
 	    rc=1; \
+	else \
+	    echo "All functions are documented."; \
 	fi; \
 	rm -f -- \
-	    $(CURDIR)/.shell-funcs-documented \
-	    $(CURDIR)/.shell-funcs-not-documented \
-	    $(CURDIR)/.shell-funcs; \
+	    "$(CURDIR)/.shell-funcs-documented" \
+	    "$(CURDIR)/.shell-funcs-not-documented" \
+	    "$(CURDIR)/.shell-funcs"; \
 	exit $$rc;
 
 verify:
-	@for f in shell-*; do \
+	@for f in ${bin_TARGETS}; do \
 	    ftype=$$(file -b "$$f"); \
-	    [ -n "$${ftype##*shell script*}" ] || \
+	    [ -z "$${ftype##*shell script*}" ] || continue; \
+	    echo "Checking $$f"; \
 	    shellcheck -s dash -e SC1090,SC1091,SC2004,SC2015,SC2034,SC2086,SC2154 "$$f"; \
 	done
 
 clean: $(SUBDIRS)
-	$(RM) -- $(man_TARGETS) $(capability_TARGETS) shell-lib DEPS SYMS
+	$(RM) -- ${man_TARGETS} ${capability_TARGETS} shell-lib DEPS SYMS
