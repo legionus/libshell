@@ -85,7 +85,7 @@ check:
 	@cd tests; \
 	for sh in /bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/pdksh; do \
 	    [ -x "$$sh" ] || continue; \
-	    echo "Checking with $$sh"; \
+	    echo "Running tests with $$sh"; \
 	    if ! "$$sh" -efu ./runtests; then \
 	        echo "Tests failed with $$sh"; \
 	        echo; \
