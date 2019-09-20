@@ -17,6 +17,9 @@ unittest_use_color="${unittest_use_color-}"
 ### Append tests condition to comment message if test failed.
 unittest_show_condition="${unittest_show_condition-}"
 
+### Do not show successful tests.
+unittest_hide_successful="${unittest_hide_successful-}"
+
 ### Called before each test is run.
 setUp() { :; }
 
@@ -220,10 +223,13 @@ messageTest()
 		return 0
 	}
 	case "$3" in
-		0) __show 'green'  printf '[done]' ;;
-		1) __show 'red'    printf '[FAIL]' ;;
-		2) __show 'yellow' printf '[skip]' ;;
-		*) printf '[status=%s]' $3 ;;
+		0)
+			[ -z "$unittest_hide_successful" ] ||
+				return 0
+			__show 'green'  printf '[done]' ;;
+		1)	__show 'red'    printf '[FAIL]' ;;
+		2)	__show 'yellow' printf '[skip]' ;;
+		*)	printf '[status=%s]' $3 ;;
 	esac
 	printf ' (%s) %s\n' "$1" "$2"
 }
