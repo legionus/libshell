@@ -1,5 +1,7 @@
 # libshell
 
+[![Build Status](https://travis-ci.org/legionus/libshell.svg?branch=master)](https://travis-ci.org/legionus/libshell)
+
 The libshell is a set of the most commonly-used shell functions. All functions use minimum
 of external utilities and written for POSIX shell.
 

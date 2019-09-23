@@ -1,0 +1,7 @@
+dist: bionic
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get install dash bash mksh 
+script:
+  - make verify
+  - make check
