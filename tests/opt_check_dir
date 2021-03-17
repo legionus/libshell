@@ -27,3 +27,17 @@ opt_check_dir_test2() { # UnitTest
 
 	assertEquals "$result" "$result" "$expect"
 }
+
+opt_check_dir_test3() { # UnitTest
+	. ../shell-args
+
+	[ -d "$WORKDIR/--help" ] ||
+		mkdir -m755 "$WORKDIR/--help"
+	cd "$WORKDIR"
+
+	expect="$(readlink -f -- --help 2>&1)" ||:
+	result="$(opt_check_dir "DIR" "--help" 2>&1)" ||:
+	rmdir -- "--help"
+
+	assertEquals "$result" "$result" "$expect"
+}

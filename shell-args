@@ -17,7 +17,7 @@ opt_check_read()
 {
 	local value
 	[ -r "$2" ] &&
-	value="$(readlink -ev "$2")" ||
+	value="$(readlink -fv -- "$2")" ||
 		fatal "$1: $2: file not available."
 	printf %s "$value"
 }
@@ -30,7 +30,7 @@ opt_check_exec()
 {
 	local value
 	[ -f "$2" ] && [ -x "$2" ] &&
-	value="$(readlink -ev "$2")" ||
+	value="$(readlink -fv -- "$2")" ||
 		fatal "$1: $2: file not executable."
 	printf %s "$value"
 }
@@ -43,7 +43,7 @@ opt_check_dir()
 {
 	local value
 	[ -d "$2" ] && [ -x "$2" ] &&
-	value="$(readlink -ev "$2")" ||
+	value="$(readlink -fv -- "$2")" ||
 		fatal "$1: $2: directory not available."
 	printf %s "$value"
 }
