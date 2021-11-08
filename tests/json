@@ -1,0 +1,202 @@
+#!/bin/ash -efu
+
+PROG='TEST'
+
+json_test_000() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/array-empty.json.out)"
+	local result="$(json_foreach <json-data/array-empty.json 2>&1)"
+
+	assertEquals "array-empty.json" "$expect" "$result"
+}
+
+json_test_001() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/array.json.out)"
+	local result="$(json_foreach <json-data/array.json 2>&1)"
+
+	assertEquals "array.json" "$expect" "$result"
+}
+
+json_test_002() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/array-objects.json.out)"
+	local result="$(json_foreach <json-data/array-objects.json 2>&1)"
+
+	assertEquals "array-objects.json" "$expect" "$result"
+}
+
+json_test_003() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/blueprint.json.out)"
+	local result="$(json_foreach <json-data/blueprint.json 2>&1)"
+
+	assertEquals "blueprint.json" "$expect" "$result"
+}
+
+json_test_004() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/boolean.json.out)"
+	local result="$(json_foreach <json-data/boolean.json 2>&1)"
+
+	assertEquals "boolean.json" "$expect" "$result"
+}
+
+json_test_005() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/mixed.json.out)"
+	local result="$(json_foreach <json-data/mixed.json 2>&1)"
+
+	assertEquals "mixed.json" "$expect" "$result"
+}
+
+json_test_006() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/newline.json.out)"
+	local result="$(json_foreach <json-data/newline.json 2>&1)"
+
+	assertEquals "newline.json" "$expect" "$result"
+}
+
+json_test_007() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/null.json.out)"
+	local result="$(json_foreach <json-data/null.json 2>&1)"
+
+	assertEquals "null.json" "$expect" "$result"
+}
+
+json_test_008() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/number-float.json.out)"
+	local result="$(json_foreach <json-data/number-float.json 2>&1)"
+
+	assertEquals "number-float.json" "$expect" "$result"
+}
+
+json_test_009() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/number.json.out)"
+	local result="$(json_foreach <json-data/number.json 2>&1)"
+
+	assertEquals "number.json" "$expect" "$result"
+}
+
+json_test_010() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/number-negative.json.out)"
+	local result="$(json_foreach <json-data/number-negative.json 2>&1)"
+
+	assertEquals "number-negative.json" "$expect" "$result"
+}
+
+json_test_011() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/number-sci.json.out)"
+	local result="$(json_foreach <json-data/number-sci.json 2>&1)"
+
+	assertEquals "number-sci.json" "$expect" "$result"
+}
+
+json_test_012() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/number-zero.json.out)"
+	local result="$(json_foreach <json-data/number-zero.json 2>&1)"
+
+	assertEquals "number-zero.json" "$expect" "$result"
+}
+
+json_test_013() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/object-complex.json.out)"
+	local result="$(json_foreach <json-data/object-complex.json 2>&1)"
+
+	assertEquals "object-complex.json" "$expect" "$result"
+}
+
+json_test_014() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/object-empty.json.out)"
+	local result="$(json_foreach <json-data/object-empty.json 2>&1)"
+
+	assertEquals "object-empty.json" "$expect" "$result"
+}
+
+json_test_015() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/object.json.out)"
+	local result="$(json_foreach <json-data/object.json 2>&1)"
+
+	assertEquals "object.json" "$expect" "$result"
+}
+
+json_test_016() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/object-nested.json.out)"
+	local result="$(json_foreach <json-data/object-nested.json 2>&1)"
+
+	assertEquals "object-nested.json" "$expect" "$result"
+}
+
+json_test_017() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/squeeze.json.out)"
+	local result="$(json_foreach <json-data/squeeze.json 2>&1)"
+
+	assertEquals "squeeze.json" "$expect" "$result"
+}
+
+json_test_018() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/string.json.out)"
+	local result="$(json_foreach <json-data/string.json 2>&1)"
+
+	assertEquals "string.json" "$expect" "$result"
+}
+
+json_test_019() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/unicode.json.out)"
+	local result="$(json_foreach <json-data/unicode.json 2>&1)"
+
+	assertEquals "unicode.json" "$expect" "$result"
+}
+
+json_test_020() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/object-whitespaces.json.out)"
+	local result="$(json_foreach <json-data/object-whitespaces.json 2>&1)"
+
+	assertEquals "object-whitespaces.json" "$expect" "$result"
+}
+
+json_test_021() { # UnitTest
+	. ../shell-json
+
+	local expect="$(cat ./json-data/array-arrays.json.out)"
+	local result="$(json_foreach <json-data/array-arrays.json 2>&1)"
+
+	assertEquals "array-arrays.json" "$expect" "$result"
+}
+

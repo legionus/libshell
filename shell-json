@@ -1,0 +1,511 @@
+#!/bin/sh -efu
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
+###
+### This source is largely based on the implementation of the json
+### parser written by Richard Crowley.
+###
+### Original source: https://github.com/rcrowley/json.sh
+
+if [ -z "${__included_shell_json-}" ]; then
+__included_shell_json=1
+
+. shell-error
+. shell-string
+
+JSON_FOREACH_ABORT=100
+
+JSON_DEBUG=
+__json_debug()
+{
+	[ -z "$JSON_DEBUG" ] ||
+		printf >&2 'json: %s\n' "$*"
+}
+
+__json_push_name()
+{
+	eval "__json_name_$__json_name=\"\$1\""
+	__json_name=$(( $__json_name + 1 ))
+}
+
+__json_pop_name()
+{
+	__json_name=$(( $__json_name - 1 ))
+	eval "unset __json_name_$__json_name"
+}
+
+json_get_last_name()
+{
+	eval "$1=\"\${__json_name_$(( $__json_name - 1 ))-}\""
+}
+
+json_get_full_name()
+{
+	local __i=0 __v=''
+	while [ "$__i" -lt "$__json_name" ]; do
+		eval "__v=\"\$__v${2-/}\${__json_name_$__i-}\""
+		__i=$(( $__i + 1 ))
+	done
+	eval "$1=\"\$__v\""
+}
+
+__json_get_stack()
+{
+	local i=0
+	stack=''
+	while [ "$i" -lt "$__json_states" ]; do
+		eval "stack=\"\${stack:+\$stack -> }\${__json_states_$i-}\""
+		i=$(( $i + 1 ))
+	done
+	stack="${stack:-none}"
+}
+
+__json_push_state()
+{
+	if [ -n "${JSON_DEBUG-}" ]; then
+		local stack
+		__json_get_stack
+		__json_debug "state: append: $stack -> { $1 }"
+	fi
+
+	__json_state="$1"
+
+	eval "__json_states_$__json_states=\"\$1\""
+	__json_states=$(( $__json_states + 1 ))
+}
+
+__json_pop_state()
+{
+	local prev="$__json_state"
+
+	__json_states=$(( $__json_states - 1 ))
+	eval "unset __json_states_$__json_states"
+	eval "__json_state=\"\${__json_states_$(( $__json_states - 1 ))-}\""
+
+	if [ -n "${JSON_DEBUG-}" ]; then
+		local stack
+		__json_get_stack
+		__json_debug "state: remove: $stack // { $prev }"
+	fi
+}
+
+json_foreach_handler()
+{
+	local name=''
+	json_get_full_name name
+	printf '%s %s %s\n' "${name:-/}" "$1" "$2"
+}
+
+__json_handle()
+{
+	if [ -n "$__json_handle" ]; then
+		local IFS="$SAVE_IFS"
+		json_foreach_handler "$1" "$2"
+	fi
+}
+
+# Consume standard input one character at a time to parse JSON.
+json_foreach()
+{
+	local __json_l __json_m __json_c __json_p __json_eof __json_buffer __json_state
+	local __json_name=0 __json_states=0
+	local __json_handle=1
+
+	local SAVE_IFS="$IFS"
+	local IFS='
+'
+
+	local __json_read_opt_n=
+	# shellcheck disable=SC2169
+	! { echo -n 1 | read -n1 -r; } 2>/dev/null ||
+		__json_read_opt_n=1
+
+	__json_buffer='' __json_eof='' __json_p=''
+
+	# Set incoming state of json.
+	__json_push_state 'value'
+
+	while [ -z "$__json_eof" ]; do
+		read ${__json_read_opt_n:+-n 9} -r __json_l || __json_eof=1
+
+		fill_mask __json_m "$__json_l"
+
+		while [ -n "$__json_l" ]; do
+			__json_c="${__json_l%$__json_m}"
+			__json_l="${__json_l#?}"
+			__json_m="${__json_m#?}"
+
+			[ -n "${__json_c##
+}" ] ||
+				continue
+
+			__json_char || [ $? -ne $JSON_FOREACH_ABORT ] ||
+				return 0
+			__json_p="$__json_c"
+		done
+	done
+	__json_c='
+'
+	__json_char ||:
+	if [ "$__json_states" -gt 0 ]; then
+		local stack
+		__json_get_stack
+		fatal "unfinished json: $stack"
+	fi
+}
+
+__json_char()
+{
+	while :; do
+		case "$__json_state" in
+			'value')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					'[')
+						__json_push_name 0
+						__json_push_state 'array'
+						;;
+					'{')
+						__json_push_state 'object'
+						;;
+					'"')
+						__json_push_state 'string'
+						__json_buffer=
+						;;
+					0)
+						__json_push_state 'number-leading-zero'
+						__json_buffer="$__json_c"
+						;;
+					[1-9])
+						__json_push_state 'number-leading-nonzero'
+						__json_buffer="$__json_c"
+						;;
+					'-')
+						__json_push_state 'number-negative'
+						__json_buffer="$__json_c"
+						;;
+					't'|'f')
+						__json_push_state 'boolean'
+						__json_buffer=
+						continue
+						;;
+					'n')
+						__json_push_state 'null'
+						__json_buffer=
+						continue
+						;;
+					'
+')
+						__json_pop_state 'value'
+						;;
+					*)
+						__json_pop_state 'value'
+						continue
+						;;
+				esac
+				;;
+			'array')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					']')
+						__json_pop_name
+						__json_pop_state 'array'
+						;;
+					*)
+						__json_push_state 'array-more'
+						__json_push_state 'value'
+						continue
+						;;
+				esac
+				;;
+			'array-more')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					']')
+						__json_pop_name
+						__json_pop_state 'object-more'
+						__json_pop_state 'array'
+						;;
+					',')
+						local last
+
+						json_get_last_name last
+						__json_pop_name
+						__json_push_name $(( $last + 1 ))
+
+						__json_push_state 'value'
+						;;
+					'"')
+						continue
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'object')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					'"')
+						__json_handle=
+						__json_push_state 'object-more'
+						__json_push_state 'object-name'
+						__json_push_state 'value'
+						continue
+						;;
+					'}')
+						__json_pop_state 'object'
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'object-name')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					'"')
+						__json_push_state 'value'
+						continue
+						;;
+					':')
+						__json_handle=1
+						__json_push_name "$__json_buffer"
+						#echo "object-name $__json_buffer"
+						__json_pop_state 'object-name'
+						__json_push_state 'value'
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'object-more')
+				case "$__json_c" in
+					'	'|' '|'')
+						;;
+					'}')
+						__json_pop_name
+						__json_pop_state 'object-more'
+						__json_pop_state 'object'
+						;;
+					',')
+						__json_pop_name
+						__json_handle=
+						__json_push_state 'object-name'
+						;;
+					'"')
+						__json_handle=
+						__json_push_state 'object-name'
+						continue
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'boolean')
+				# Boolean values are multicharacter literals but they're unique
+				# from their first character.  This means the eventual value is
+				# already known when the "boolean" state is entered so we can
+				# raise syntax errors as soon as the input goes south.
+				case "$__json_buffer$__json_c" in
+					't'|'tr'|'tru'|'f'|'fa'|'fal'|'fals')
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					'true'|'false')
+						__json_pop_state 'boolean'
+						__json_handle boolean "$__json_buffer$__json_c" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'null')
+				# Null values work exactly like boolean values.  See above.
+				case "$__json_buffer$__json_c" in
+					'n'|'nu'|'nul')
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					'null')
+						__json_pop_state 'null'
+						__json_handle null "$__json_buffer$__json_c" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'string')
+				# shellcheck disable=SC1003
+				case "$__json_p$__json_c" in
+					'\"'|'\/'|'\\')
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					'\b'|'\f'|'\n'|'\r'|'\t'|'\u')
+						__json_buffer="$__json_buffer\\$__json_c"
+						;;
+					*'"')
+						__json_pop_state 'string'
+						__json_handle string "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						;;
+					*'\')
+						;;
+					*)
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+				esac
+				;;
+			'number-negative')
+				# This is an entrypoint into parsing a number, used when
+				# the first character consumed is a '-'.  From here, a number
+				# may progress to the "number-leading-nonzero" or
+				# "number-leading-zero" states.
+				__json_pop_state 'number-negative'
+				case "$__json_c" in
+					'0')
+						__json_push_state 'number-leading-zero'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[1-9])
+						__json_push_state 'number-leading-nonzero'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						__json_buffer=
+						continue
+						;;
+				esac
+				;;
+			'number-leading-zero')
+				# This is an entrypoint into parsing a number, used when
+				# the first digit consumed is zero.  From here, a number
+				# may remain zero, become a floating-point number by
+				# consuming a '.', or become scientific-notation by consuming
+				# an 'E' or 'e'.
+				__json_pop_state 'number-leading-zero'
+				case "$__json_c" in
+					'.')
+						__json_push_state 'number-float'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[eE])
+						__json_push_state 'number-sci'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[0-9])
+						fatal "$__json_state unexpected '$__json_buffer$__json_c'"
+						;;
+					*)
+						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						__json_buffer=
+						continue
+						;;
+				esac
+				;;
+			'number-leading-nonzero')
+				# This is an entrypoint into parsing a number, used when
+				# the first digit consumed is non-zero.  From here, a number
+				# may continue on a positive integer, become a floating-point
+				# number by consuming a '.', or become scientific-notation by
+				# consuming an 'E' or 'e'.
+				case "$__json_c" in
+					'.')
+						__json_pop_state 'number-leading-nonzero'
+						__json_push_state 'number-float'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[eE])
+						__json_pop_state 'number-leading-nonzero'
+						__json_push_state 'number-sci'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[0-9])
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						__json_pop_state 'number-leading-nonzero'
+						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						__json_buffer=
+						continue
+						;;
+				esac
+				;;
+			'number-float')
+				# Numbers that encounter a '.' become floating point and may
+				# continue consuming digits forever or may become
+				# scientific-notation.
+				case "$__json_c" in
+					[eE])
+						__json_pop_state 'number-float'
+						__json_push_state 'number-sci'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[0-9])
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						__json_pop_state 'number-float'
+						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						__json_buffer=
+						continue
+						;;
+				esac
+				;;
+			'number-sci')
+				# Numbers that encounter an 'E' or 'e' become
+				# scientific-notation and consume digits, optionally prefixed
+				# by a '+' or '-', forever.  The actual consumption is
+				# delegated to the "number-sci-neg" and "number-sci-pos"
+				# states.  Any other character immediately following the 'E'
+				# or 'e' is a syntax error.
+				__json_pop_state 'number-sci'
+				case "$__json_c" in
+					[0-9]|'+'|'-')
+						__json_push_state 'number-sci-digits'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_buffer$__json_c'"
+						;;
+				esac
+				;;
+			'number-sci-digits')
+				# Once in these states, numbers may consume digits forever.
+				case "$__json_c" in
+					[0-9])
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						__json_pop_state 'number-sci-digits'
+						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
+							return $JSON_FOREACH_ABORT
+						__json_buffer=
+						continue
+						;;
+				esac
+				;;
+		esac
+
+		__json_debug "c='$__json_c'"
+		break
+	done
+}
+
+fi #__included_shell_json
+# vim: tw=200
