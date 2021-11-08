@@ -33,6 +33,7 @@ for s in \
 	run_scripts \
 	terminfo_init color_message color_text \
 	create_temporary \
+	json \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||
