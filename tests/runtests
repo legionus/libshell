@@ -6,6 +6,9 @@ export PATH="$srcdir:$PATH"
 unittest_use_color=1
 unittest_hide_successful=1
 
+[ -z "${VERBOSE:-${V:-}}" ] ||
+	unittest_hide_successful=
+
 . ../shell-unittest
 
 WORKDIR=
