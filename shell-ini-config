@@ -134,6 +134,11 @@ ini_config_set()
 					{ [ -n "$eof" ] || printf '\n'; }
 				;;
 			*)
+				if [ -z "$sect" ]; then
+					printf '%s\n' "$str"
+					continue
+				fi
+
 				shell_var_trim n "${tstr%%=*}"
 				shell_var_trim v "${tstr#*=}"
 
@@ -185,6 +190,11 @@ __ini_config_del_comment()
 					{ [ -n "$eof" ] || printf '\n'; }
 				;;
 			*)
+				if [ -z "$sect" ]; then
+					printf '%s\n' "$str"
+					continue
+				fi
+
 				shell_var_trim n "${tstr%%=*}"
 				shell_var_trim v "${tstr#*=}"
 
