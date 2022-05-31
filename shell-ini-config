@@ -198,9 +198,19 @@ __ini_config_del_comment()
 				shell_var_trim n "${tstr%%=*}"
 				shell_var_trim v "${tstr#*=}"
 
-				[ "$sect" = 2 ] &&
-					__ini_config_action "$n" "$v" ||
-					__ini_config_print 1 "$n = $v"
+				if [ -z "${tstr##*=*}" ]; then
+					if [ "$sect" = 2 ]; then
+						__ini_config_action 2 "$n" "$v"
+					else
+						__ini_config_print 1 "$n = $v"
+					fi
+				else
+					if [ "$sect" = 2 ]; then
+						__ini_config_action 1 "$n"
+					else
+						__ini_config_print 1 "$n"
+					fi
+				fi
 				;;
 		esac
 	done < "$fn" > "$fn_tmp"
@@ -221,8 +231,11 @@ ini_config_del()
 
 	__ini_config_action()
 	{
-		[ -z "$var" ] || [ "$1" = "$var" ] ||
-			__ini_config_print 1 "$1 = $2"
+		if [ -n "$var" ] && [ ! "$2" = "$var" ]; then
+			[ "$1" = 2 ] &&
+				__ini_config_print 1 "$2 = $3" ||
+				__ini_config_print 1 "$2"
+		fi
 	}
 	__ini_config_del_comment
 }
@@ -239,11 +252,15 @@ ini_config_comment()
 
 	__ini_config_action()
 	{
-		if [ -n "$var" ] && [ "$1" != "$var" ]; then
-			__ini_config_print 1 "$1 = $2"
+		if [ -n "$var" ] && [ "$2" != "$var" ]; then
+			[ "${1}" = 2 ] && __ini_config_print 1 "$2 = $3" ||
+				__ini_config_print 1 "$2"
 			return
 		fi
-		__ini_config_print 1 "$shell_ini_config_comment $1 = $2"
+		[ "$1" = 2 ] &&
+			__ini_config_print 1 "$shell_ini_config_comment $2 = $3" ||
+			__ini_config_print 1 "$shell_ini_config_comment $2"
+
 	}
 	__ini_config_del_comment
 }
