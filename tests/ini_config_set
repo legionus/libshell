@@ -109,3 +109,18 @@ ini_config_set_test7() { # UnitTest
 	assertEquals "Wrong return code: rc=$rc" "$rc" "1"
 	assertEquals "$result" "$result" "$expect"
 }
+
+ini_config_set_test8() { # UnitTest
+	. ../shell-ini-config
+	cp -f ini-config/krb5.include.conf ini-config/ini_config_set-t8.ini
+
+	ini_config_set ini-config/ini_config_set-t8.ini libdefaults default_realm SCHOOL.ALT
+
+	local rc=0
+	cmp -s ini-config/ini_config_set-t8.ini ini-config/ini_config_set-t8.ini.expect || rc=$?
+
+	[ "$rc" != 0 ] ||
+		rm -f  -- ini-config/ini_config_set-t8.ini
+
+	assertTrue $rc
+}

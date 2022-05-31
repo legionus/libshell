@@ -1,0 +1,7 @@
+includedir /etc/krb5.conf.d/
+
+[libdefaults]
+[realms]
+	SCHOOL.ALT = {
+	kdc = SCHOOL.ALT
+	}
