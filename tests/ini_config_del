@@ -47,3 +47,18 @@ ini_config_del_test3() { # UnitTest
 
 	assertTrue $rc
 }
+
+ini_config_del_test4() { # UnitTest
+        . ../shell-ini-config
+        cp -f ini-config/krb5.include.conf ini-config/ini_config_del-t4.ini
+
+        ini_config_del ini-config/ini_config_del-t4.ini libdefaults
+
+        local rc=0
+        cmp -s ini-config/ini_config_del-t4.ini ini-config/ini_config_del-t4.ini.expect || rc=$?
+
+        [ "$rc" != 0 ] ||
+                rm -f  -- ini-config/ini_config_del-t4.ini
+
+        assertTrue $rc
+}

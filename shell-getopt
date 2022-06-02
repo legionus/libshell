@@ -86,7 +86,7 @@ getoptex()
 					OPTARG="${1#$p=}"
 					return 1
 					;;
-				$p)
+				"$p")
 					getoptex_argument "$2" ||
 						return 3
 					return 1
@@ -98,7 +98,7 @@ getoptex()
 	{
 		local o="-${1#-${OPTOFS-}}"
 		case "$o" in
-			-$OPTOPT)
+			"-$OPTOPT")
 				OPTOFS=
 				getoptex_argument "$2" ||
 					return 3
