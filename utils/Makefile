@@ -9,7 +9,7 @@ datadir ?= /usr/share
 mandir  ?= ${datadir}/man
 man1dir ?= ${mandir}/man1
 
-HELP2MAN1 = env PATH="..:$$PATH" help2man -N -s1 -S '$(PROJECT) $(VERSION)'
+SCDOC ?= scdoc
 INSTALL = install
 CP      = cp -a
 TOUCH_R = touch -r
@@ -30,8 +30,8 @@ all: $(TARGETS) $(MAN1PAGES)
 	$(TOUCH_R) $< $@
 	chmod --reference=$< $@
 
-%.1: %
-	$(HELP2MAN1) -i $@.inc ./$< >$@
+%.1: %.md
+	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
 
 install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
