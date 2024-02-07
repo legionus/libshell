@@ -1,0 +1,52 @@
+#!/bin/bash -efu
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+if [ -z "${__included_shell_locks-}" ]; then
+__included_shell_locks=1
+
+__shell_fd_lock()
+{
+	local fd="$1"; shift
+	local fn="$1"; shift
+	eval "exec $fd<\"$fn\""
+	flock "$@" "$fd"
+}
+
+### The function opens the file to the specified descriptor and takes a read
+### lock.
+### Usage: fd_rlock $num $filename
+fd_rlock()   { __shell_fd_lock "$1" "$2" -s; }
+
+### The function opens the file to the specified descriptor and takes a write
+### lock.
+### Usage: fd_lock $num $filename
+fd_lock()    { __shell_fd_lock "$1" "$2" -x; }
+
+### The function opens the file to the specified descriptor and takes a write
+### lock. If the lock could not be taken, then the function failed.
+### Usage: fd_trylock $num $filename
+fd_trylock() { __shell_fd_lock "$1" "$2" -n; }
+
+### Closes the descriptor and releases the lock.
+### Usage: fd_unlock $fd_num
+fd_unlock()  { eval "exec $1<&-"; }
+
+### Checks whether a lock is present on the specified file.
+### Usage: fd_is_locked $filename
+fd_is_locked()
+{
+	local fd=0
+	while [ -e "/proc/self/fd/$fd" ]; do
+		fd=$(( $fd + 1 ))
+	done
+
+	if fd_trylock "$fd" "$1"; then
+		fd_unlock "$fd"
+		return 1
+	fi
+
+	eval "exec $fd<&-"
+	return 0
+}
+
+fi #__included_shell_locks
