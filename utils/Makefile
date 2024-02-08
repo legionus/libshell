@@ -19,9 +19,9 @@ PROGRAMS = cgrep
 MAN1PAGES = $(PROGRAMS:=.1)
 TARGETS = $(PROGRAMS)
 
-.PHONY:	all install clean
+.PHONY:	all install install-man clean
 
-all: $(TARGETS) $(MAN1PAGES)
+all: $(TARGETS)
 
 %: %.in
 	sed \
@@ -33,11 +33,17 @@ all: $(TARGETS) $(MAN1PAGES)
 %.1: %.md
 	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
 
-install: all
+install: $(PROGRAMS)
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(CP) $(PROGRAMS) $(DESTDIR)$(bindir)/
-	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
-	$(INSTALL) -p -m644 $(MAN1PAGES) $(DESTDIR)$(man1dir)/
+
+install-man: $(MAN1PAGES)
+	if [ -n "$(SCDOC)" ]; then \
+	  $(MKDIR_P) -m755 $(DESTDIR)$(man1dir); \
+	  $(INSTALL) -p -m644 $(MAN1PAGES) $(DESTDIR)$(man1dir)/; \
+	fi
+
+install: install-man
 
 clean:
 	$(RM) $(TARGETS) $(MAN1PAGES) *~
