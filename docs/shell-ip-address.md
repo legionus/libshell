@@ -2,7 +2,7 @@ shell-ip-address(3)
 
 # NAME
 
-ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, valid_ipv4 - functions to validate the IPv4 address
+ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, valid_ipv4 - functions to manipulate IPv4 addresses
 
 # SYNOPSIS
 
@@ -10,6 +10,7 @@ ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, valid_ipv4 - functions to va
 - ipv4_mask2prefix value
 - ipv4_prefix2mask value
 - valid_ipv4 ipaddr
+- ipv4_ptonx ipaddr
 
 # DESCRIPTION
 
@@ -48,6 +49,30 @@ ipv4_prefix2mask 16
 ipv4_prefix2mask 24
 255.255.255.0
 ```
+
+## ipv4_ptonx
+This function interprets the given option value as an IPv4 address similarly to inet_pton(3), and outputs each octet in network byte order as 4 adjacent 2-digit hexadecimal numbers.
+This form is useful to perform bitwise operations on the address.
+
+Example:
+```
+ipv4_ptonx 192.0.0.2; echo res=$?
+c0000002
+res=0
+
+ipv4_ptonx example.org; echo res=$?
+res=1
+
+ipv4_ptonx 377.0.0.1; echo res=$?
+res=1
+
+ipv4_ptonx 255.255.255.255; echo res=$?
+ffffffff
+res=0
+```
+
+*ipv4_ptonx* expects the entire string to represent an address, i. e. no trailing characters after the address.
+Note that *ipv4_ptonx* makes no assumptions about the meaning of the address or the network environment; unlike *valid_ipv4*, it does not exclude special-use and multicast addresses, nor infer any special qualities based on a certain prefix length (e. g. last octet is not disallowed to be equal to 0 or 255).
 
 ## valid_ipv4
 Function checks that given option value is a valid IPv4 address.

@@ -1,0 +1,199 @@
+#!/bin/ash -efu
+
+ip_address_test400() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=0.0.0.0
+	ipv4_ptonx "$repr" || rc=1
+	out="$(ipv4_ptonx "$repr")"
+
+	assertTrue "the unspecified address" $rc
+	assertEquals "00000000" "$out"
+}
+
+ip_address_test401() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=192.0.0.2
+	ipv4_ptonx "$repr" || rc=1
+	out="$(ipv4_ptonx "$repr")"
+
+	assertTrue "well-formed IPv4 address: $repr" $rc
+	assertEquals "c0000002" "$out"
+}
+
+ip_address_test402() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=8.0.0.292
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "octet out of range: $repr" $rc
+}
+
+ip_address_test403() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=8.0.0.-1
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "negative octets: $repr" $rc
+}
+
+ip_address_test404() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=-8.0.0.81
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "negative octets: $repr" $rc
+}
+
+ip_address_test405() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=16777217
+	ipv4_ptonx "$repr" || rc=1
+
+	# There is an older library function, inet_aton(3), which supports this
+	# and other peculiar address notations. We do not.
+	assertFalse "decimal u32: $repr (1.0.0.1)" $rc
+}
+
+ip_address_test406() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=11111111111
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "decimal above u32: $repr" $rc
+}
+
+ip_address_test407() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=0x16777217
+	ipv4_ptonx "$repr" || rc=1
+
+	# There is an older library function, inet_aton(3), which supports this
+	# and other peculiar address notations. We do not.
+	assertFalse "hexadecimal u32: $repr (22.119.114.23)" $rc
+}
+
+ip_address_test408() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=1.2.3.4.5.6
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "too many octets: $repr" $rc
+}
+
+ip_address_test409() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr="192.0.0.2."
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "extra period: $repr" $rc
+}
+
+ip_address_test410() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=...
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "no digits: '$repr'" $rc
+}
+
+ip_address_test411() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=....
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "no digits: '$repr'" $rc
+}
+
+ip_address_test412() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "valid IPv6 address: '$repr'" $rc
+}
+
+ip_address_test413() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::9
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "valid IPv6 address: '$repr'" $rc
+}
+
+ip_address_test414() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=''
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "empty string" $rc
+}
+
+ip_address_test415() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=example.com
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "domain name: $repr" $rc
+}
+
+ip_address_test416() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=163.com
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "domain name: $repr" $rc
+}
+
+ip_address_test418() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=4.5.6.7.in-addr.arpa
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "reverse pointer domain name: $repr" $rc
+}
+
+ip_address_test419() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=1.0.0.1:443
+	ipv4_ptonx "$repr" || rc=1
+
+	assertFalse "socket address with 16-bit port: '$repr'" $rc
+}
