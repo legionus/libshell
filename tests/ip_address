@@ -197,3 +197,544 @@ ip_address_test419() { # UnitTest
 
 	assertFalse "socket address with 16-bit port: '$repr'" $rc
 }
+
+ip_address_test600() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "unspecified address: $repr" $rc
+}
+
+ip_address_test601() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:DB8:0:502:BC:A:9:8
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "valid address in uppercase digits: $repr" $rc
+}
+
+ip_address_test603() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::b
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "leading skip block: $repr" $rc
+}
+
+ip_address_test604() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::a:3b
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "leading skip block: $repr" $rc
+}
+
+ip_address_test605() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=7::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "trailing skip block: $repr" $rc
+}
+
+ip_address_test606() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=44::5
+	ipv6_ptonx "$repr" || rc=1
+	out="$(ipv6_ptonx "$repr")"
+
+	assertTrue "middle skip block: $repr" $rc
+	assertEquals "00440000000000000000000000000005" "$out"
+}
+
+ip_address_test607() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=44:5::
+	ipv6_ptonx "$repr" || rc=1
+	out="$(ipv6_ptonx "$repr")"
+
+	assertTrue "trailing skip block: $repr" $rc
+	assertEquals "00440005000000000000000000000000" "$out"
+}
+
+ip_address_test608() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2002::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "trailing skip block: $repr" $rc
+}
+
+ip_address_test609() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:4:5:6:7:7::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "16-bit trailing skip block: $repr" $rc
+}
+
+ip_address_test610() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out32=
+	local repr=2001:7::23:443
+	ipv6_ptonx "$repr" || rc=1
+	out32="$(ipv6_ptonx "$repr" | tr -d '\n' | tail -c8)"
+
+	assertTrue "sockaddr lookalike: $repr" $rc
+	assertEquals '0x00230443' "0x$out32"
+}
+
+ip_address_test611() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:0:603:b:a:99.11.6.18
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "IPv4-mapped tail: $repr" $rc
+}
+
+ip_address_test612() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=ff02::3:0:0:0:1:a
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "skip block in unusual position: $repr" $rc
+}
+
+ip_address_test613() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=abcd:ef01:2345:6789:bcde:fa01:2345:6789
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "uncompressible address: $repr" $rc
+}
+
+ip_address_test614() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=2001:db8:0:0:8:800:200c:417a
+	ipv6_ptonx "$repr" || rc=1
+	out="$(ipv6_ptonx "$repr")"
+
+	assertTrue "valid address: $repr" $rc
+	assertEquals "20010db80000000000080800200c417a" "$out"
+}
+
+ip_address_test615() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local repr=2001:db8:0000:0000:0008:0800:200c:417a
+	ipv6_ptonx "$repr" || rc=1
+	out="$(ipv6_ptonx "$repr")"
+
+	assertTrue "leading zeroes: $repr" $rc
+	assertEquals "20010db80000000000080800200c417a" "$out"
+}
+
+ip_address_test616() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::192.7.6.5
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "skip block and IPv4-mapped tail: $repr" $rc
+}
+
+ip_address_test617() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2002:0a7f:8c44:001f:abcd:ef01:130.141.152.163
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "max length string: $repr" $rc
+}
+
+ip_address_test618() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:0:402:b:a:9:8
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "valid address: $repr" $rc
+}
+
+ip_address_test619() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:0:402:b:a:9::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "16-bit trailing skip block: $repr" $rc
+}
+
+ip_address_test620() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::f890:0a:10:8c44:79a3:5120:1304
+	ipv6_ptonx "$repr" || rc=1
+
+	assertTrue "16-bit leading skip block: $repr" $rc
+}
+
+ip_address_test621() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=''
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "empty string: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test622() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2005
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "single component, no colon: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test625() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=:
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "single colon: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test626() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=:12
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "single colon, too short: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test627() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=44:5
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "single colon, too short: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test628() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=200a:b:
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "too short: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test629() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001::g
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "bad char: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test630() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001::H
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "bad uppercase char: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test631() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:f:e:d:c:8:9:a:b
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "too many components: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test632() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::f:edc89
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "component too long: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test633() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8:0:103c:b:a:9::8
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "no 16-bit zeroed word at skip block: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test634() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=8::f890:0a:10:8c44:79a3:5120:1304
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "no 16-bit zeroed word at skip block: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test635() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001::5::23
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "two skip blocks have undefined meaning: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test636() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=:::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "colon cancer: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test637() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=::::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "colon cancer: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test638() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=:::::::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "all components empty: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test639() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001::::
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "terminal colon cancer: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test640() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:7:8:9:a:b:c:d:443
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "naive sockaddr lookalike, too many components: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test641() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr='[2001:7::23]':443
+	ipv6_ptonx "$repr" || rc=1
+
+	# We are not the tool for this job.
+	assertFalse "actual sockaddr: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test642() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:0:1:2:3:4:192.44.42.58:443
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "IPv4 literal not at end: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test643() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:0:3:4:192.44.42.58
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "IPv4 literal too early: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test644() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:1:2:3:4:5:6:7:192.44.42.58
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "IPv4 literal too late: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test645() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::192.6.5
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "truncated IPv4 literal: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test646() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::192.6
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "truncated IPv4 literal: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test647() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::.6
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "malformed dot notation literal: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test648() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=2001:db8::...
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "malformed dot-notation literal: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test649() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=fe80:1:2:3:4:5:6:7%en0
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "LLA with scope identifier: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test650() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=example.com
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "domain name: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test651() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=163.com
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "domain name starting with digits: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
+
+ip_address_test652() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=11.10.9.8.in-addr.arpa
+	ipv6_ptonx "$repr" || rc=1
+
+	assertFalse "reverse pointer domain name: $repr" $rc
+	assertNull "empty output" "$(ipv6_ptonx "$repr")"
+}
