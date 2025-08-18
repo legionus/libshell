@@ -738,3 +738,155 @@ ip_address_test652() { # UnitTest
 	assertFalse "reverse pointer domain name: $repr" $rc
 	assertNull "empty output" "$(ipv6_ptonx "$repr")"
 }
+
+ip_address_test6t00() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=::
+	local target=unspec
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t01() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=::1
+	local target=loopback
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t02() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=::c000:8
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t03() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=0:0:0:0:2::
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t04() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=0:0:0:0:0:ffff:7f00:1
+	local target=ipv4-mapped
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t05() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=0:0:0:0:0:ffff:198.15.0.5
+	local target=ipv4-mapped
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t06() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=0:0:0:0:ffff:0:7f00:1
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t08() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=2001::3
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t09() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=2001:db8::
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t10() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=2001:db8:0:8a96:0:ffff::
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t11() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=2001:db8:8a96:33::
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t12() { # UnitTest
+	. ../shell-ip-address
+
+	local repr=2001:db8:8a96:33::5.0.0.5
+	local target=other
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t16() { # UnitTest
+	. ../shell-ip-address
+
+	# Link-scope unicast address.
+	local repr=fe80::8
+	local target=link-local
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t17() { # UnitTest
+	. ../shell-ip-address
+
+	# Link-scope unicast address.
+	local repr=feba:d0ba::
+	local target=link-local
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t18() { # UnitTest
+	. ../shell-ip-address
+
+	# Link-scope multicast address.
+	local repr=ff02::1:2
+	local target=multicast
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t19() { # UnitTest
+	. ../shell-ip-address
+
+	# Site-scope multicast address.
+	local repr=ff05::1:3
+	local target=multicast
+	assertEquals "'$repr' is $target" "$target" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t20() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=''
+	ipv6_addr_type "$repr" || rc=1
+	assertFalse "empty string" $rc
+	assertNull "empty output" "$(ipv6_addr_type "$repr")"
+}
+
+ip_address_test6t21() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local repr=ffff:::::::
+	ipv6_addr_type "$repr" || rc=1
+	assertFalse "malformed address: $repr" $rc
+	assertNull "empty output" "$(ipv6_addr_type "$repr")"
+}

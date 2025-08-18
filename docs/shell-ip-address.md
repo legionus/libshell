@@ -2,7 +2,7 @@ shell-ip-address(3)
 
 # NAME
 
-ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_ptonx, valid_ipv4 - functions to manipulate IP addresses
+ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_addr_type, ipv6_ptonx, valid_ipv4 - functions to manipulate IP addresses
 
 # SYNOPSIS
 
@@ -12,6 +12,7 @@ ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_ptonx, vali
 - valid_ipv4 ipaddr
 - ipv4_ptonx ipaddr
 
+- ipv6_addr_type ipaddr
 - ipv6_ptonx ipaddr
 
 # DESCRIPTION
@@ -75,6 +76,40 @@ res=0
 
 *ipv4_ptonx* expects the entire string to represent an address, i. e. no trailing characters after the address.
 Note that *ipv4_ptonx* makes no assumptions about the meaning of the address or the network environment; unlike *valid_ipv4*, it does not exclude special-use and multicast addresses, nor infer any special qualities based on a certain prefix length (e. g. last octet is not disallowed to be equal to 0 or 255).
+
+## ipv6_addr_type
+This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and determines its type in regard to various special properties. If the input string is a well-formed IPv6 address, the function returns successfully, and its output value belongs to the following enum:
+- *unspec*
+- *loopback*
+- *ipv4-mapped*
+- *link-local*
+- *multicast*
+- *other*
+
+Most IPv6 addresses fall into the *other* category. If *ipv6_addr_type* outputs *other* on an address, that address is _likely_ safe to be a source, a destination, and traffic to and from it is _likely_ forwardable by routers.
+
+Example:
+```
+ipv6_addr_type 2001:db8:1:103a::2; echo res=$?
+other
+res=0
+
+ipv6_addr_type example.org; echo res=$?
+res=1
+
+ipv6_addr_type ff02::1:0:a; echo res=$?
+multicast
+res=0
+
+ipv6_addr_type ::ffff:25.25.25.25; echo res=$?
+ipv4-mapped
+res=0
+```
+
+*ipv6_addr_type* expects the entire string to represent an address, i. e. no trailing characters after the address.
+
+The intended purpose of *ipv6_addr_type* is to prevent misuse of special-use addresses.
+For example, since link-local unicast addresses only make sense within a link and are incomplete without a scope identifier, it generally makes no sense to specify them in DNS AAAA records.
 
 ## ipv6_ptonx
 This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and outputs each octet in network byte order as 16 adjacent 2-digit hexadecimal numbers.

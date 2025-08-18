@@ -278,4 +278,50 @@ ipv6_ptonx()
 	return 0
 }
 
+### Reads an IPv6 address from the option value and determines its type,
+### in regard to any special properties derived from that type.
+### If an address was recognized successfully, outputs a value
+### belonging to the following enum:
+### - unspec
+### - loopback
+### - ipv4-mapped
+### - link-local
+### - multicast
+### - other
+### Otherwise, returns non-zero with empty output.
+ipv6_addr_type()
+{
+	local na hi lo atype
+	local hi0 hi32 lo64 lo96
+
+	na="$(ipv6_ptonx "$1")" ||
+		return 1
+	hi="${na%????????}"
+	hi="${hi%????????}"
+	lo="${na#$hi}"
+
+	case "$hi" in
+	ff*) atype=multicast ;;
+	fe[89ab]*) atype=link-local ;;
+	*) ;;
+	esac
+	if [ -z "${atype-}" ]; then
+		hi0="0x${hi%????????}"
+		hi32="0x${hi#????????}"
+		lo64="0x${lo%????????}"
+		lo96="0x${lo#????????}"
+
+		case "$(($hi0)),$(($hi32)),$(($lo64)),$(($lo96))" in
+		"0,0,0,0") atype=unspec ;;
+		"0,0,0,1") atype=loopback ;;
+		"0,0,65535,"*) atype=ipv4-mapped ;;
+		*) ;;
+		esac
+	fi
+	[ -n "${atype-}" ] || atype=other
+
+	printf '%s\n' "$atype"
+	return 0
+}
+
 fi #__included_shell_ip_address
