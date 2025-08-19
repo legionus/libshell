@@ -2,7 +2,7 @@ shell-ip-address(3)
 
 # NAME
 
-ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, valid_ipv4 - functions to validate the IPv4 address
+ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_addr_type, ipv6_ptonx, valid_ipv4 - functions to manipulate IP addresses
 
 # SYNOPSIS
 
@@ -10,6 +10,10 @@ ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, valid_ipv4 - functions to va
 - ipv4_mask2prefix value
 - ipv4_prefix2mask value
 - valid_ipv4 ipaddr
+- ipv4_ptonx ipaddr
+
+- ipv6_addr_type ipaddr
+- ipv6_ptonx ipaddr
 
 # DESCRIPTION
 
@@ -48,6 +52,88 @@ ipv4_prefix2mask 16
 ipv4_prefix2mask 24
 255.255.255.0
 ```
+
+## ipv4_ptonx
+This function interprets the given option value as an IPv4 address similarly to inet_pton(3), and outputs each octet in network byte order as 4 adjacent 2-digit hexadecimal numbers.
+This form is useful to perform bitwise operations on the address.
+
+Example:
+```
+ipv4_ptonx 192.0.0.2; echo res=$?
+c0000002
+res=0
+
+ipv4_ptonx example.org; echo res=$?
+res=1
+
+ipv4_ptonx 377.0.0.1; echo res=$?
+res=1
+
+ipv4_ptonx 255.255.255.255; echo res=$?
+ffffffff
+res=0
+```
+
+*ipv4_ptonx* expects the entire string to represent an address, i. e. no trailing characters after the address.
+Note that *ipv4_ptonx* makes no assumptions about the meaning of the address or the network environment; unlike *valid_ipv4*, it does not exclude special-use and multicast addresses, nor infer any special qualities based on a certain prefix length (e. g. last octet is not disallowed to be equal to 0 or 255).
+
+## ipv6_addr_type
+This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and determines its type in regard to various special properties. If the input string is a well-formed IPv6 address, the function returns successfully, and its output value belongs to the following enum:
+- *unspec*
+- *loopback*
+- *ipv4-mapped*
+- *link-local*
+- *multicast*
+- *other*
+
+Most IPv6 addresses fall into the *other* category. If *ipv6_addr_type* outputs *other* on an address, that address is _likely_ safe to be a source, a destination, and traffic to and from it is _likely_ forwardable by routers.
+
+Example:
+```
+ipv6_addr_type 2001:db8:1:103a::2; echo res=$?
+other
+res=0
+
+ipv6_addr_type example.org; echo res=$?
+res=1
+
+ipv6_addr_type ff02::1:0:a; echo res=$?
+multicast
+res=0
+
+ipv6_addr_type ::ffff:25.25.25.25; echo res=$?
+ipv4-mapped
+res=0
+```
+
+*ipv6_addr_type* expects the entire string to represent an address, i. e. no trailing characters after the address.
+
+The intended purpose of *ipv6_addr_type* is to prevent misuse of special-use addresses.
+For example, since link-local unicast addresses only make sense within a link and are incomplete without a scope identifier, it generally makes no sense to specify them in DNS AAAA records.
+
+## ipv6_ptonx
+This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and outputs each octet in network byte order as 16 adjacent 2-digit hexadecimal numbers.
+This form is useful to perform bitwise operations on the address.
+
+Example:
+```
+ipv6_ptonx 2001:db8:1:103a::2; echo res=$?
+20010db80001103a0000000000000002
+res=0
+
+ipv6_ptonx 2001:db8:1:103a:6f:8d71:192.0.2.4; echo res=$?
+20010db80001103a006f8d71c0000204
+res=0
+
+ipv6_ptonx example.org; echo res=$?
+res=1
+
+ipv6_ptonx 9:a; echo res=$?
+res=1
+```
+
+*ipv6_ptonx* expects the entire string to represent an address, i. e. no trailing characters after the address.
+Note that *ipv6_ptonx* only deals with a 128-bit network address; it knows nothing about scope identifiers (e. g. %eth0) or upper layer ports.
 
 ## valid_ipv4
 Function checks that given option value is a valid IPv4 address.

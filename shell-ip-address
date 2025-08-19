@@ -6,6 +6,8 @@
 if [ -z "${__included_shell_ip_address-}" ]; then
 __included_shell_ip_address=1
 
+. shell-var
+
 ### Regexp for single byte
 readonly regex_byte='([01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'
 
@@ -166,6 +168,160 @@ ipv4_prefix2mask()
 	    "$(($mask >> 16 & 0xFF))" \
 	    "$(($mask >> 8  & 0xFF))" \
 	    "$(($mask       & 0xFF))"
+}
+
+### Outputs the serialized address in network byte order
+### as 8 hexadecimal digits.
+ipv4_ptonx()
+{
+	local repr="$1"
+	local octets=
+
+	local i d
+	i=0
+	while :; do
+		d="${repr%%.*}"
+		[ -n "$d" ] ||
+			return 1
+		[ "$d" = 0 ] || shell_var_is_number "$d" ||
+			return 1
+		[ "$d" -le 255 ] ||
+			return 1
+		octets="$octets$(printf %02x $d)"
+		repr="${repr#$d}"
+		[ -n "$repr" ] || [ "$i" -ne 3 ] ||
+			break
+		[ -z "${repr##.*}" ] ||
+			return 1
+		i=$(($i + 1))
+		repr="${repr#.}"
+		[ "$i" -lt 4 ] ||
+			return 1
+	done
+	printf '%s\n' "$octets"
+	return 0
+}
+
+### Outputs the serialized address in network byte order
+### as 32 hexadecimal digits.
+### Bitwise operations are easy enough to implement over this
+### address representation.
+ipv6_ptonx()
+{
+	local repr="$1"
+	local skip=''
+	local pref='' impz='' suff=''
+	[ -n "$repr" ] ||
+		return 1
+	[ -z "${repr##??*}" ] ||
+		return 1
+	[ -n "${repr##:[!:]*}" ] ||
+		return 1
+
+	local i d
+	i=0
+	while :; do
+		if [ -z "${repr##::*}" ]; then
+			# Encountered '::'.
+			[ -z "$skip" ] ||
+				return 1
+			skip=1
+			repr="${repr#::}"
+			[ -n "$repr" ] ||
+				break
+
+			i=$(($i + 1))
+			[ "$i" -lt 8 ] ||
+				return 1
+			continue
+		fi
+		# Did not encounter '::'.
+		repr="${repr#:}"
+
+		d="${repr%%:*}"
+		repr="${repr#$d}"
+		[ -n "$d" ] ||
+			return 1
+		if [ -z "${d##*.*.*.*}" ]; then
+			# Embedded IPv4 representation.
+			[ -z "$repr" ] ||
+				return 1
+			[ "$i" -eq 6 ] || [ -n "$skip" ] ||
+				return 1
+			d="$(ipv4_ptonx "$d")" ||
+				return 1
+			suff="$suff$d"
+			break
+		fi
+		[ -n "${d##*[!0-9a-fA-F]*}" ] ||
+			return 1
+		[ $(( 0x0$d <= 65535 )) -gt 0 ] ||
+			return 1
+		if [ -n "$skip" ]; then
+			suff="$suff$(printf %04x 0x0$d)"
+		else
+			pref="$pref$(printf %04x 0x0$d)"
+		fi
+		if [ -z "$repr" ]; then
+			[ "$i" -eq 7 ] || [ -n "$skip" ] &&
+				break
+			return 1
+		fi
+
+		i=$(($i + 1))
+		[ "$i" -lt 8 ] ||
+			return 1
+	done
+	impz=$((32 - ${#pref} - ${#suff}))
+	[ "$impz" -ne 0 ] && impz="$(printf "%0${impz}x" 0)" || impz=
+	printf "%s%s\n" "$pref" "$impz$suff" | tr 'A-Z' 'a-z'
+	return 0
+}
+
+### Reads an IPv6 address from the option value and determines its type,
+### in regard to any special properties derived from that type.
+### If an address was recognized successfully, outputs a value
+### belonging to the following enum:
+### - unspec
+### - loopback
+### - ipv4-mapped
+### - link-local
+### - multicast
+### - other
+### Otherwise, returns non-zero with empty output.
+ipv6_addr_type()
+{
+	local na hi lo atype
+	local hi0 hi32 lo64 lo96
+
+	na="$(ipv6_ptonx "$1")" ||
+		return 1
+	hi="${na%????????}"
+	hi="${hi%????????}"
+	lo="${na#$hi}"
+
+	case "$hi" in
+	ff*) atype=multicast ;;
+	fe[89ab]*) atype=link-local ;;
+	*) ;;
+	esac
+	if [ -z "${atype-}" ]; then
+		hi0="0x${hi%????????}"
+		hi32="0x${hi#????????}"
+		lo64="0x${lo%????????}"
+		lo96="0x${lo#????????}"
+
+		case "$(($hi0)),$(($hi32)),$(($lo64)),$(($lo96))" in
+		"0,0,0,0") atype=unspec ;;
+		"0,0,0,1") atype=loopback ;;
+		"0,0,65535,"*) atype=ipv4-mapped ;;
+		*) ;;
+		esac
+	fi
+	[ -n "${atype-}" ] || atype=other
+
+	printf '%s\n' "$atype"
+	return 0
 }
 
 fi #__included_shell_ip_address
