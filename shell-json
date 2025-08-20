@@ -108,7 +108,7 @@ __json_handle()
 # Consume standard input one character at a time to parse JSON.
 json_foreach()
 {
-	local __json_l __json_m __json_c __json_p __json_eof __json_buffer __json_state
+	local __json_l __json_ctx __json_c __json_p __json_eof __json_buffer __json_state
 	local __json_name=0 __json_states=0
 	local __json_handle=1
 
@@ -129,12 +129,11 @@ json_foreach()
 	while [ -z "$__json_eof" ]; do
 		read ${__json_read_opt_n:+-n 9} -r __json_l || __json_eof=1
 
-		fill_mask __json_m "$__json_l"
+		__shell_string_foreach_prepare __json_ctx "$__json_l"
 
-		while [ -n "$__json_l" ]; do
-			__json_c="${__json_l%$__json_m}"
-			__json_l="${__json_l#?}"
-			__json_m="${__json_m#?}"
+		while __shell_string_foreach_continue "$__json_ctx"; do
+			__shell_string_foreach_char __json_c "$__json_ctx"
+			__shell_string_foreach_iter "$__json_ctx"
 
 			[ -n "${__json_c##
 }" ] ||

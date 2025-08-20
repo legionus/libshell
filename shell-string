@@ -36,4 +36,55 @@ __fill_mask()
 	eval "$1=\$__fill_masko"
 }
 
+__shell_string_foreach=0
+
+# Usage: __shell_string_foreach_prepare ctxvar str
+__shell_string_foreach_prepare()
+{
+	eval "__shell_string_foreach_${__shell_string_foreach:-0}_line=\"\$2\""
+	eval "__shell_string_foreach_${__shell_string_foreach:-0}_mask=\"\""
+
+	fill_mask "__shell_string_foreach_${__shell_string_foreach:-0}_mask" "$2"
+
+	eval "$1=\"__shell_string_foreach_${__shell_string_foreach:-0}\""
+	__shell_string_foreach=$(( ${__shell_string_foreach:-0} + 1 ))
+}
+
+# Usage: __shell_string_foreach_finish ctxvar
+__shell_string_foreach_finish()
+{
+	unset "${1}_line"
+	unset "${1}_mask"
+}
+
+# Usage: __shell_string_foreach_condition ctxvar
+__shell_string_foreach_condition()
+{
+	local l
+	eval "l=\"\${${1}_line-}\""
+	[ -n "$l" ]
+}
+
+# Usage: __shell_string_foreach_continue ctxvar
+__shell_string_foreach_continue()
+{
+	if ! __shell_string_foreach_condition "$1"; then
+		__shell_string_foreach_finish "$1"
+		return 1
+	fi
+}
+
+# Usage: __shell_string_foreach_char retchar ctxvar
+__shell_string_foreach_char()
+{
+	eval "$1=\"\${${2}_line%\$${2}_mask}\""
+}
+
+# Usage: __shell_string_foreach_char ctxvar
+__shell_string_foreach_iter()
+{
+	eval "${1}_line=\"\${${1}_line#?}\""
+	eval "${1}_mask=\"\${${1}_mask#?}\""
+}
+
 fi #__included_shell_string

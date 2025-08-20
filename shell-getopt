@@ -231,21 +231,22 @@ getoptex()
 ###
 getopts()
 {
-	local l="$1"
-	local m=         ### mask
-	local r=         ### to store result
-	fill_mask m "$l" ### create a "???..." mask
+	local c=
+	local r=  ### to store result
 
-	while [ -n "$l" ]; do
-		r="${r:+"$r "}${l%$m}" ### append the first character of $l to $r
-		l="${l#?}"             ### cut the first charecter from $l
-		m="${m#?}"             ### cut one "?" sign from m
+	__shell_string_foreach_prepare ctx "$1"
+
+	while __shell_string_foreach_continue "$ctx"; do
+		__shell_string_foreach_char c "$ctx"
+		r="${r:+"$r "}$c" ### append the first character of $1 to $r
+
+		__shell_string_foreach_iter "$ctx"
+		__shell_string_foreach_char c "$ctx"
 
 		### a special character (";", ".", or ":") was found
-		if [ "${l#[:.;]}" != "$l" ]; then
-			r="$r${l%$m}" ### append it to $r
-			l="${l#?}"    ### cut the special character from l
-			m="${m#?}"    ### cut one more "?" sign
+		if [ -n "$c" ] && [ -z "${c#[:.;]}" ]; then
+			r="$r$c"
+			__shell_string_foreach_iter "$ctx"
 		fi
 	done
 	shift
@@ -266,14 +267,14 @@ getsubopt()
 	local l="$2"
 
 	if [ -z "$__getsubopt_arguments" ]; then
-		local ch m=
-		fill_mask m "$l"
+		local ctx ch
+
+		__shell_string_foreach_prepare ctx "$l"
 
 		__getsubopt_arguments='--'
-		while [ -n "$l" ]; do
-			ch="${l%$m}"
-			l="${l#?}"
-			m="${m#?}"
+		while __shell_string_foreach_continue "$ctx"; do
+			__shell_string_foreach_char ch "$ctx"
+			__shell_string_foreach_iter "$ctx"
 
 			# shellcheck disable=SC2102
 			# Disable this `Ranges can only match single chars (mentioned due to duplicates)`

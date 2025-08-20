@@ -35,12 +35,11 @@ __shell_crc32()
 		crc=$(( ($crc >> 8) ^ $val ))
 	done <<-EOF
 		`
-	buf="$1"
-	fill_mask mask "$buf"
-	while [ -n "$buf" ]; do
-		printf '%u\n' "'${buf%$mask}"
-		buf=${buf#?}
-		mask=${mask#?}
+	__shell_string_foreach_prepare ctx "$1"
+	while __shell_string_foreach_continue "$ctx"; do
+		__shell_string_foreach_char i "$ctx"
+		__shell_string_foreach_iter "$ctx"
+		printf '%u\n' "'$i"
 	done`
 	EOF
 	__shell_crc32_crc=$(( $crc ^ 0xFFFFFFFF ))

@@ -11,7 +11,7 @@ __included_shell_cmdline=1
 ### Run handler for each variable in /proc/cmdline.
 cmdline_foreach()
 {
-	local l h c='' m=''
+	local l h ctx c=''
 
 	l="$1"; shift
 	h="$1"; shift
@@ -20,8 +20,6 @@ cmdline_foreach()
 		[ $(( $1 & $2 )) -eq $2 ]
 	}
 
-	fill_mask m "$l"
-
 	local state=$((0))
 	local VALUE=$((2))
 	local EQUAL=$((4))
@@ -29,8 +27,10 @@ cmdline_foreach()
 
 	local n='' v='' f=1
 
-	while [ -n "$l" ]; do
-		c="${l%$m}"
+	__shell_string_foreach_prepare ctx "$l"
+
+	while __shell_string_foreach_continue "$ctx"; do
+		__shell_string_foreach_char c "$ctx"
 
 		case "$c" in
 			'"')
@@ -66,8 +66,7 @@ cmdline_foreach()
 				;;
 		esac
 
-		l="${l#?}"
-		m="${m#?}"
+		__shell_string_foreach_iter "$ctx"
 	done
 
 	if [ -n "$n" ]; then
@@ -101,18 +100,18 @@ cmdline_get()
 		__cmdline="$1"
 	fi
 
-	local c m l="$__getn"
+	local c ctx
+
+	__shell_string_foreach_prepare ctx "$__getn"
 	__getn=
 
-	fill_mask m "$l"
-	while [ -n "$l" ]; do
-		c="${l%$m}"
+	while __shell_string_foreach_continue "$ctx"; do
+		__shell_string_foreach_char c "$ctx"
 		[ "$c" != '-' ] || c='_'
 		__getn="$__getn$c"
-		l="${l#?}"
-		m="${m#?}"
+		__shell_string_foreach_iter "$ctx"
 	done
-	unset c m l
+	unset c
 
 	__getval()
 	{
