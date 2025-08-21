@@ -36,17 +36,31 @@ __fill_mask()
 	eval "$1=\$__fill_masko"
 }
 
+__shell_is_bash()
+{
+	[ -n "${BASH-}" ] && [ -n "${BASH_VERSION-}" ]
+}
+
+__shell_is_ksh()
+{
+	[ -n "${KSH_VERSION-}" ]
+}
+
 __shell_string_foreach=0
 
 # Usage: __shell_string_foreach_prepare ctxvar str
 __shell_string_foreach_prepare()
 {
-	eval "__shell_string_foreach_${__shell_string_foreach:-0}_line=\"\$2\""
-	eval "__shell_string_foreach_${__shell_string_foreach:-0}_mask=\"\""
+	set -- "$@" "__shell_string_foreach_${__shell_string_foreach:-0}"
+	eval "${3}_line=\"\$2\""
+	eval "${3}_mask=\"\""
+	eval "${3}_i=0"
 
-	fill_mask "__shell_string_foreach_${__shell_string_foreach:-0}_mask" "$2"
+	if ! __shell_is_bash && ! __shell_is_ksh; then
+		fill_mask "${3}_mask" "$2"
+	fi
 
-	eval "$1=\"__shell_string_foreach_${__shell_string_foreach:-0}\""
+	eval "$1=\"\$3\""
 	__shell_string_foreach=$(( ${__shell_string_foreach:-0} + 1 ))
 }
 
@@ -55,14 +69,21 @@ __shell_string_foreach_finish()
 {
 	unset "${1}_line"
 	unset "${1}_mask"
+	unset "${1}_i"
 }
 
 # Usage: __shell_string_foreach_condition ctxvar
 __shell_string_foreach_condition()
 {
-	local l
-	eval "l=\"\${${1}_line-}\""
-	[ -n "$l" ]
+	eval "set -- \"\${${1}_i-}\" \"\${${1}_line-}\""
+
+	if __shell_is_bash || __shell_is_ksh; then
+		[ $1 -lt "${#2}" ] ||
+			return 1
+	else
+		[ -n "$2" ] ||
+			return 1
+	fi
 }
 
 # Usage: __shell_string_foreach_continue ctxvar
@@ -77,14 +98,22 @@ __shell_string_foreach_continue()
 # Usage: __shell_string_foreach_char retchar ctxvar
 __shell_string_foreach_char()
 {
-	eval "$1=\"\${${2}_line%\$${2}_mask}\""
+	if __shell_is_bash || __shell_is_ksh; then
+		eval "$1=\"\${${2}_line:\$${2}_i:1}\""
+	else
+		eval "$1=\"\${${2}_line%\$${2}_mask}\""
+	fi
 }
 
 # Usage: __shell_string_foreach_char ctxvar
 __shell_string_foreach_iter()
 {
-	eval "${1}_line=\"\${${1}_line#?}\""
-	eval "${1}_mask=\"\${${1}_mask#?}\""
+	if __shell_is_bash || __shell_is_ksh; then
+		eval "${1}_i=\$(( \$${1}_i + 1 ))"
+	else
+		eval "${1}_line=\"\${${1}_line#?}\""
+		eval "${1}_mask=\"\${${1}_mask#?}\""
+	fi
 }
 
 fi #__included_shell_string
