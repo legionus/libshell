@@ -1,0 +1,66 @@
+#!/bin/sh -efu
+
+get_user_time()
+{
+	# 0m0.099s 0m0.095s
+
+	local user_time system_time
+	read -r user_time system_time ||:
+
+	user_time="${user_time%.*}"
+
+	echo "$user_time"
+}
+
+string_performance_test1() { # UnitTest
+	. ../shell-string
+
+	local i p s dash_shell
+
+	case "${TEST_SHELL##*/}" in
+		ash|dash)
+			shouldSkip
+			;;
+	esac
+
+
+	for i in ash dash; do
+		dash_shell="$(which "$i" 2>/dev/null)" && break ||:
+	done
+
+	[ -n "$dash_shell" ] ||
+		shouldSkip
+
+	p="1234567890AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
+	s=
+	for i in \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		0 1 2 3 4 5 6 7 8 9 \
+		;
+	do
+		s="$s$p"
+	done
+
+	export string="$s"
+
+	local result_dash result_test
+
+	result_dash="$($dash_shell -efu ./string-data/iterate-string.sh | get_user_time)"
+	result_test="$($TEST_SHELL -efu ./string-data/iterate-string.sh | get_user_time)"
+
+	assertTrue "$TEST_SHELL ran longer: $dash_shell: $result_dash, $TEST_SHELL: $result_test" \
+		"test $(( (${result_dash%m*} * 60) + ${result_dash#*m} )) -ge $(( (${result_test%m*} * 60) + ${result_test#*m} ))"
+
+	case "${TEST_SHELL##*/}" in
+		bash*|*ksh)
+			assertTrue "$TEST_SHELL is too slow: $result_test" \
+				"test ${result_test%m*} -eq 0 -a ${result_test#*m} -lt 3"
+			;;
+	esac
+}

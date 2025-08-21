@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "install tools"
-        run: sudo apt-get -y -qq install dash
+        run: sudo apt-get -y -qq install dash bash mksh
       - name: "unittests"
         run: make check CHECK_SHELL=/bin/dash V=1
 
@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "install tools"
-        run: sudo apt-get -y -qq install bash
+        run: sudo apt-get -y -qq install dash bash mksh
       - name: "unittests"
         run: make check CHECK_SHELL=/bin/bash V=1
 
@@ -76,6 +76,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "install tools"
-        run: sudo apt-get -y -qq install mksh
+        run: sudo apt-get -y -qq install dash bash mksh
       - name: "unittests"
         run: make check CHECK_SHELL=/bin/mksh V=1
