@@ -1,0 +1,36 @@
+#!/bin/sh -efu
+
+getsubopt_test01() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTOPT='' OPTARG='' OPTERR=''
+
+	optstring='rw mode: path: dev:'
+
+	rc=0; getsubopt "$optstring" 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz' || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTOPT=$OPTOPT OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=2 OPTOPT=rw OPTARG="
+
+	rc=0; getsubopt "$optstring" 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz' || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTOPT=$OPTOPT OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=3 OPTOPT=mode OPTARG=755"
+
+	rc=0; getsubopt "$optstring" 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz' || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTOPT=$OPTOPT OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=4 OPTOPT=path OPTARG=\"/zzz xxx\""
+
+	rc=0; getsubopt "$optstring" 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz' || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTOPT=$OPTOPT OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=5 OPTOPT=dev OPTARG=/dev/zzz"
+
+	rc=0; getsubopt "$optstring" 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz' || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTOPT=$OPTOPT OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=1 OPTIND=5 OPTOPT=dev OPTARG=/dev/zzz"
+}
+

@@ -1,0 +1,130 @@
+#!/bin/ash -efu
+
+getopts_test01() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="abc"
+
+	rc=0; getopts "$optstring" "-b" "-c" "-a" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=2 OPTARG="
+
+	rc=0; getopts "$optstring" "-b" "-c" "-a" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=2: $result" "$result" "rc=0 OPTIND=3 OPTARG="
+
+	rc=0; getopts "$optstring" "-b" "-c" "-a" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=3: $result" "$result" "rc=0 OPTIND=4 OPTARG="
+
+	rc=0; getopts "$optstring" "-b" "-c" "-a" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=4: $result" "$result" "rc=1 OPTIND=4 OPTARG="
+}
+
+getopts_test02() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="a:b"
+
+	rc=0; getopts "$optstring" "-a" "FOO" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=3 OPTARG=FOO"
+
+	rc=0; getopts "$optstring" "-a" "FOO" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=2: $result" "$result" "rc=0 OPTIND=4 OPTARG="
+
+	rc=0; getopts "$optstring" "-a" "FOO" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=3: $result" "$result" "rc=1 OPTIND=4 OPTARG="
+}
+
+getopts_test03() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="a:b"
+
+	rc=0; getopts "$optstring" "-a900" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=2 OPTARG=900"
+
+	rc=0; getopts "$optstring" "-a900" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=2: $result" "$result" "rc=0 OPTIND=3 OPTARG="
+
+	rc=0; getopts "$optstring" "-a900" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=3: $result" "$result" "rc=1 OPTIND=3 OPTARG="
+}
+
+getopts_test04() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="a;b"
+
+	rc=0; getopts "$optstring" "-a" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=0 OPTIND=2 OPTARG="
+
+	rc=0; getopts "$optstring" "-a" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=2: $result" "$result" "rc=0 OPTIND=3 OPTARG="
+
+	rc=0; getopts "$optstring" "-a" "-b" || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=3: $result" "$result" "rc=1 OPTIND=3 OPTARG="
+}
+
+getopts_test05() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="a:b"
+
+	rc=0; getopts "$optstring" "-c" 2>/dev/null || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=2 OPTIND=2 OPTARG="
+}
+
+getopts_test06() { # UnitTest
+	. ../shell-getopt
+
+	local result optstring
+	OPTIND=0 OPTARG=''''
+
+	optstring="a:b"
+
+	rc=0; getopts "$optstring" "-a" 2>/dev/null || rc=$?
+	result="rc=$rc OPTIND=$OPTIND OPTARG=$OPTARG"
+
+	assertEquals "iter=1: $result" "$result" "rc=2 OPTIND=2 OPTARG=a"
+}
