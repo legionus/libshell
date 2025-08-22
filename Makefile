@@ -115,12 +115,27 @@ check:
 	    "$(CURDIR)/.shell-funcs"; \
 	exit $$rc;
 
+NULL  =
+SPACE = $(NULL) $(NULL)
+COMMA = ,
+
+DISABLE_SHELLCHECK =
+DISABLE_SHELLCHECK += SC1090 # (warning): ShellCheck can't follow non-constant source. Use a directive to specify location.
+DISABLE_SHELLCHECK += SC1091 # (info): Not following: file was not specified as input (see shellcheck -x).
+DISABLE_SHELLCHECK += SC2004 # (style): $/${} is unnecessary on arithmetic variables.
+DISABLE_SHELLCHECK += SC2015 # (info): Note that A && B || C is not if-then-else. C may run when A is true.
+DISABLE_SHELLCHECK += SC2034 # (warning): foo appears unused. Verify it or export it.
+DISABLE_SHELLCHECK += SC2086 # (info): Double quote to prevent globbing and word splitting.
+DISABLE_SHELLCHECK += SC2154 # (warning): variable is referenced but not assigned.
+DISABLE_SHELLCHECK += SC2295 # (info): Expansions inside ${..} need to be quoted separately, otherwise they match as patterns.
+DISABLE_SHELLCHECK += SC2329 # (info): This function is never invoked. Check usage (or ignored if invoked indirectly).
+
 verify:
 	@for f in ${bin_TARGETS}; do \
 	    ftype=$$(file -b "$$f"); \
 	    [ -z "$${ftype##*shell script*}" ] || continue; \
 	    echo "Checking $$f"; \
-	    shellcheck -s dash -e SC1090,SC1091,SC2004,SC2015,SC2034,SC2086,SC2154 "$$f"; \
+	    shellcheck -s dash -e $(subst $(SPACE),$(COMMA),$(sort $(DISABLE_SHELLCHECK))) "$$f"; \
 	done
 
 clean: $(SUBDIRS)

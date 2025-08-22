@@ -117,8 +117,8 @@ json_foreach()
 '
 
 	local __json_read_opt_n=
-	# shellcheck disable=SC2169
-	! { echo -n 1 | read -n1 -r; } 2>/dev/null ||
+	# shellcheck disable=SC2169,SC3045
+	! { echo -n 1 | read -n1 -r _; } 2>/dev/null ||
 		__json_read_opt_n=1
 
 	__json_buffer='' __json_eof='' __json_p=''

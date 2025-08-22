@@ -274,7 +274,7 @@ ipv6_ptonx()
 	done
 	impz=$((32 - ${#pref} - ${#suff}))
 	[ "$impz" -ne 0 ] && impz="$(printf "%0${impz}x" 0)" || impz=
-	printf "%s%s\n" "$pref" "$impz$suff" | tr 'A-Z' 'a-z'
+	printf "%s%s\n" "$pref" "$impz$suff" | tr '[:upper:]' '[:lower:]'
 	return 0
 }
 
