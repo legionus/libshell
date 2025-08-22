@@ -79,14 +79,12 @@ Note that *ipv4_ptonx* makes no assumptions about the meaning of the address or 
 
 ## ipv6_addr_type
 This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and determines its type in regard to various special properties. If the input string is a well-formed IPv6 address, the function returns successfully, and its output value belongs to the following enum:
-- *unspec*
-- *loopback*
-- *ipv4-mapped*
-- *link-local*
-- *multicast*
-- *other*
-
-Most IPv6 addresses fall into the *other* category. If *ipv6_addr_type* outputs *other* on an address, that address is _likely_ safe to be a source, a destination, and traffic to and from it is _likely_ forwardable by routers.
+- *unspec*, the zero address;
+- *loopback*, the *::1* address;
+- *ipv4-mapped*, an address from *::ffff:0:0/96*;
+- *link-local*, a link-local unicast address;
+- *multicast*, an address from *ff00::/8*;
+- *other*.
 
 Example:
 ```
@@ -104,6 +102,30 @@ res=0
 ipv6_addr_type ::ffff:25.25.25.25; echo res=$?
 ipv4-mapped
 res=0
+```
+
+Most IPv6 addresses fall into the *other* category. The value *other*, though, is designed to be a default match.
+If an address falls into a different category, not *other*, we guarantee it will remain in that category, but new categories might or might not appear in the future that may cover some addresses that were previously *other*.
+It is not recommended to test if an address is in the *other* category; instead, test for a different category, and fall back to different code otherwise.
+
+Example:
+```
+for addr in $(get_ifaddrs "$iface"); do
+	t="$(ipv6_addr_type "$addr")" ||
+		continue
+	case "$t" in
+		ipv4-mapped|multicast)
+			# Ignore.
+			;;
+		link-local)
+			maybe_update "$addr%$iface"
+			;;
+		*)
+			maybe_update "$addr"
+			;;
+	esac
+done
+# This code does not rely on $addr staying 'other'.
 ```
 
 *ipv6_addr_type* expects the entire string to represent an address, i. e. no trailing characters after the address.
