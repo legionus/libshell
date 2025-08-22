@@ -1,5 +1,9 @@
 #!/bin/sh -efu
 
+export LANG=C
+export LANGUAGE=C
+export LC_ALL=C
+
 srcdir="$(readlink -ev ..)"
 export PATH="$srcdir:$PATH"
 
