@@ -36,7 +36,7 @@ for s in \
 	git_config_foreach git_config_get git_config_count git_config_list git_config_set git_config_unset git_config_append \
 	shell_var_unquote shell_var_trim \
 	fill_mask \
-	ip_address \
+	ip_address ip_address_mask \
 	cmdline_foreach \
 	cmdline_get \
 	run_scripts \

@@ -1,0 +1,189 @@
+#!/bin/ash -efu
+
+ip_address_mask_test400() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=0
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "0.0.0.0" "$out"
+}
+
+ip_address_mask_test401() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=1
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "128.0.0.0" "$out"
+}
+
+ip_address_mask_test402() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=4
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "240.0.0.0" "$out"
+}
+
+ip_address_mask_test403() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=8
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.0.0.0" "$out"
+}
+
+ip_address_mask_test404() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=10
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.192.0.0" "$out"
+}
+
+ip_address_mask_test405() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=11
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.224.0.0" "$out"
+}
+
+ip_address_mask_test406() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=13
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.248.0.0" "$out"
+}
+
+ip_address_mask_test407() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=15
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.254.0.0" "$out"
+}
+
+ip_address_mask_test408() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=16
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.255.0.0" "$out"
+}
+
+ip_address_mask_test409() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=24
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.255.255.0" "$out"
+}
+
+ip_address_mask_test410() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=30
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.255.255.252" "$out"
+}
+
+ip_address_mask_test411() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0 out=
+	local plen=32
+	ipv4_prefix2mask "$plen" || rc=1
+	out="$(ipv4_prefix2mask "$plen")"
+
+	assertTrue "/$plen" $rc
+	assertEquals "255.255.255.255" "$out"
+}
+
+ip_address_mask_test412() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local plen=33
+	ipv4_prefix2mask "$plen" || rc=1
+
+	assertFalse "prefix length too large: $plen" $rc
+	assertNull "$(ipv4_prefix2mask "$plen")"
+}
+
+ip_address_mask_test413() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local plen=''
+	ipv4_prefix2mask "$plen" || rc=1
+
+	assertFalse "empty prefix length" $rc
+	assertNull "$(ipv4_prefix2mask "$plen")"
+}
+
+ip_address_mask_test414() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local plen=xyz
+	ipv4_prefix2mask "$plen" || rc=1
+
+	assertFalse "garbage prefix length: $plen" $rc
+	assertNull "$(ipv4_prefix2mask "$plen")"
+}
+
+ip_address_mask_test416() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local plen=255.255.224.0
+	ipv4_prefix2mask "$plen" || rc=1
+
+	assertFalse "passed netmask: $plen" $rc
+	assertNull "$(ipv4_prefix2mask "$plen")"
+}

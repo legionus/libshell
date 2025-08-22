@@ -88,6 +88,26 @@ __ipv4_hex()
 	printf '%02x' "$@"
 }
 
+__len2mask_32()
+{
+	local len
+	len="${1-}"
+
+	[ -n "$len" ] ||
+		return 2
+
+	local mask
+	local pos=0 n nbits
+	while [ "$len" -lt 32 ]; do
+		n=$(( ($len | 7) + 1 - $len ))
+		nbits=$(((1 << $n) - 1))
+		len=$(($len + $n))
+		pos=$(( ($pos << $n) | $nbits ))
+	done
+	mask=$((0xFFFFFFFF - $pos))
+	printf '%s' "$mask"
+}
+
 ### Checks that IP address is in subnet
 ### Usage example:
 ### ipv4_ip_subnet 172.16.1.2 172.16.1.0/24; echo res=$?
@@ -154,14 +174,15 @@ ipv4_mask2prefix()
 ### 255.255.255.0
 ipv4_prefix2mask()
 {
-	local len
+	local len mask
 	len="${1-}"
 
-	[ "$len" -ge 0 ] && [ "$len" -le 32 ] 2>/dev/null ||
+	[ "$len" = 0 ] || shell_var_is_number "$len" ||
+		return 1
+	[ "$len" -ge 0 ] && [ "$len" -le 32 ] ||
 		return 1
 
-	local position=$((0xFFFFFFFF))
-	local mask=$(($position - ($position >> $len)))
+	mask="$(__len2mask_32 "$len")"
 
 	printf '%s.%s.%s.%s\n' \
 	    "$(($mask >> 24 & 0xFF))" \
