@@ -35,10 +35,12 @@ jobs:
         run: |
           echo
           echo 'Commits to check:'
-          echo '${{ toJSON(github.event.commits) }}' | jq -r ".[].id" |
-             xargs -r -i git log -1 --pretty='%H%x09%s%x09%ce%x09-%(trailers:key=Signed-off-by,valueonly,separator=%x00)' '{}' |
-             tee /tmp/commits |
+          jq -r '.[].id' <<-'EOF' | \
+             xargs -r -i git log -1 --pretty='%H%x09%s%x09%ce%x09-%(trailers:key=Signed-off-by,valueonly,separator=%x00)' '{}' | \
+             tee /tmp/commits | \
              cut -f1,2
+          ${{ toJSON(github.event.commits) }}
+          EOF
           echo ''
           if grep -e '-$' /tmp/commits | cut -f1,2 | grep -e '^' > /tmp/bad-commits; then
              echo 'Сommits that fail verification:'
