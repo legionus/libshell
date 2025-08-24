@@ -2,7 +2,7 @@ shell-ip-address(3)
 
 # NAME
 
-ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_addr_type, ipv6_ptonx, valid_ipv4 - functions to manipulate IP addresses
+ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_addr_type, ipv6_ip_matches, ipv6_ptonx, valid_ipv4 - functions to manipulate IP addresses
 
 # SYNOPSIS
 
@@ -13,12 +13,13 @@ ipv4_ip_subnet, ipv4_mask2prefix, ipv4_prefix2mask, ipv4_ptonx, ipv6_addr_type, 
 - ipv4_ptonx ipaddr
 
 - ipv6_addr_type ipaddr
+- ipv6_ip_matches ipaddr prefix
 - ipv6_ptonx ipaddr
 
 # DESCRIPTION
 
 ## ipv4_ip_subnet
-Function checks that IP address is in subnet.
+Function checks that IPv4 address is in subnet.
 
 Example:
 ```
@@ -132,6 +133,23 @@ done
 
 The intended purpose of *ipv6_addr_type* is to prevent misuse of special-use addresses.
 For example, since link-local unicast addresses only make sense within a link and are incomplete without a scope identifier, it generally makes no sense to specify them in DNS AAAA records.
+
+## ipv6_ip_matches
+Checks that an IPv6 address is in a prefix (IOW, belongs in a range with common leading bits).
+
+Example:
+```
+ipv6_ip_matches 3fff:e:b:1::2 3fff:e:b:1::/64; echo res=$?
+res=0
+
+ipv6_ip_matches 3fff:e:b:3::2 3fff:e:b:1::/64; echo res=$?
+res=1
+
+ipv6_ip_matches 3fff:e:b:3::2 3fff:e:b::/48; echo res=$?
+res=0
+```
+
+Remember that an IPv6 prefix (netmask of leading 1 bits), unlike an IPv4 prefix, does not necessarily have routing significance; it might or might not be reachable "on-link" in any subnet.
 
 ## ipv6_ptonx
 This function interprets the given option value as an IPv6 address similarly to inet_pton(3), and outputs each octet in network byte order as 16 adjacent 2-digit hexadecimal numbers.
