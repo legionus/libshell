@@ -890,3 +890,183 @@ ip_address_test6t21() { # UnitTest
 	assertFalse "malformed address: $repr" $rc
 	assertNull "empty output" "$(ipv6_addr_type "$repr")"
 }
+
+ip_address_test_match600() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:7::23:443
+	local prefix=::/0
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "matches 'default route': $addr" $rc
+}
+
+ip_address_test_match602() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=::ffff:c000:2
+	local prefix=::/64
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "enough common bits: $addr -> $prefix" $rc
+}
+
+ip_address_test_match603() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=::ffff:c000:2
+	local prefix=::ffff:0:0/96
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "$addr -> $prefix" $rc
+}
+
+ip_address_test_match604() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:560a::c000:204
+	local prefix=2001:db8:7:5608::/61
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "non-4bit-aligned prefix: $addr -> $prefix" $rc
+}
+
+ip_address_test_match605() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:560a::c000:204
+	local prefix=2001:db8:7:5600::/60
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "non-32bit-aligned prefix: $addr -> $prefix" $rc
+}
+
+ip_address_test_match606() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:560a::c000:204
+	local prefix=2001:db8:7:5000::/52
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "non-32bit-aligned prefix: $addr -> $prefix" $rc
+}
+
+ip_address_test_match607() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:500a::c000:205
+	local prefix=2001:db8:7:500a::c000:204/127
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "127-bit prefix: $addr -> $prefix" $rc
+}
+
+ip_address_test_match608() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:500a::c000:204
+	local prefix=2001:db8:7:500a::c000:204/128
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "128-bit prefix: $addr -> $prefix" $rc
+}
+
+ip_address_test_match616() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=3fff:f:e:4::c
+	local prefix=3fff:f:e:4::/64
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "$addr -> $prefix" $rc
+}
+
+ip_address_test_match617() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=3fff:f:e:4::c
+	local prefix=3fff:f:e:4::/48
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertTrue "$addr -> $prefix" $rc
+}
+
+ip_address_test_match620() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=::ffff:c000:2
+	local prefix=::/96
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertFalse "common bits too short: $addr -> $prefix" $rc
+}
+
+ip_address_test_match621() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001::ffff:c000:2
+	local prefix=::ffff:0:0/96
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertFalse "common low bits: $addr -> $prefix" $rc
+}
+
+ip_address_test_match624() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:560a::c000:204
+	local prefix=2001:db8::/60
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertFalse "! $addr -> $prefix" $rc
+}
+
+ip_address_test_match636() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=3fff:f:e:4::c
+	local prefix=3fff:f:e:1::/64
+	ipv6_ip_matches "$addr" "$prefix" || rc=1
+	assertFalse "! $addr -> $prefix" $rc
+}
+
+ip_address_test_match640() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=xxx
+	local prefix=2002::/16
+	ipv6_ip_matches "$addr" "$prefix" || rc=$?
+	assertEquals "garbage addr: $addr" 2 $rc
+}
+
+ip_address_test_match641() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:e8::c0
+	local prefix=yyy/16
+	ipv6_ip_matches "$addr" "$prefix" || rc=$?
+	assertEquals "garbage prefix: $prefix" 2 $rc
+}
+
+ip_address_test_match642() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:e8::c0
+	local prefix=3fff:1::/zzz
+	ipv6_ip_matches "$addr" "$prefix" || rc=$?
+	assertEquals "garbage prefix length: $prefix" 2 $rc
+}
+
+ip_address_test_match643() { # UnitTest
+	. ../shell-ip-address
+
+	local rc=0
+	local addr=2001:db8:7:e8::c0
+	local prefix=3fff:1::/100500
+	ipv6_ip_matches "$addr" "$prefix" || rc=$?
+	assertEquals "garbage prefix length: $prefix" 2 $rc
+}

@@ -108,7 +108,7 @@ __len2mask_32()
 	printf '%s' "$mask"
 }
 
-### Checks that IP address is in subnet
+### Checks that IPv4 address is in subnet
 ### Usage example:
 ### ipv4_ip_subnet 172.16.1.2 172.16.1.0/24; echo res=$?
 ### res=0
@@ -343,6 +343,58 @@ ipv6_addr_type()
 
 	printf '%s\n' "$atype"
 	return 0
+}
+
+### Checks that IPv6 address is in a prefix.
+### Usage example:
+### ipv6_ip_matches 3fff:e:b:1::2 3fff:e:b:1::/64; echo res=$?
+### res=0
+###
+### ipv6_ip_matches 3fff:e:b:3::2 3fff:e:b:1::/64; echo res=$?
+### res=1
+###
+### ipv6_ip_matches 3fff:e:b:3::2 3fff:e:b::/48; echo res=$?
+### res=0
+ipv6_ip_matches()
+{
+	local addr pref preflen
+	addr="${1-}"; shift
+	pref="${1-}"; shift
+	preflen="${pref##*/}"
+
+	[ -n "$preflen" ] ||
+		return 2
+	[ "$preflen" = 0 ] || shell_var_is_number "$preflen" ||
+		return 2
+	[ "$preflen" -le 128 ] ||
+		return 2
+
+	local hex_addr hex_pref hex_mask
+
+	hex_addr="$(ipv6_ptonx "$addr")" &&
+	hex_pref="$(ipv6_ptonx "${pref%%/*}")" ||
+		return 2
+
+	local i_addr i_pref w_addr w_pref
+	while [ "$preflen" -gt 32 ]; do
+		i_addr="${hex_addr#????????}"
+		i_pref="${hex_pref#????????}"
+		w_addr="${hex_addr%$i_addr}"
+		w_pref="${hex_pref%$i_pref}"
+		[ "$w_pref" = "$w_addr" ] ||
+			return 1
+
+		hex_addr="$i_addr"
+		hex_pref="$i_pref"
+		preflen="$(($preflen - 32))"
+	done
+	i_addr="${hex_addr#????????}"
+	i_pref="${hex_pref#????????}"
+	w_addr="${hex_addr%$i_addr}"
+	w_pref="${hex_pref%$i_pref}"
+	hex_mask="$(__len2mask_32 "$preflen")"
+	[ "$((0x$w_pref & $hex_mask))" -eq "$((0x$w_addr & $hex_mask))" ] ||
+		return 1
 }
 
 fi #__included_shell_ip_address
