@@ -83,6 +83,7 @@ release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
 	@cd tests; \
+	    rc=0; \
 	    for sh in $${CHECK_SHELL:-/bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/lksh /bin/pdksh}; do \
 	    [ -x "$$sh" ] || continue; \
 	    export TEST_SHELL="$$sh"; \
@@ -90,9 +91,9 @@ check:
 	    if ! "$$sh" -efu ./runtests; then \
 	        echo "Tests failed with $$sh"; \
 	        echo; \
-	        exit 1; \
+	        rc=1; \
 	    fi; \
-	done
+	done; exit $$rc;
 	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mddocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
 	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}    |sort -uo "$(CURDIR)/.shell-funcs"
 	@comm -13 \
