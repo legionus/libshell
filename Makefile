@@ -83,7 +83,7 @@ release: $(PROJECT)-$(VERSION).tar.sign
 
 check:
 	@cd tests; \
-	    for sh in $${CHECK_SHELL:-/bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/yash /bin/pdksh}; do \
+	    for sh in $${CHECK_SHELL:-/bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/lksh /bin/pdksh}; do \
 	    [ -x "$$sh" ] || continue; \
 	    export TEST_SHELL="$$sh"; \
 	    echo "Running tests with $$sh"; \
