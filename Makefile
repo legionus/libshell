@@ -20,9 +20,9 @@ capability_TARGETS = shell-regexp
 bin_TARGETS = $(filter-out shell-lib,$(wildcard shell-*))
 data_TARGETS = COPYING
 
-mddocs_TARGETS = $(wildcard docs/shell-*.md)
-docs_TARGETS = docs/libshell.md $(mddocs_TARGETS)
-man_TARGETS = $(docs_TARGETS:.md=.3)
+mandocs_TARGETS = $(wildcard mans/shell-*.scd)
+docs_TARGETS = mans/libshell.scd $(mandocs_TARGETS)
+man_TARGETS = $(docs_TARGETS:.scd=.3)
 
 .PHONY: $(SUBDIRS)
 
@@ -40,7 +40,7 @@ shell-lib: ${bin_TARGETS}
 shell-regexp: shell-quote
 	ln -s -- $^ $@
 
-%.3: %.md
+%.3: %.scd
 	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
 
 man: ${man_TARGETS}
@@ -100,8 +100,8 @@ check-tests:
 	exit $$rc;
 
 check-documented:
-	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mddocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
-	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}    |sort -uo "$(CURDIR)/.shell-funcs"
+	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mandocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
+	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}     |sort -uo "$(CURDIR)/.shell-funcs"
 	@comm -13 \
 	    "$(CURDIR)/.shell-funcs-documented" \
 	    "$(CURDIR)/.shell-funcs" \
