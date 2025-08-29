@@ -13,16 +13,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: "Current environ"
+        run: env | sort
+
+      - name: "github object"
+        run: |
+          cat >/dev/null <<EOF
+          ${{ toJSON(github) }}
+          EOF
+
+      - name: "github event"
+        run: |
+          cat >/dev/null <<EOF
+          ${{ toJSON(github.event) }}
+          EOF
+
       - name: "Developer's Certificate of Origin"
         run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            from="${{ github.event.before }}"
+            to="HEAD"
+          else
+            from="${{ github.event.pull_request.base.sha }}"
+            to="HEAD"
+          fi
           echo
-          echo 'Commits to check:'
-          jq -r '.[].id' <<-'EOF' | \
-             xargs -r -i git log -1 --pretty='%H%x09%s%x09%ce%x09-%(trailers:key=Signed-off-by,valueonly,separator=%x00)' '{}' | \
-             tee /tmp/commits | \
-             cut -f1,2
-          ${{ toJSON(github.event.commits) }}
-          EOF
+          echo "Commits between $from and $to:"
+          git log --pretty='%H%x09%s%x09%ce%x09-%(trailers:key=Signed-off-by,valueonly,separator=%x00)' $from..$to > /tmp/commits
+          cut -f1,2 < /tmp/commits
           echo ''
           if grep -e '-$' /tmp/commits | cut -f1,2 | grep -e '^' > /tmp/bad-commits; then
              echo 'Сommits that fail verification:'
