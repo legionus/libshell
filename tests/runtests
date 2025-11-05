@@ -43,6 +43,7 @@ for s in \
 	terminfo_init color_message color_text \
 	create_temporary \
 	json \
+	integer_to_binary set_bit \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||

@@ -1,0 +1,72 @@
+#!/bin/sh -efu
+
+set_bit_test01() { # UnitTest
+	. ../shell-bitwise
+
+	local binary flags=0
+
+	set_bit flags $flags 1
+	set_bit flags $flags 3
+	set_bit flags $flags 5
+	binary="$(integer_to_binary $flags)"
+
+	assertEquals "$binary" "00101010" "$binary"
+	assertEquals "$flags" "42" "$flags"
+}
+
+set_bit_test02() { # UnitTest
+	. ../shell-bitwise
+
+	local binary flags=0
+
+	set_bit flags $flags 30
+	binary="$(integer_to_binary $flags 32)"
+
+	assertEquals "$binary" "01000000000000000000000000000000" "$binary"
+	assertEquals "$flags" "1073741824" "$flags"
+}
+
+set_bit_test03() { # UnitTest
+	. ../shell-bitwise
+
+	local binary flags=0
+
+	set_bit flags $flags 31
+	binary="$(integer_to_binary $flags 32)"
+
+	assertEquals "$binary" "10000000000000000000000000000000" "$binary"
+
+	[ $flags -lt 0 ] &&
+		assertEquals "$flags" "-2147483648" "$flags" ||
+		assertEquals "$flags"  "2147483648" "$flags"
+}
+
+set_bit_test04() { # UnitTest
+	. ../shell-bitwise
+
+	local binary check32=0 flags=0
+
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	set_bit flags $flags 62
+	binary="$(integer_to_binary $flags 64)"
+
+	assertEquals "$binary" "0100000000000000000000000000000000000000000000000000000000000000" "$binary"
+	assertEquals "$flags"  "4611686018427387904" "$flags"
+}
+
+set_bit_test05() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0 flags=0
+
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	set_bit flags $flags 63
+
+	[ $flags -lt 0 ] &&
+		assertEquals "$flags"  "-9223372036854775808" "$flags" ||
+		assertEquals "$flags"   "9223372036854775808" "$flags"
+}
