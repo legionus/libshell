@@ -1,0 +1,33 @@
+#!/bin/ash -efu
+
+quote_grep_regexp_test1() { # UnitTest
+	. ../shell-quote
+	local string='.*'
+	local regexp="$(quote_grep_regexp "$string")"
+	local result="$(printf '%s\n' "$string passed" |grep "$regexp")"
+	assertEquals "$string" "$string passed" "$result"
+}
+
+quote_grep_regexp_test2() { # UnitTest
+	. ../shell-quote
+	local string='[[:space:]]'
+	local regexp="$(quote_grep_regexp "$string")"
+	local result="$(printf '%s\n' "test $string" |grep "$regexp")"
+	assertEquals "$string" "test $string" "$result"
+}
+
+quote_grep_regexp_test3() { # UnitTest
+	. ../shell-quote
+	local string='t{1,3}'
+	local regexp="$(quote_grep_regexp "$string")"
+	local result="$(printf '%s\n' "test$string passed" |grep "$regexp")"
+	assertEquals "$string" "test$string passed" "$result"
+}
+
+quote_grep_regexp_test4() { # UnitTest
+	. ../shell-quote
+	local string='&\1'
+	local regexp="$(quote_grep_regexp "$string")"
+	local result="$(printf '%s\n' "test &\1 passed" |grep "$regexp")" #"
+	assertEquals "$result" 'test &\1 passed' "$result"
+}

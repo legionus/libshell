@@ -10,6 +10,22 @@ __included_shell_quote=1
 . shell-error
 . shell-string
 
+__quote_basic_regexp_variable()
+{
+	local __quote_basic_regexp_variable_var __quote_basic_regexp_variable_out
+	local __quote_basic_regexp_variable_pattren __quote_basic_regexp_variable_sed_script
+	__quote_basic_regexp_variable_var="$1"; shift
+	__quote_basic_regexp_variable_pattern="$1"; shift
+	__quote_basic_regexp_variable_sed_script="$1"; shift
+	__quote_basic_regexp_variable_out="$*"
+	if [ -z "${__quote_basic_regexp_variable_out##*$__quote_basic_regexp_variable_pattern*}" ]; then
+		__quote_basic_regexp_variable_out="$(printf %s "$__quote_basic_regexp_variable_out" |
+				sed -e "$__quote_basic_regexp_variable_sed_script")" ||
+			return 1
+	fi
+	eval "$__quote_basic_regexp_variable_var=\"\$__quote_basic_regexp_variable_out\""
+}
+
 ### Quote argument for sed basic regular expression and store result into variable.
 ### Usage example:
 ### quote_sed_regexp_variable var_pattern "$pattern"
@@ -17,15 +33,9 @@ __included_shell_quote=1
 ### sed "s/$var_pattern/$var_replace/"
 quote_sed_regexp_variable()
 {
-	local __quote_sed_regexp_variable_var __quote_sed_regexp_variable_out
+	local __quote_sed_regexp_variable_var
 	__quote_sed_regexp_variable_var="$1"; shift
-	__quote_sed_regexp_variable_out="$*"
-	if [ -z "${__quote_sed_regexp_variable_out##*[\[\].*&^\$\\\\/]*}" ]; then
-		__quote_sed_regexp_variable_out="$(printf %s "$__quote_sed_regexp_variable_out" |
-				sed -e 's/[].*&^$[\/]/\\&/g')" ||
-			return 1
-	fi
-	eval "$__quote_sed_regexp_variable_var=\"\$__quote_sed_regexp_variable_out\""
+	__quote_basic_regexp_variable "$__quote_sed_regexp_variable_var" '[\[\].*&^\$\\\\/]' 's/[].*&^$[\/]/\\&/g' "$*"
 }
 
 ### Quote given arguments for sed basic regular expression.
@@ -34,6 +44,26 @@ quote_sed_regexp()
 {
 	local result
 	quote_sed_regexp_variable result "$@"
+	printf %s "$result"
+}
+
+### Quote argument for grep basic regular expression and store result into variable.
+### Usage example:
+### quote_grep_regexp_variable var_pattern "$pattern"
+### grep "$var_pattern"
+quote_grep_regexp_variable()
+{
+	local __quote_grep_regexp_variable_var
+	__quote_grep_regexp_variable_var="$1"; shift
+	__quote_basic_regexp_variable "$__quote_grep_regexp_variable_var" '[\[\].*^\$\\]' 's/[].*^$[\]/\\&/g' "$*"
+}
+
+### Quote given arguments for grep basic regular expression.
+### Usage example: grep "$(quote_grep_regexp "$var_pattern")"
+quote_grep_regexp()
+{
+	local result
+	quote_grep_regexp_variable result "$@"
 	printf %s "$result"
 }
 

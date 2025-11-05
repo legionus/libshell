@@ -26,9 +26,9 @@ tearDownTests() {
 
 for s in \
 	check-string-performance \
-	quote_sed_regexp quote_shell string_quote_remove \
+	quote_sed_regexp quote_shell quote_grep_regexp string_quote_remove \
 	opt_check_dir opt_check_number opt_check_read \
-	quote_sed_regexp_variable quote_shell_variable \
+	quote_sed_regexp_variable quote_shell_variable quote_grep_regexp_variable \
 	getopt getsubopt getopts signal \
 	fatal message verbose \
 	quote_shell_args \
