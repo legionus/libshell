@@ -1,0 +1,41 @@
+#!/bin/sh -efu
+
+get_bit_test01() { # UnitTest
+	. ../shell-bitwise
+
+	local bit0 bit1 bit2 bit3 bit4 bit5 flags=42
+
+	get_bit bit0 $flags 0
+	get_bit bit1 $flags 1
+	get_bit bit2 $flags 2
+	get_bit bit3 $flags 3
+	get_bit bit4 $flags 4
+	get_bit bit5 $flags 5
+
+	assertEquals "wrong bit 0" "0" "$bit0"
+	assertEquals "wrong bit 1" "1" "$bit1"
+	assertEquals "wrong bit 2" "0" "$bit2"
+	assertEquals "wrong bit 3" "1" "$bit3"
+	assertEquals "wrong bit 4" "0" "$bit4"
+	assertEquals "wrong bit 5" "1" "$bit5"
+
+	clear_bit flags $flags 1
+	clear_bit flags $flags 3
+	clear_bit flags $flags 5
+
+	get_bit bit0 $flags 0
+	get_bit bit1 $flags 1
+	get_bit bit2 $flags 2
+	get_bit bit3 $flags 3
+	get_bit bit4 $flags 4
+	get_bit bit5 $flags 5
+
+	assertEquals "wrong bit 0" "0" "$bit0"
+	assertEquals "wrong bit 1" "0" "$bit1"
+	assertEquals "wrong bit 2" "0" "$bit2"
+	assertEquals "wrong bit 3" "0" "$bit3"
+	assertEquals "wrong bit 4" "0" "$bit4"
+	assertEquals "wrong bit 5" "0" "$bit5"
+
+	assertEquals "wrong flags" "0" "$flags"
+}

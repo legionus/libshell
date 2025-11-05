@@ -1,0 +1,141 @@
+#!/bin/sh -efu
+
+integer_to_binary_64bit_test01() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary 0xee 64)" ||
+		exit 1
+
+	assertEquals "$binary" "0000000000000000000000000000000000000000000000000000000011101110" "$binary"
+}
+
+integer_to_binary_64bit_test02() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary 42 64)" ||
+		exit 1
+
+	assertEquals "$binary" "0000000000000000000000000000000000000000000000000000000000101010" "$binary"
+}
+
+
+integer_to_binary_64bit_test03() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary -42 64)" ||
+		exit 1
+
+	assertEquals "$binary" "1111111111111111111111111111111111111111111111111111111111010110" "$binary"
+}
+
+integer_to_binary_64bit_test04() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary -042 64)" ||
+		exit 1
+
+	assertEquals "$binary" "1111111111111111111111111111111111111111111111111111111111011110" "$binary"
+}
+
+integer_to_binary_64bit_test05() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary -255 64)" ||
+		exit 1
+
+	assertEquals "$binary" "1111111111111111111111111111111111111111111111111111111100000001" "$binary"
+}
+
+integer_to_binary_64bit_test06() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary 9223372036854775808 64)" ||
+		exit 1
+
+	assertEquals "$binary" "1000000000000000000000000000000000000000000000000000000000000000" "$binary"
+}
+
+integer_to_binary_64bit_test07() { # UnitTest
+	. ../shell-bitwise
+
+	local check32=0
+	set_bit check32 $check32 31
+	[ $check32 -gt 0 ] || shouldSkip
+
+	local binary
+	binary="$(integer_to_binary 9223372036854775807 64)" ||
+		exit 1
+
+	assertEquals "$binary" "0111111111111111111111111111111111111111111111111111111111111111" "$binary"
+}
+
+integer_to_binary_32bit_test08() { # UnitTest
+	. ../shell-bitwise
+
+	local binary
+	binary="$(integer_to_binary 42 32)" ||
+		exit 1
+
+	assertEquals "$binary" "00000000000000000000000000101010" "$binary"
+}
+
+integer_to_binary_32bit_test09() { # UnitTest
+	. ../shell-bitwise
+
+	local binary
+	binary="$(integer_to_binary -42 32)" ||
+		exit 1
+
+	assertEquals "$binary" "11111111111111111111111111010110" "$binary"
+}
+
+integer_to_binary_32bit_test10() { # UnitTest
+	. ../shell-bitwise
+
+	local binary
+	binary="$(integer_to_binary 2147483648 32)" ||
+		exit 1
+
+	assertEquals "$binary" "10000000000000000000000000000000" "$binary"
+}
+
+integer_to_binary_32bit_test11() { # UnitTest
+	. ../shell-bitwise
+
+	local binary
+	binary="$(integer_to_binary 4294967296 32)" ||
+		exit 1
+
+	assertEquals "$binary" "00000000000000000000000000000000" "$binary"
+}
+

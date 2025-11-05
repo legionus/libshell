@@ -1,0 +1,236 @@
+#!/bin/sh -efu
+### This file is covered by the GNU General Public License,
+### which should be included with libshell as the file LICENSE.
+### All copyright information are listed in the COPYING.
+
+if [ -z "${__included_shell_bits-}" ]; then
+__included_shell_bits=1
+
+__shell_prepare_integer()
+{
+	case "$2" in
+		9223372036854775808|-9223372036854775808|0[xX]8000000000000000|-0[xX]8000000000000000)
+			set -- "$1" "(0x7fffffffffffffff + 1)"
+			;;
+		0[xX][0-9A-Fa-f]*|[1-9]*|-[1-9]*)
+			;;
+		-0[xX]*)
+			return 1
+			;;
+		0*|-0*)
+			set -- "$1" "$(printf '%d' "$2")"
+			;;
+		*)
+			return 1
+			;;
+	esac
+	eval "$1=\"\$2\""
+}
+
+### Usage: is_bit_set number bit_pos
+###
+### Checks whether the bit at position bit_pos is set.
+###
+### Arguments:
+###   number     - integer value to extract the bit from
+###   bit_pos    - bit position (0 = least significant bit)
+###
+### Result:
+###   The return 0 (true) if bit is set, 1 (false) if not.
+###
+is_bit_set()
+{
+	return $(( !(($1 >> $2) & 1) ))
+}
+
+### Usage: get_bit result_var number bit_pos
+###
+### Extract the value of the specified bit from a number.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to extract the bit from
+###   bit_pos    - bit position (0 = least significant bit)
+###
+### Result:
+###   The value of the specified bit (0 or 1) is stored in result_var.
+###
+get_bit()
+{
+	is_bit_set "$2" "$3" &&
+		eval "$1=1" ||
+		eval "$1=0"
+}
+
+### Usage: set_bit_value result_var number bit value
+###
+### Sets the specified bit in a number to a given value (0 or 1).
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit        - bit position (0 = least significant bit)
+###   value      - desired bit value (0 or 1)
+###
+### Result:
+###   The modified number with the updated bit is stored in result_var.
+###
+set_bit_value()
+{
+	local set_bit_value=''
+	__set_bit_value() {
+		local v
+		__shell_prepare_integer v "$1"
+		if [ "$3" -eq 0 ]; then
+			set_bit_value=$(( $v & ~(1 << $2) ))
+		else
+			set_bit_value=$(( $v | (1 << $2) ))
+		fi
+	}
+	__set_bit_value "$2" "$3" "$4"
+	unset -f __set_bit_value
+	eval "$1=\"\$set_bit_value\""
+}
+
+### Usage: set_bit result_var number bit
+###
+### Sets the specified bit to 1.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit        - bit position (0 = least significant bit)
+###
+### Result:
+###   The modified number with the bit set to 1 is stored in result_var.
+###
+set_bit()
+{
+	set_bit_value "$1" "$2" "$3" 1
+}
+
+### Usage: clear_bit result_var number bit
+###
+### Clears (sets to 0) the specified bit.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit        - bit position (0 = least significant bit)
+###
+### Result:
+###   The modified number with the bit cleared is stored in result_var.
+###
+clear_bit()
+{
+	set_bit_value "$1" "$2" "$3" 0
+}
+
+### Usage: toggle_bit result_var number bit
+###
+### Toggles (inverts) the specified bit.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit        - bit position (0 = least significant bit)
+###
+### Result:
+###   The modified number with the bit inverted is stored in result_var.
+###
+toggle_bit()
+{
+	if is_bit_set "$2" "$3"; then
+		set_bit_value "$1" "$2" "$3" 0
+	else
+		set_bit_value "$1" "$2" "$3" 1
+	fi
+}
+
+### Usage: set_bits result_var number bit1 bit2 ...
+###
+### Sets multiple bits to 1 in a number.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit1...N   - list of bit positions to set
+###
+### Result:
+###   The modified number with all specified bits set to 1 is stored in result_var.
+###
+set_bits()
+{
+	local __res="$1" number="$2"
+	shift 2
+	while [ "$#" -gt 0 ]; do
+		set_bit_value number "$number" "$1" 1
+		shift
+	done
+	eval "$__res=\"\$number\""
+}
+
+### Usage: clear_bits result_var number bit1 bit2 ...
+###
+### Clears (sets to 0) multiple bits in a number.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit1...N   - list of bit positions to clear
+###
+### Result:
+###   The modified number with all specified bits cleared is stored in result_var.
+###
+clear_bits()
+{
+	local __res="$1" number="$2"
+	shift 2
+	while [ "$#" -gt 0 ]; do
+		set_bit_value number "$number" "$1" 0
+		shift
+	done
+	eval "$__res=\"\$number\""
+}
+
+### Usage: toggle_bits result_var number bit1 bit2 ...
+###
+### Toggles (inverts) multiple bits in a number.
+###
+### Arguments:
+###   result_var - name of the variable to store the result
+###   number     - integer value to modify
+###   bit1...N   - list of bit positions to toggle
+###
+### Result:
+###   The modified number with all specified bits inverted is stored in result_var.
+###
+toggle_bits()
+{
+	printf -v "$__res" '%d' "$number"
+	local __res="$1" number="$2"
+	shift 2
+	while [ "$#" -gt 0 ]; do
+		toggle_bit number "$number" "$1"
+		shift
+	done
+	eval "$__res=\"\$number\""
+}
+
+integer_to_binary()
+{
+	local arg
+
+	__shell_prepare_integer arg "$1" ||
+		return 1
+
+	set -- "$arg" "$(( ${2:-8} - 1 ))" ""
+
+	while [ $2 -ge 0 ]; do
+		set -- "$1" "$(( $2 - 1 ))" "$3$(( ($1 >> $2) & 1 ))"
+	done
+
+	printf '%s\n' "$3"
+}
+
+fi #__included_shell_bits
