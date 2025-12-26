@@ -20,9 +20,9 @@ capability_TARGETS = shell-regexp
 bin_TARGETS = $(filter-out shell-lib,$(wildcard shell-*))
 data_TARGETS = COPYING
 
-mddocs_TARGETS = $(wildcard docs/shell-*.md)
-docs_TARGETS = docs/libshell.md $(mddocs_TARGETS)
-man_TARGETS = $(docs_TARGETS:.md=.3)
+mandocs_TARGETS = $(wildcard mans/shell-*.scd)
+docs_TARGETS = mans/libshell.scd $(mandocs_TARGETS)
+man_TARGETS = $(docs_TARGETS:.scd=.3)
 
 .PHONY: $(SUBDIRS)
 
@@ -40,7 +40,7 @@ shell-lib: ${bin_TARGETS}
 shell-regexp: shell-quote
 	ln -s -- $^ $@
 
-%.3: %.md
+%.3: %.scd
 	@[ -z "$(SCDOC)" ] || $(SCDOC) < $< > $@
 
 man: ${man_TARGETS}
@@ -81,20 +81,27 @@ $(PROJECT)-$(VERSION).tar.sign: $(PROJECT)-$(VERSION).tar.xz
 tar: $(PROJECT)-$(VERSION).tar.xz
 release: $(PROJECT)-$(VERSION).tar.sign
 
-check:
-	@cd tests; \
-	    for sh in $${CHECK_SHELL:-/bin/sh /bin/dash /bin/bash /bin/bash3 /bin/bash4 /bin/mksh /bin/yash /bin/pdksh}; do \
-	    [ -x "$$sh" ] || continue; \
-	    export TEST_SHELL="$$sh"; \
-	    echo "Running tests with $$sh"; \
-	    if ! "$$sh" -efu ./runtests; then \
-	        echo "Tests failed with $$sh"; \
+CHECK_SHELL =
+CHECK_SHELL += /bin/sh                         # POSIX Shell
+CHECK_SHELL += /bin/dash                       # Debian Almquist Shell (https://git.kernel.org/pub/scm/utils/dash/dash.git)
+CHECK_SHELL += /bin/bash /bin/bash3 /bin/bash4 # GNU Bourne-Again Shell (https://git.savannah.gnu.org/cgit/bash.git)
+CHECK_SHELL += /bin/mksh /bin/lksh             # MirBSD Korn Shell (https://mbsd.evolvis.org/mksh.htm)
+
+check-tests:
+	@cd tests; rc=0; \
+	for TEST_SHELL in $(wildcard $(CHECK_SHELL)); do export TEST_SHELL; \
+	    echo "Running tests with $$TEST_SHELL"; \
+	    if ! $$TEST_SHELL -efu ./runtests; then \
+	        echo >&2 "ERROR: tests failed."; \
 	        echo; \
-	        exit 1; \
+	        rc=1; \
 	    fi; \
-	done
-	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mddocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
-	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}    |sort -uo "$(CURDIR)/.shell-funcs"
+	done; \
+	exit $$rc;
+
+check-documented:
+	@sed -n -e 's/^## \([^[:space:]]\+\)$$/\1/p'        ${mandocs_TARGETS} |sort -uo "$(CURDIR)/.shell-funcs-documented"
+	@sed -n -e 's/^\([A-Za-z][A-Za-z0-9_]\+\)().*/\1/p' ${bin_TARGETS}     |sort -uo "$(CURDIR)/.shell-funcs"
 	@comm -13 \
 	    "$(CURDIR)/.shell-funcs-documented" \
 	    "$(CURDIR)/.shell-funcs" \
@@ -103,17 +110,18 @@ check:
 	if [ "$$(wc -l < "$(CURDIR)/.shell-funcs-not-documented")" != "0" ]; then \
 	    echo >&2 "ERROR: some functions are not documented:"; \
 	    cat "$(CURDIR)/.shell-funcs-not-documented"; \
-	    echo; \
 	    rc=1; \
 	else \
 	    echo "All functions are documented."; \
-	    echo; \
 	fi; \
+	echo; \
 	rm -f -- \
 	    "$(CURDIR)/.shell-funcs-documented" \
 	    "$(CURDIR)/.shell-funcs-not-documented" \
 	    "$(CURDIR)/.shell-funcs"; \
 	exit $$rc;
+
+check: check-tests check-documented
 
 NULL  =
 SPACE = $(NULL) $(NULL)

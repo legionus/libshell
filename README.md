@@ -14,7 +14,7 @@ Install dependencies:
 
 ## Documentation
 
-See [docs](docs/libshell.md)
+See [docs](mans/libshell.scd)
 
 ## LICENSE
 
