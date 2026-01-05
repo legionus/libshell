@@ -69,8 +69,7 @@ $(SUBDIRS):
 	$(MAKE) $(MFLAGS) -C "$@" $(MAKECMDGOALS)
 
 $(PROJECT)-$(VERSION).tar.xz:
-	tar --transform='s,^,$(PROJECT)-$(VERSION)/,' -Jcf $@ \
-	    shell-* gen-* contrib tests docs LICENSE COPYING Makefile
+	git archive --prefix='$(PROJECT)-$(VERSION)/' v$(VERSION) | xz -c > $@
 
 $(PROJECT)-$(VERSION).tar.sign: $(PROJECT)-$(VERSION).tar.xz
 	xz -d -c $^ | \
