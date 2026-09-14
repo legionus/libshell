@@ -29,11 +29,14 @@ shell_config_set()
 		fatal "Usage: shell_config_set file name value [read-delim [write-delim]]"
 
 	local file="$1" name="$2" value="$3" r_delim="${4-=}" w_delim="${5-=}"
-	local n v nv='' created=''
+	local n v dir nv='' created=''
 
 	if [ ! -f "$file" ]; then
-		if [ ! -w "${file%/*}" ]; then
-			message "${file%/*}: not writable."
+		dir="${file%/*}"
+		[ "$dir" != "$file" ] || dir=.
+
+		if [ ! -w "$dir" ]; then
+			message "$dir: not writable."
 			return 1
 		fi
 		touch -- "$file" ||
