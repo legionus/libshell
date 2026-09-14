@@ -1,0 +1,27 @@
+#!/bin/sh -efu
+
+shell_config_del_test01() { # UnitTest
+	. ../shell-config
+
+	local t1="$WORKDIR/del.conf"
+	printf 'keep=1\ndel=1\nafter=2\n' > "$t1"
+	shell_config_del "$t1" del
+	assertNull "del removes line" "$(grep ^del= "$t1" 2>/dev/null || true)"
+	assertEquals "keep survives" "1" "$(sed -n 's/^keep=//p' "$t1")"
+	assertEquals "after survives" "2" "$(sed -n 's/^after=//p' "$t1")"
+	rm -f -- "$t1"
+}
+
+shell_config_del_test02() { # UnitTest
+	. ../shell-config
+
+	# deleting a non-existent key must not modify the file
+	local t2="$WORKDIR/del.conf"
+	local before after
+	printf 'k=1\n' > "$t2"
+	before="$(cat "$t2")"
+	shell_config_del "$t2" nothere
+	after="$(cat "$t2")"
+	assertEquals "file unchanged on no-match" "$before" "$after"
+	rm -f -- "$t2"
+}

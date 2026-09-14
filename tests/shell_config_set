@@ -1,0 +1,47 @@
+#!/bin/sh -efu
+
+shell_config_set_test01() { # UnitTest
+	. ../shell-config
+
+	# create a new file using an absolute path
+	local t1="$WORKDIR/abs.conf"
+	rm -f -- "$t1"
+	shell_config_set "$t1" key value1
+	assertEquals "file content: line 1" "key=value1" "$(sed -n '1p' "$t1")"
+	rm -f -- "$t1"
+}
+
+shell_config_set_test02() { # UnitTest
+	. ../shell-config
+
+	# relative filename without any slash in it (regression test:
+	# older versions failed with "not writable" on this case)
+	local t2="cfg-rel.conf"
+	rm -f -- "$t2"
+	shell_config_set "$t2" k v1
+	assertEquals "file content: line 1" "k=v1" "$(sed -n '1p' "$t2")"
+	rm -f -- "$t2"
+}
+
+shell_config_set_test03() { # UnitTest
+	. ../shell-config
+
+	# explicit ./ prefix should also work
+	local t3="./cfg-rel2.conf"
+	rm -f -- "cfg-rel2.conf"
+	shell_config_set "$t3" k v2
+	assertEquals "file content: line 1" "k=v2" "$(sed -n '1p' "$t3")"
+	rm -f -- "$t3"
+}
+
+shell_config_set_test04() { # UnitTest
+	. ../shell-config
+
+	# updating an existing file must not create duplicates
+	local t4="$WORKDIR/cfg-existing.conf"
+	printf 'old=1\nkey=old\n' > "$t4"
+	shell_config_set "$t4" key new
+	assertEquals "exactly one key= line" "1" "$(grep -c 'key=' "$t4")"
+	assertEquals "value updated" "key=new" "$(grep '^key=' "$t4")"
+	rm -f -- "$t4"
+}

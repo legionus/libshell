@@ -1,0 +1,74 @@
+#!/bin/sh -efu
+
+set_bit_value_test01() { # UnitTest
+	. ../shell-bitwise
+
+	local v
+	set_bit_value v 0 3 1
+	assertEquals "bit 3 set" "8" "$v"
+
+	set_bit_value v 0 3 0
+	assertEquals "bit 3 not set" "0" "$v"
+
+	# value=1 should be idempotent once the bit is already 1
+	set_bit_value v 8 3 1
+	assertEquals "already set stays set" "8" "$v"
+
+	# value=0 should clear a set bit
+	set_bit_value v 24 3 0
+	assertEquals "clear bit 3 from 24" "16" "$v"
+
+	# value=1 should not affect already-clear bits
+	set_bit_value v 16 3 1
+	assertEquals "set bit 3 in 16" "24" "$v"
+}
+
+toggle_bit_test01() { # UnitTest
+	. ../shell-bitwise
+
+	local v
+	toggle_bit v 0 3
+	assertEquals "toggle on 0, bit 3" "8" "$v"
+
+	toggle_bit v 8 3
+	assertEquals "toggle off 8, bit 3" "0" "$v"
+
+	# unmodified bits must stay the same
+	toggle_bit v 42 2
+	assertEquals "toggle bit 2 of 42 (was 0)" "46" "$v"
+	toggle_bit v 46 2
+	assertEquals "toggle bit 2 of 46 (was 1)" "42" "$v"
+}
+
+toggle_bits_test01() { # UnitTest
+	. ../shell-bitwise
+
+	# 42 = 0b101010 (bits 1,3,5 set); toggling 0,3,5 sets bit 0 and
+	# clears bits 3 and 5: 0b101010 ^ 0b101001 = 0b000011 = 3.
+	local v
+	toggle_bits v 42 0 3 5
+	assertEquals "toggle bit 0,3,5" "3" "$v"
+
+	# toggle back must restore the original value
+	toggle_bits v 3 0 3 5
+	assertEquals "toggle bit 0,3,5 back" "42" "$v"
+
+	# unmentioned bit 1 must survive the round-trip
+	local b
+	get_bit b 42 1
+	assertEquals "bit 1 of 42 is set" "1" "$b"
+}
+
+toggle_bits_test02() { # UnitTest
+	. ../shell-bitwise
+
+	local v
+	toggle_bits v 42 1
+	assertEquals "toggle bit 1" "40" "$v"
+
+	toggle_bits v 42 2
+	assertEquals "toggle bit 2" "46" "$v"
+
+	toggle_bits v 42 7
+	assertEquals "toggle bit 7" "170" "$v"
+}

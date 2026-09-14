@@ -1,0 +1,38 @@
+#!/bin/sh -efu
+
+shell_config_get_test01() { # UnitTest
+	. ../shell-config
+
+	local t1="$WORKDIR/get.conf"
+	printf 'a=1\nb=2\n' > "$t1"
+	local out
+	out="$(shell_config_get "$t1" a)"
+	assertEquals "get a" "1" "$out"
+	out="$(shell_config_get "$t1" b)"
+	assertEquals "get b" "2" "$out"
+	rm -f -- "$t1"
+}
+
+shell_config_get_test02() { # UnitTest
+	. ../shell-config
+
+	# key not present -> empty output, rc 0
+	local t2="$WORKDIR/get.conf"
+	printf 'a=1\n' > "$t2"
+	local v
+	v="$(shell_config_get "$t2" zzz)"
+	assertNull "missing key returns empty" "$v"
+	rm -f -- "$t2"
+}
+
+shell_config_get_test03() { # UnitTest
+	. ../shell-config
+
+	# empty file -> empty output, rc 0
+	local t3="$WORKDIR/get-empty.conf"
+	: > "$t3"
+	local v
+	v="$(shell_config_get "$t3" a)"
+	assertNull "empty file returns empty" "$v"
+	rm -f -- "$t3"
+}

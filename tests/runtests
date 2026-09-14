@@ -43,7 +43,8 @@ for s in \
 	terminfo_init color_message color_text \
 	create_temporary \
 	json \
-	integer_to_binary get_bit set_bit clear_bit \
+	integer_to_binary get_bit set_bit clear_bit toggle_bits \
+	shell_config_get shell_config_set shell_config_del shell_config_comment \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||

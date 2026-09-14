@@ -1,0 +1,27 @@
+#!/bin/sh -efu
+
+shell_config_comment_test01() { # UnitTest
+	. ../shell-config
+
+	local t1="$WORKDIR/com.conf"
+	printf 'a=1\nb=2\n' > "$t1"
+	shell_config_comment "$t1" a
+	# 'a' is now commented out, 'b' is unchanged
+	assertEquals "a is commented" "#a=1" "$(grep '^#.*a=1$' "$t1" || true)"
+	assertEquals "b stays" "2" "$(sed -n 's/^b=//p' "$t1")"
+	rm -f -- "$t1"
+}
+
+shell_config_comment_test02() { # UnitTest
+	. ../shell-config
+
+	# commenting a missing key is a no-op
+	local t2="$WORKDIR/com.conf"
+	printf 'a=1\n' > "$t2"
+	local before after
+	before="$(cat "$t2")"
+	shell_config_comment "$t2" zzz
+	after="$(cat "$t2")"
+	assertEquals "no-op on missing key" "$before" "$after"
+	rm -f -- "$t2"
+}
