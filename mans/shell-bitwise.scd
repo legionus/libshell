@@ -1,143 +1,132 @@
 shell-bitwise(3)
 
 # NAME
-
-is_bit_set, clear_bit, clear_bits, get_bit, set_bit, set_bit_value,
-set_bits, toggle_bit, toggle_bits, integer_to_binary - functions for obtaining,
-setting, and clearing individual bits in a number.
+is_bit_set, get_bit, set_bit_value, set_bit, clear_bit, toggle_bit,
+set_bits, clear_bits, toggle_bits, integer_to_binary - functions for
+examining, setting, clearing and toggling individual or groups of bits
+in a shell integer.
 
 # SYNOPSIS
-
 - is_bit_set number bit_pos
 - get_bit result_var number bit_pos
-- set_bit_value result_var number bit value
-- set_bit result_var number bit
-- clear_bit result_var number bit
-- toggle_bit result_var number bit
-- integer_to_binary number max_bits
+- set_bit_value result_var number bit_pos bit_value
+- set_bit result_var number bit_pos
+- clear_bit result_var number bit_pos
+- toggle_bit result_var number bit_pos
+- set_bits result_var number bit_pos...
+- clear_bits result_var number bit_pos...
+- toggle_bits result_var number bit_pos...
+- integer_to_binary number [max_bits]
 
 # DESCRIPTION
 
 ## is_bit_set
+Checks whether bit *bit_pos* of *number* is set. Returns 0 when the
+bit is set, non-zero otherwise.
 
-Checks whether the bit at position bit_pos is set.
-
-Arguments:
-- number     - integer value to extract the bit from
-- bit_pos    - bit position (0 = least significant bit)
-
-Result:
-The return 0 (true) if bit is set, 1 (false) if not.
+Example:
+```
+is_bit_set 42 2 && echo "bit 2 set"
+```
 
 ## get_bit
+Stores the value of bit *bit_pos* of *number* (0 or 1) in the
+variable named by *result_var*.
 
-Extract the value of the specified bit from a number.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to extract the bit from
-- bit_pos    - bit position (0 = least significant bit)
-
-Result:
-The value of the specified bit (0 or 1) is stored in result_var.
+Example:
+```
+get_bit b 42 1; echo $b       # 1
+get_bit b 42 2; echo $b       # 0
+```
 
 ## set_bit_value
+Copies *number* into the variable named by *result_var* after setting
+bit *bit_pos* to the value *bit_value* (0 or 1).
 
-Sets the specified bit in a number to a given value (0 or 1).
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit        - bit position (0 = least significant bit)
-- value      - desired bit value (0 or 1)
-
-Result:
-The modified number with the updated bit is stored in result_var.
+Example:
+```
+set_bit_value v 0 3 1; echo $v    # 8
+set_bit_value v 8 3 0; echo $v    # 0
+```
 
 ## set_bit
+Equivalent to *set_bit_value* with *bit_value* set to 1.
 
-Sets the specified bit to 1.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit        - bit position (0 = least significant bit)
-
-Result:
-The modified number with the bit set to 1 is stored in result_var.
+Example:
+```
+set_bit v 0 3; echo $v    # 8
+```
 
 ## clear_bit
+Equivalent to *set_bit_value* with *bit_value* set to 0.
 
-Clears (sets to 0) the specified bit.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit        - bit position (0 = least significant bit)
-
-Result:
-The modified number with the bit cleared is stored in result_var.
+Example:
+```
+clear_bit v 255 7; echo $v    # 127
+```
 
 ## toggle_bit
+Equivalent to *set_bit_value* with *bit_value* chosen to invert the
+current value of *bit_pos* in *number*.
 
-Toggles (inverts) the specified bit.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit        - bit position (0 = least significant bit)
-
-Result:
-The modified number with the bit inverted is stored in result_var.
+Example:
+```
+toggle_bit v 42 2; echo $v    # 46
+toggle_bit v 46 2; echo $v    # 42
+```
 
 ## set_bits
+Sets every bit listed in *bit_pos*... to 1. Equivalent to a series
+of *set_bit* calls.
 
-Sets multiple bits to 1 in a number.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit1...N   - list of bit positions to set
-
-Result:
-The modified number with all specified bits set to 1 is stored in result_var.
+Example:
+```
+set_bits v 0 1 3 5; echo $v    # 42
+```
 
 ## clear_bits
+Sets every bit listed in *bit_pos*... to 0. Equivalent to a series
+of *clear_bit* calls.
 
-Clears (sets to 0) multiple bits in a number.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit1...N   - list of bit positions to clear
-
-Result:
-The modified number with all specified bits cleared is stored in result_var.
+Example:
+```
+clear_bits v 255 0 2 4 6; echo $v    # 42 (== 0x2a)
+```
 
 ## toggle_bits
+Inverts every bit listed in *bit_pos*.... Equivalent to a series of
+*toggle_bit* calls.
 
-Toggles (inverts) multiple bits in a number.
-
-Arguments:
-- result_var - name of the variable to store the result
-- number     - integer value to modify
-- bit1...N   - list of bit positions to toggle
-
-Result:
-The modified number with all specified bits inverted is stored in result_var.
+Example:
+```
+toggle_bits v 42 0 1; echo $v    # 40
+```
 
 ## integer_to_binary
+Prints the value of *number* as a binary number with at least
+*max_bits* digits, zero-padded from the left. When *max_bits* is
+omitted, it defaults to 8.
 
-Prints the number in bit representation.
+Example:
+```
+integer_to_binary 42 8
+integer_to_binary 42 32
+integer_to_binary -42 32
+integer_to_binary 255      # 8 bits by default
+```
 
-Arguments:
-- number   - integer value
-- max_bits - specifies the bitness of the number
+# NOTES
+Bit positions are zero-based, the least significant bit is position 0.
+
+All operations are performed with shell integer arithmetic, so values
+wrap around the width of the shell's `intmax_t`. On a 64-bit shell,
+bit positions up to 62 are meaningful (position 63 corresponds to
+the sign-extended constant `9223372036854775808`). On a 32-bit
+shell, positions up to 30 (or 31 for the sign-extended constant).
 
 # AUTHOR
-Authors and contributors of the programs included in the *libshell* package are listed
-in the COPYING file.
+Authors and contributors of the programs included in the *libshell*
+package are listed in the COPYING file.
 
 # BUGS
 Report bugs to the authors.
-

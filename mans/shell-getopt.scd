@@ -1,110 +1,144 @@
 shell-getopt(3)
 
 # NAME
-
-getopt, getoptex, getopts, getsubopt - parses command options (enhanced)
+getopt, getoptex, getopts, getsubopt - functions to parse command
+line options.
 
 # SYNOPSIS
-
-- getopt optstring parameters
 - getopt [options] [--] optstring parameters
+- getopt optstring parameters
 - getopt [options] -o|--options optstring [options] [--] parameters
-- getsubopt optstring parameters
-- getopts optstring name [args]
-- getoptex optstring name [args]
+- getopts optstring parameters
+- getoptex optstring parameters
+- getsubopt subopt-string
 
 # DESCRIPTION
-Collection of functions to parse commend line options.
+A portable, shell-only implementation of *getopt(1)*, *getopts(1)*,
+*getsubopt(3)*, and of an extended option parser *getoptex* that adds
+long-option support to *getopts*.
 
 ## getopt
-This function is used to parse command line options and to check for legal options.
-Shell implementation of *getopt (1)* utility from the util-linux package. This
-function is written to be as compatible as possible with *getopt (1)* utility. Usually
-you can just replace *getopt (1)* without any modifications by this function.
+A shell implementation of the *getopt(1)* utility (`util-linux`).
+It parses *parameters* against *optstring*, performs option
+permutation, and prints the resulting canonicalized command line on
+stdout so that it can be *eval*ed by the calling
+shell.
+
+*getopt* supports most of the options accepted by *getopt(1)*:
+*alternative*, *longoptions*, *name*, *options*, *quiet*,
+*quiet-output*, *shell*, *unquoted*, *version*, and *help* (see
+*getopt(1)* for the exact spelling and behavior of each option).
 
 Example:
 ```
-TEMP=`getopt -n "$PROG" -o "v:,V,h" -l "verbose:,version,help" -- "$@"` || show_usage
+TEMP=$(getopt -n "$PROG" -o "v:,V,h" -l "verbose:,version,help" -- "$@") ||
+	show_usage
 eval set -- "$TEMP"
 
 while :; do
-    case "$1" in
-        -h|--help) show_help
-            ;;
-        -v|--verbose) shift; verbose="$1"
-            ;;
-        -V|--version) print_version "$PROG"
-            ;;
-        *) fatal "Unrecognized option: $1"
-            ;;
-    esac
-    shift
+	case "$1" in
+		-h|--help) show_help ;;
+		-v|--verbose) shift; verbose="$1" ;;
+		-V|--version) print_version "$PROG" ;;
+		*) fatal "Unrecognized option: $1" ;;
+	esac
+	shift
 done
 ```
 
 ## getsubopt
-Function parses suboption arguments from a string. This is a shell-implementation of *getsubopt (3)*.
+Parses comma-separated sub-options in a single string. This is a
+shell implementation of *getsubopt(3)*.
+
+*subopt-string* is a string that names the recognized options and
+indicates which of them require a value, using a trailing `:` for
+each option that takes an argument.
+
+On each iteration the function sets *OPTOPT* to the option name that
+was recognized and *OPTARG* to the value that followed the `=`
+separator (empty when none was given).
 
 Example:
 ```
-while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path="/zzz xxx",dev=/dev/zzz'; do
-    echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
+while getsubopt 'rw mode: path: dev:' 'rw,mode=755,path=/zzz,dev=/dev/zzz'; do
+	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 done
+```
+
+When run, the loop prints:
+```
+Option <rw> 
+Option <mode> has an arg <755>
+Option <path> has an arg </zzz>
+Option <dev> has an arg </dev/zzz>
 ```
 
 ## getopts
-Shell implementation of *getopts (1)* utility. It's a built-in utility in some shells.
+A shell implementation of the *getopts(1)* built-in as found in most
+shells, with a small extension: the list of arguments to parse may be
+passed as an additional argument to the function. Without the
+extension, the first argument after *optstring* is the option string
+itself and the rest are the parameters being walked (the canonical
+form used by most shells).
+
+*optstring* is a list of short option characters, with an optional
+trailing `:` after each character that takes an argument.
+
+On each iteration the function sets *OPTOPT* to the character of the
+recognized option and *OPTARG* to its argument, if any. When the end
+of the option list is reached, the function returns 1 and *OPTIND* is
+set to the position of the first non-option argument.
 
 Example:
 ```
-echo "Using getopt to parse arguments:"
+set -- -a -b -d 10 -e file1 file2
 
 while getopts "abcd:e." "$@"; do
-    echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
+	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 done
 
-shift $(($OPTIND-1))
-set -- $@ ${OPTUKN-}
-
+# at this point OPTIND points at the first non-option argument:
+shift $((OPTIND - 1))
 for arg in "$@"; do
-    echo "Non option argument <$arg>"
+	echo "Non-option argument <$arg>"
 done
 ```
 
 ## getoptex
-This function is the same as *getopts*, but supports long options.
+The same as *getopts* but with long-option support. In addition to
+the short-option characters of *getopts* (same syntax), the
+*optstring* may contain long-option names separated by spaces. A
+trailing colon (`:`) after an option name means the option requires
+an argument; a trailing `;` or `.` means the option may take an
+argument but does not require one.
 
 Example:
 ```
-echo Using getoptex to parse arguments:
-
 while getoptex "a; b; c; d: e. opt1 opt2 opt3 opt4: opt5." "$@"; do
-    echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
-done
-
-shift $(($OPTIND-1))
-set -- $@ ${OPTUKN-}
-
-for arg in "$@"; do
-    echo "Non option argument <$arg>"
+	echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 done
 ```
 
 # ENVIRONMENT
+*GETOPT_ALLOW_UNKNOWN* - when set, unknown options are not reported
+as errors; they are returned via *OPTUKN* at the end of the scan.
 
-*GETOPT_ALLOW_UNKNOWN* - Ignore unknown options.
+*GETOPT_ALLOW_ABBREV* - when set, long options may be abbreviated as
+long as the abbreviation is unambiguous. This is enabled by default.
 
-*GETOPT_ALLOW_ABBREV* - Long options may be abbreviated, as long as the abbreviation is not ambiguous.
+*GETOPT_ALLOW_ALTERNATIVE* - when set, long options may start with a
+single `-` (equivalent to *getopt(1)* `-a`).
 
-*GETOPT_ALLOW_ALTERNATIVE* - Allow long options to start with a single `-'. See (getopt -a).
+*GETOPT_POSIXLY_CORRECT* - when set, all remaining parameters are
+treated as non-option parameters as soon as the first non-option
+parameter is encountered.
 
-*GETOPT_POSIXLY_CORRECT* - If the is set, all remaining parameters are interpreted as non-option
-parameters as soon as the first non-option parameter is found.
+*OPTIND*, *OPTOPT*, *OPTARG*, *OPTTYP*, *OPTUKN* - standard option
+parsing state variables; see *getopt(1)* for the meanings.
 
 # AUTHOR
-Authors and contributors of the programs included in the *libshell* package are listed
-in the COPYING file.
+Authors and contributors of the programs included in the *libshell*
+package are listed in the COPYING file.
 
 # BUGS
 Report bugs to the authors.
-

@@ -1,46 +1,59 @@
 shell-cmdline(3)
 
 # NAME
-
-cmdline_foreach, cmdline_get - parses and get values from `/proc/cmdline`
+cmdline_foreach, cmdline_get - functions for parsing kernel command line
+data.
 
 # SYNOPSIS
-
-- cmdline_foreach "proc-cmdline-data" "handler-function"
-- cmdline_get "name-for-result" "name" ["proc-cmdline-data"]
+- cmdline_foreach cmdline handler
+- cmdline_get resultvar name [cmdline]
 
 # DESCRIPTION
-Collection of functions to parse and get values from `/proc/cmdline`. Because `/proc/cmdline` isn't
-just shell command line we need to parse it differently. This string can have repetitions of parameters,
-and only the last value makes sense, parameter names may contain characters illegal characters
-for variables in a shell.
+Helpers for processing the kernel command line, the data normally held
+in *proc/cmdline*. The command line is a whitespace-separated sequence
+of tokens, each either name=value or a bare flag name; a leading dash
+in a token name is normalized to an underscore.
 
 ## cmdline_foreach
-Function runs *handler-function* for each variable in *proc-cmdline-data*.
-Returns nothing.
+Calls *handler* once for every token in *cmdline*. The handler is
+invoked as *handler name value first*: *name* is the token name;
+*value* is the text following the equals sign, or the literal value
+1 when the token is a bare flag with no equals sign; *first* is 1
+when the token carries no equals-sign value and empty otherwise.
+Processing stops as soon as the handler returns a non-zero status.
+
+Example:
+```
+show() { echo "name=$1 value=$2 first=$3"; }
+cmdline_foreach "initrd=/x quiet other=yes" show
+# name=initrd value=/x first=
+# name=quiet value=1 first=1
+# name=other value=yes first=
+```
 
 ## cmdline_get
-Function finds specified by *name* variable in `/proc/cmdline` or in *proc-cmdline-data*
-and stores result into variable passed by *name-for-result*.
-Usage example:
+Looks up the token named *name* in *cmdline* (by default, in
+*proc/cmdline*) and assigns its value to the variable *resultvar*.
+When the token occurs several times, the last occurrence wins. If
+*name* is not present, *resultvar* is left unchanged.
 
+Example:
 ```
-read cmdline < /proc/cmdline
-cmdline_get 'initrd_value' 'initrd' "$cmdline"
-echo "$initrd_value"
+cmdline_get initrd_value initrd "initrd=/first initrd=/second quiet"
+echo "$initrd_value"        # /second
+
+cmdline_get other_value other "quiet=1"
+echo "[$other_value]"       # []
 ```
 
-or
-
-```
-cmdline_get 'initrd_value' 'initrd'
-echo "$initrd_value"
-```
+# NOTES
+Both functions operate on ordinary shell strings; they are intended
+to be pointed at the contents of *proc/cmdline* but can be used for
+any compatible tokenized string.
 
 # AUTHOR
-Authors and contributors of the programs included in the *libshell* package are listed
-in the COPYING file.
+Authors and contributors of the programs included in the *libshell*
+package are listed in the COPYING file.
 
 # BUGS
 Report bugs to the authors.
-
