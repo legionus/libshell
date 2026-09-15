@@ -48,6 +48,62 @@ __shell_is_ksh()
 
 __shell_string_foreach=0
 
+# Iteration primitives for shells with `${parameter:offset:length}'
+# expansion (bash, ksh).
+__shell_string_foreach_condition_modern()
+{
+	eval "set -- \"\${${1}_i-}\" \"\${${1}_line-}\""
+
+	[ $1 -lt "${#2}" ] ||
+		return 1
+}
+
+__shell_string_foreach_char_modern()
+{
+	eval "$1=\"\${${2}_line:\$${2}_i:1}\""
+}
+
+__shell_string_foreach_iter_modern()
+{
+	eval "${1}_i=\$(( \$${1}_i + 1 ))"
+}
+
+# Iteration primitives for remaining shells (dash, ash, ...), which
+# are driven by trimming the line against its mask.
+__shell_string_foreach_condition_plain()
+{
+	eval "set -- \"\${${1}_line-}\""
+
+	[ -n "$1" ] ||
+		return 1
+}
+
+__shell_string_foreach_char_plain()
+{
+	eval "$1=\"\${${2}_line%\$${2}_mask}\""
+}
+
+__shell_string_foreach_iter_plain()
+{
+	eval "${1}_line=\"\${${1}_line#?}\""
+	eval "${1}_mask=\"\${${1}_mask#?}\""
+}
+
+# Bind the generic iteration functions to the implementation matching
+# the current shell.  The shell cannot change during the session, so
+# the test is performed once here instead of on every iteration.
+if ! __shell_is_bash && ! __shell_is_ksh; then
+	__shell_string_foreach_plain=1
+
+	__shell_string_foreach_condition() { __shell_string_foreach_condition_plain "$@"; }
+	__shell_string_foreach_char()      { __shell_string_foreach_char_plain "$@"; }
+	__shell_string_foreach_iter()      { __shell_string_foreach_iter_plain "$@"; }
+else
+	__shell_string_foreach_condition() { __shell_string_foreach_condition_modern "$@"; }
+	__shell_string_foreach_char()      { __shell_string_foreach_char_modern "$@"; }
+	__shell_string_foreach_iter()      { __shell_string_foreach_iter_modern "$@"; }
+fi
+
 # Usage: __shell_string_foreach_prepare ctxvar str
 __shell_string_foreach_prepare()
 {
@@ -56,7 +112,9 @@ __shell_string_foreach_prepare()
 	eval "${3}_mask=\"\""
 	eval "${3}_i=0"
 
-	if ! __shell_is_bash && ! __shell_is_ksh; then
+	# plain-implementation drives the loop by trimming the line
+	# against its mask.
+	if [ -n "${__shell_string_foreach_plain-}" ]; then
 		fill_mask "${3}_mask" "$2"
 	fi
 
@@ -72,47 +130,12 @@ __shell_string_foreach_finish()
 	unset "${1}_i"
 }
 
-# Usage: __shell_string_foreach_condition ctxvar
-__shell_string_foreach_condition()
-{
-	eval "set -- \"\${${1}_i-}\" \"\${${1}_line-}\""
-
-	if __shell_is_bash || __shell_is_ksh; then
-		[ $1 -lt "${#2}" ] ||
-			return 1
-	else
-		[ -n "$2" ] ||
-			return 1
-	fi
-}
-
 # Usage: __shell_string_foreach_continue ctxvar
 __shell_string_foreach_continue()
 {
 	if ! __shell_string_foreach_condition "$1"; then
 		__shell_string_foreach_finish "$1"
 		return 1
-	fi
-}
-
-# Usage: __shell_string_foreach_char retchar ctxvar
-__shell_string_foreach_char()
-{
-	if __shell_is_bash || __shell_is_ksh; then
-		eval "$1=\"\${${2}_line:\$${2}_i:1}\""
-	else
-		eval "$1=\"\${${2}_line%\$${2}_mask}\""
-	fi
-}
-
-# Usage: __shell_string_foreach_char ctxvar
-__shell_string_foreach_iter()
-{
-	if __shell_is_bash || __shell_is_ksh; then
-		eval "${1}_i=\$(( \$${1}_i + 1 ))"
-	else
-		eval "${1}_line=\"\${${1}_line#?}\""
-		eval "${1}_mask=\"\${${1}_mask#?}\""
 	fi
 }
 
