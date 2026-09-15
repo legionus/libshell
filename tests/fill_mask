@@ -1,4 +1,78 @@
 #!/bin/ash -efu
+# Iteration tests for the per-character traversal helpers.
+#
+# The walked string may contain anything that is not a double quote:
+# glob characters, shells metacharacters, commands and code.  The
+# traversal must return exactly the original characters, in order,
+# without performing any of them.
+
+. ../shell-string
+
+### Collect every character of $1 and compare it with the original.
+foreach_roundtrip()
+{
+	local ctx c='' acc='' len
+	__shell_string_foreach_prepare ctx "$1"
+	while __shell_string_foreach_continue "$ctx"; do
+		__shell_string_foreach_char c "$ctx"
+		acc="$acc$c"
+		__shell_string_foreach_iter "$ctx"
+	done
+	assertEquals "roundtrip of $1" "$1" "$acc"
+}
+
+iteration_test01() { # UnitTest
+	foreach_roundtrip '1234567890'
+}
+
+iteration_test02() { # UnitTest
+	foreach_roundtrip 'a?b*c[d][]]!?'
+}
+
+iteration_test03() { # UnitTest
+	foreach_roundtrip '  leading and  double   spaces '
+}
+
+iteration_test04() { # UnitTest
+	local bs
+	bs="$(printf '\t')"
+	foreach_roundtrip "a${bs}b c   d"
+}
+
+iteration_test05() { # UnitTest
+	foreach_roundtrip 'a\b\\c\'
+}
+
+iteration_test06() { # UnitTest
+	foreach_roundtrip 'x $(uname -a) $PATH $1 `date` y'
+}
+
+iteration_test07() { # UnitTest
+	foreach_roundtrip 'say "hello world" to "me"'
+}
+
+iteration_test08() { # UnitTest
+	foreach_roundtrip 'one "two" three '\''four'\'' five'
+}
+
+iteration_test09() { # UnitTest
+	local nl
+	nl="$(printf '\n')"
+	foreach_roundtrip "one${nl}two${nl}three"
+}
+
+iteration_test10() { # UnitTest
+	local ctx c='' acc=''
+	local line='0123456789abcdef'
+	__shell_string_foreach_prepare ctx "$line"
+	__shell_string_foreach_continue "$ctx" ||
+		return 1
+	__shell_string_foreach_char c "$ctx"
+	assertEquals "first character" "0" "$c"
+	__shell_string_foreach_iter "$ctx"
+	__shell_string_foreach_char c "$ctx"
+	assertEquals "second character" "1" "$c"
+}
 
 fill_mask_test01() { # UnitTest
 	. ../shell-quote

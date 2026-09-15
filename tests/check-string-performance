@@ -17,13 +17,6 @@ string_performance_test1() { # UnitTest
 
 	local i p s dash_shell
 
-	case "${TEST_SHELL##*/}" in
-		ash|dash)
-			shouldSkip
-			;;
-	esac
-
-
 	for i in ash dash; do
 		dash_shell="$(which "$i" 2>/dev/null)" && break ||:
 	done

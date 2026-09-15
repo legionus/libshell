@@ -68,8 +68,14 @@ __shell_string_foreach_iter_modern()
 	eval "${1}_i=\$(( \$${1}_i + 1 ))"
 }
 
-# Iteration primitives for remaining shells (dash, ash, ...), which
-# are driven by trimming the line against its mask.
+# Iteration primitives for the remaining shells (dash, ash, ...).
+# Each character is obtained by trimming the rest of the line and
+# removing it back from it:
+#	rest="${line#?}"
+#	c="${line%"$rest"}"
+# The quotes make the rest a literal string, so neither glob
+# characters nor any code embedded in the walked string can
+# change the meaning of the expansion.
 __shell_string_foreach_condition_plain()
 {
 	eval "set -- \"\${${1}_line-}\""
@@ -80,13 +86,14 @@ __shell_string_foreach_condition_plain()
 
 __shell_string_foreach_char_plain()
 {
-	eval "$1=\"\${${2}_line%\$${2}_mask}\""
+	local __rest
+	eval "__rest=\"\${${2}_line#?}\""
+	eval "$1=\"\${${2}_line%\"\$__rest\"}\""
 }
 
 __shell_string_foreach_iter_plain()
 {
 	eval "${1}_line=\"\${${1}_line#?}\""
-	eval "${1}_mask=\"\${${1}_mask#?}\""
 }
 
 # Bind the generic iteration functions to the implementation matching
@@ -109,14 +116,7 @@ __shell_string_foreach_prepare()
 {
 	set -- "$@" "__shell_string_foreach_${__shell_string_foreach:-0}"
 	eval "${3}_line=\"\$2\""
-	eval "${3}_mask=\"\""
 	eval "${3}_i=0"
-
-	# plain-implementation drives the loop by trimming the line
-	# against its mask.
-	if [ -n "${__shell_string_foreach_plain-}" ]; then
-		fill_mask "${3}_mask" "$2"
-	fi
 
 	eval "$1=\"\$3\""
 	__shell_string_foreach=$(( ${__shell_string_foreach:-0} + 1 ))
@@ -126,7 +126,6 @@ __shell_string_foreach_prepare()
 __shell_string_foreach_finish()
 {
 	unset "${1}_line"
-	unset "${1}_mask"
 	unset "${1}_i"
 }
 
