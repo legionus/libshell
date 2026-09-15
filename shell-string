@@ -7,33 +7,29 @@ if [ -z "${__included_shell_string-}" ]; then
 __included_shell_string=1
 
 ### Creates a mask of equal length string.
+### The mask is shorter than the string by one character unless
+### the full-length flag is present, in which case it has the same
+### length as the string.
 ### Usage: fill_mask var str [full-length]
 fill_mask()
 {
-__fill_mask()
-{
-	local m=
-	while :; do
-		case $((${#1} - ${#m})) in
-			0) break ;;
-			1) m="$m?" ;;
-			2) m="$m??" ;;
-			3) m="$m???" ;;
-			4) m="$m????" ;;
-			5) m="$m?????" ;;
-			6) m="$m??????" ;;
-			7) m="$m???????" ;;
-			8) m="$m????????" ;;
-			9) m="$m?????????" ;;
-			*) m="$m??????????" ;;
-		esac
+	local m= p='?' n
+	n="${#2}"
+	[ "$#" -eq 2 ] && n=$(( n - 1 ))
+
+	# Build the mask by doubling the pattern: each round handles two
+	# bits of the requested length, so the loop runs log2(n) times
+	# and the total amount of copied data is O(n) instead of the
+	# O(n^2) of growing the mask one character at a time.
+	while [ "$n" -gt 0 ]; do
+		if [ $(( n % 2 )) -eq 1 ]; then
+			m="$m$p"
+		fi
+		n=$(( n / 2 ))
+		p="$p$p"
 	done
-	__fill_masko="${m#$2}"
-}
-	local __fill_masko
-	__fill_mask "$2" "${3:-?}"
-	unset -f __fill_mask
-	eval "$1=\$__fill_masko"
+
+	eval "$1=\"$m\""
 }
 
 __shell_is_bash()
