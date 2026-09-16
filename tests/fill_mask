@@ -11,12 +11,12 @@
 ### Collect every character of $1 and compare it with the original.
 foreach_roundtrip()
 {
-	local ctx c='' acc='' len
-	__shell_string_foreach_prepare ctx "$1"
-	while __shell_string_foreach_continue "$ctx"; do
-		__shell_string_foreach_char c "$ctx"
+	local l="$1" c='' acc=''
+	__shell_string_foreach_prepare l
+	while __shell_string_foreach_continue l; do
+		__shell_string_foreach_char c l
 		acc="$acc$c"
-		__shell_string_foreach_iter "$ctx"
+		__shell_string_foreach_iter l
 	done
 	assertEquals "roundtrip of $1" "$1" "$acc"
 }
@@ -62,15 +62,15 @@ iteration_test09() { # UnitTest
 }
 
 iteration_test10() { # UnitTest
-	local ctx c='' acc=''
+	local c='' acc=''
 	local line='0123456789abcdef'
-	__shell_string_foreach_prepare ctx "$line"
-	__shell_string_foreach_continue "$ctx" ||
+	__shell_string_foreach_prepare "line"
+	__shell_string_foreach_continue "line" ||
 		return 1
-	__shell_string_foreach_char c "$ctx"
+	__shell_string_foreach_char c "line"
 	assertEquals "first character" "0" "$c"
-	__shell_string_foreach_iter "$ctx"
-	__shell_string_foreach_char c "$ctx"
+	__shell_string_foreach_iter "line"
+	__shell_string_foreach_char c "line"
 	assertEquals "second character" "1" "$c"
 }
 

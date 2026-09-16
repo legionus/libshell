@@ -113,7 +113,7 @@ quote_shell_args()
 {
 ### This is an internal function to avoid the use of ugly namespace.
 __quote_shell_args() {
-	local ctx='' r='' c=''
+	local l="$1" r='' c=''
 	### backslash/double/single quote mode
 	local bq='' dq='' sq=''
 
@@ -122,11 +122,11 @@ __quote_shell_args() {
 		eval [ -n \"\$$1\" ] && eval "$1=" || eval "$1=\$$2"
 	}
 
-	__shell_string_foreach_prepare ctx "$1"
+	__shell_string_foreach_prepare l
 
-	while __shell_string_foreach_continue "$ctx"; do
-		__shell_string_foreach_char c "$ctx"
-		__shell_string_foreach_iter "$ctx"
+	while __shell_string_foreach_continue l; do
+		__shell_string_foreach_char c l
+		__shell_string_foreach_iter l
 
 		case "$c" in
 			\")

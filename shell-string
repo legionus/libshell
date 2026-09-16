@@ -13,7 +13,7 @@ __included_shell_string=1
 ### Usage: fill_mask var str [full-length]
 fill_mask()
 {
-	local m= p='?' n
+	local m='' p='?' n
 	n="${#2}"
 	[ "$#" -eq 2 ] && n=$(( n - 1 ))
 
@@ -42,90 +42,70 @@ __shell_is_ksh()
 	[ -n "${KSH_VERSION-}" ]
 }
 
-__shell_string_foreach=0
-
-# Iteration primitives for shells with `${parameter:offset:length}'
-# expansion (bash, ksh).
-__shell_string_foreach_condition_modern()
-{
-	eval "set -- \"\${${1}_i-}\" \"\${${1}_line-}\""
-
-	[ $1 -lt "${#2}" ] ||
-		return 1
-}
-
-__shell_string_foreach_char_modern()
-{
-	eval "$1=\"\${${2}_line:\$${2}_i:1}\""
-}
-
-__shell_string_foreach_iter_modern()
-{
-	eval "${1}_i=\$(( \$${1}_i + 1 ))"
-}
-
-# Iteration primitives for the remaining shells (dash, ash, ...).
-# Each character is obtained by trimming the rest of the line and
-# removing it back from it:
-#	rest="${line#?}"
-#	c="${line%"$rest"}"
-# The quotes make the rest a literal string, so neither glob
-# characters nor any code embedded in the walked string can
-# change the meaning of the expansion.
-__shell_string_foreach_condition_plain()
-{
-	eval "set -- \"\${${1}_line-}\""
-
-	[ -n "$1" ] ||
-		return 1
-}
-
-__shell_string_foreach_char_plain()
-{
-	local __rest
-	eval "__rest=\"\${${2}_line#?}\""
-	eval "$1=\"\${${2}_line%\"\$__rest\"}\""
-}
-
-__shell_string_foreach_iter_plain()
-{
-	eval "${1}_line=\"\${${1}_line#?}\""
-}
-
-# Bind the generic iteration functions to the implementation matching
-# the current shell.  The shell cannot change during the session, so
-# the test is performed once here instead of on every iteration.
 if ! __shell_is_bash && ! __shell_is_ksh; then
-	__shell_string_foreach_plain=1
+	# Iteration primitives for the remaining shells (dash, ash, ...).
+	# The walked string is trimmed one character at a time, each character
+	# being obtained as the first character of the current string:
+	#	c="${l%"${l#?}"}"
+	# where the quoted ${l#?} is treated as a literal string, so neither
+	# glob characters nor any code embedded in the walked string can
+	# change the meaning of the expansion.
+	__shell_string_foreach_condition()
+	{
+		eval "[ \${#$1} -gt 0 ]" ||
+			return 1
+	}
 
-	__shell_string_foreach_condition() { __shell_string_foreach_condition_plain "$@"; }
-	__shell_string_foreach_char()      { __shell_string_foreach_char_plain "$@"; }
-	__shell_string_foreach_iter()      { __shell_string_foreach_iter_plain "$@"; }
+	__shell_string_foreach_char()
+	{
+		eval "$1=\"\${$2%\"\${$2#?}\"}\""
+	}
+
+	__shell_string_foreach_iter()
+	{
+		eval "$1=\"\${$1#?}\""
+	}
 else
-	__shell_string_foreach_condition() { __shell_string_foreach_condition_modern "$@"; }
-	__shell_string_foreach_char()      { __shell_string_foreach_char_modern "$@"; }
-	__shell_string_foreach_iter()      { __shell_string_foreach_iter_modern "$@"; }
+	# Iteration primitives for shells with `${parameter:offset:length}'
+	# expansion (bash, ksh).  The walked string is addressed by an index
+	# stored in a companion ${1}_i variable.
+	__shell_string_foreach_condition()
+	{
+		eval "set -- \"\$${1}_i\" \"\${#$1}\""
+
+		[ $1 -lt "$2" ] ||
+			return 1
+	}
+
+	__shell_string_foreach_char()
+	{
+		eval "$1=\"\${$2:\$$2_i:1}\""
+	}
+
+	__shell_string_foreach_iter()
+	{
+		eval "${1}_i=\$(( \$$1_i + 1 ))"
+	}
 fi
 
-# Usage: __shell_string_foreach_prepare ctxvar str
+# Usage: __shell_string_foreach_prepare var
+### Prepare the variable for the per-character traversal helpers.
+### The caller owns the string; the traversal state is kept in a
+### companion ${var}_i variable.
 __shell_string_foreach_prepare()
 {
-	set -- "$@" "__shell_string_foreach_${__shell_string_foreach:-0}"
-	eval "${3}_line=\"\$2\""
-	eval "${3}_i=0"
-
-	eval "$1=\"\$3\""
-	__shell_string_foreach=$(( ${__shell_string_foreach:-0} + 1 ))
+	eval "${1}_i=0"
 }
 
-# Usage: __shell_string_foreach_finish ctxvar
+# Usage: __shell_string_foreach_finish var
 __shell_string_foreach_finish()
 {
-	unset "${1}_line"
 	unset "${1}_i"
 }
 
-# Usage: __shell_string_foreach_continue ctxvar
+# Usage: __shell_string_foreach_continue var
+### Returns success while characters remain in the walked string, and
+### calls __shell_string_foreach_finish when it becomes empty.
 __shell_string_foreach_continue()
 {
 	if ! __shell_string_foreach_condition "$1"; then

@@ -67,14 +67,14 @@ __git_config_fullpath()
 
 __git_config_value()
 {
-	local ctx='' dq='' bq='' c=''
+	local dq='' bq='' c='' l="$1"
 
-	__shell_string_foreach_prepare ctx "$1"
+	__shell_string_foreach_prepare l
 
 	value=
-	while __shell_string_foreach_continue "$ctx"; do
-		__shell_string_foreach_char c "$ctx"
-		__shell_string_foreach_iter "$ctx"
+	while __shell_string_foreach_continue l; do
+		__shell_string_foreach_char c l
+		__shell_string_foreach_iter l
 
 		case "$c" in
 			\\)

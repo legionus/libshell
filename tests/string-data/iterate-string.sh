@@ -3,9 +3,9 @@
 
 . ../shell-string
 
-__shell_string_foreach_prepare ctx "$string"
-while __shell_string_foreach_continue "$ctx"; do
-	__shell_string_foreach_char c "$ctx"
-	__shell_string_foreach_iter "$ctx"
+__shell_string_foreach_prepare string
+while __shell_string_foreach_continue string; do
+	__shell_string_foreach_char c string
+	__shell_string_foreach_iter string
 done
 times

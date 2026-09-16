@@ -22,7 +22,8 @@ __shell_crc32()
 {
 	unset -f __shell_crc32
 
-	local i n val crc=$(( 0xFFFFFFFF ))
+	local i n l val crc=$(( 0xFFFFFFFF ))
+	l="$1"
 	while read n; do
 		val=$(( ($crc & 0xFF) ^ $n ))
 		i=0
@@ -35,10 +36,10 @@ __shell_crc32()
 		crc=$(( ($crc >> 8) ^ $val ))
 	done <<-EOF
 		`
-	__shell_string_foreach_prepare ctx "$1"
-	while __shell_string_foreach_continue "$ctx"; do
-		__shell_string_foreach_char i "$ctx"
-		__shell_string_foreach_iter "$ctx"
+	__shell_string_foreach_prepare l
+	while __shell_string_foreach_continue l; do
+		__shell_string_foreach_char i l
+		__shell_string_foreach_iter l
 		printf '%u\n' "'$i"
 	done`
 	EOF

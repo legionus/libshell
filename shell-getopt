@@ -231,22 +231,23 @@ getoptex()
 ###
 getopts()
 {
+	local l="$1"
 	local c=
 	local r=  ### to store result
 
-	__shell_string_foreach_prepare ctx "$1"
+	__shell_string_foreach_prepare l
 
-	while __shell_string_foreach_continue "$ctx"; do
-		__shell_string_foreach_char c "$ctx"
+	while __shell_string_foreach_continue l; do
+		__shell_string_foreach_char c l
 		r="${r:+"$r "}$c" ### append the first character of $1 to $r
 
-		__shell_string_foreach_iter "$ctx"
-		__shell_string_foreach_char c "$ctx"
+		__shell_string_foreach_iter l
+		__shell_string_foreach_char c l
 
 		### a special character (";", ".", or ":") was found
 		if [ -n "$c" ] && [ -z "${c#[:.;]}" ]; then
 			r="$r$c"
-			__shell_string_foreach_iter "$ctx"
+			__shell_string_foreach_iter l
 		fi
 	done
 	shift
@@ -267,14 +268,14 @@ getsubopt()
 	local l="$2"
 
 	if [ -z "$__getsubopt_arguments" ]; then
-		local ctx ch
+		local ch
 
-		__shell_string_foreach_prepare ctx "$l"
+		__shell_string_foreach_prepare l
 
 		__getsubopt_arguments='--'
-		while __shell_string_foreach_continue "$ctx"; do
-			__shell_string_foreach_char ch "$ctx"
-			__shell_string_foreach_iter "$ctx"
+		while __shell_string_foreach_continue l; do
+			__shell_string_foreach_char ch l
+			__shell_string_foreach_iter l
 
 			# shellcheck disable=SC2102
 			# Disable this `Ranges can only match single chars (mentioned due to duplicates)`
