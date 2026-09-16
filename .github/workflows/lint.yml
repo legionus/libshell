@@ -10,7 +10,7 @@ jobs:
   check-commits:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: "Developer's Certificate of Origin"
@@ -37,14 +37,14 @@ jobs:
   lint-shell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get -y -qq install shellcheck
       - run: make verify
 
   check-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get -y -qq install scdoc
       - run: make man
 
@@ -70,6 +70,6 @@ jobs:
 
     name: "check with ${{ matrix.name }}"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: sudo apt-get -y -qq install ${{ matrix.pkgs }}
       - run: make check V=1 CHECK_SHELL=/bin/${{ matrix.name }}
