@@ -115,3 +115,18 @@ fill_mask_test06() { # UnitTest
 	fill_mask result "$string"
 	assertEquals "$string" "$result" "??"
 }
+
+fill_mask_test07() { # UnitTest
+	local m=old p=old n=old
+
+	fill_mask m abcd
+	assertEquals 'output named m' '???' "$m"
+	fill_mask p abcd full
+	assertEquals 'output named p' '????' "$p"
+	fill_mask n ''
+	assertEquals 'output named n' '' "$n"
+
+	m=abcd
+	fill_mask m "$m"
+	assertEquals 'input and output named m' '???' "$m"
+}

@@ -72,3 +72,36 @@ toggle_bits_test02() { # UnitTest
 	toggle_bits v 42 7
 	assertEquals "toggle bit 7" "170" "$v"
 }
+
+multiple_bits_output_name_test() { # UnitTest
+	. ../shell-bitwise
+
+	local number=0 __res=0
+
+	set_bits number "$number" 1 2
+	assertEquals 'set_bits output named number' 6 "$number"
+	clear_bits number "$number" 1
+	assertEquals 'clear_bits output named number' 4 "$number"
+	toggle_bits number "$number" 1 2
+	assertEquals 'toggle_bits output named number' 2 "$number"
+
+	set_bits __res 0 1 2
+	assertEquals 'set_bits output named __res' 6 "$__res"
+	clear_bits __res "$__res" 1
+	assertEquals 'clear_bits output named __res' 4 "$__res"
+	toggle_bits __res "$__res" 1 2
+	assertEquals 'toggle_bits output named __res' 2 "$__res"
+}
+
+multiple_bits_empty_list_test() { # UnitTest
+	. ../shell-bitwise
+
+	local number=0
+
+	set_bits number 42
+	assertEquals 'set_bits without positions' 42 "$number"
+	clear_bits number 43
+	assertEquals 'clear_bits without positions' 43 "$number"
+	toggle_bits number 44
+	assertEquals 'toggle_bits without positions' 44 "$number"
+}

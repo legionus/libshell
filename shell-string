@@ -13,23 +13,23 @@ __included_shell_string=1
 ### Usage: fill_mask var str [full-length]
 fill_mask()
 {
-	local m='' p='?' n
-	n="${#2}"
-	[ "$#" -eq 2 ] && n=$(( n - 1 ))
+	local __fill_mask_mask='' __fill_mask_pattern='?' __fill_mask_length
+	__fill_mask_length="${#2}"
+	[ "$#" -eq 2 ] && __fill_mask_length=$(( __fill_mask_length - 1 ))
 
 	# Build the mask by doubling the pattern: each round handles two
 	# bits of the requested length, so the loop runs log2(n) times
 	# and the total amount of copied data is O(n) instead of the
 	# O(n^2) of growing the mask one character at a time.
-	while [ "$n" -gt 0 ]; do
-		if [ $(( n % 2 )) -eq 1 ]; then
-			m="$m$p"
+	while [ "$__fill_mask_length" -gt 0 ]; do
+		if [ $(( __fill_mask_length % 2 )) -eq 1 ]; then
+			__fill_mask_mask="$__fill_mask_mask$__fill_mask_pattern"
 		fi
-		n=$(( n / 2 ))
-		p="$p$p"
+		__fill_mask_length=$(( __fill_mask_length / 2 ))
+		__fill_mask_pattern="$__fill_mask_pattern$__fill_mask_pattern"
 	done
 
-	eval "$1=\"$m\""
+	eval "$1=\"$__fill_mask_mask\""
 }
 
 __shell_is_bash()

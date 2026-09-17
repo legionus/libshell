@@ -161,13 +161,13 @@ toggle_bit()
 ###
 set_bits()
 {
-	local __res="$1" number="$2"
+	local __set_bits_result="$1" __set_bits_number="$2"
 	shift 2
 	while [ "$#" -gt 0 ]; do
-		set_bit_value number "$number" "$1" 1
+		set_bit_value __set_bits_number "$__set_bits_number" "$1" 1
 		shift
 	done
-	eval "$__res=\"\$number\""
+	eval "$__set_bits_result=\"\$__set_bits_number\""
 }
 
 ### Usage: clear_bits result_var number bit1 bit2 ...
@@ -184,13 +184,13 @@ set_bits()
 ###
 clear_bits()
 {
-	local __res="$1" number="$2"
+	local __clear_bits_result="$1" __clear_bits_number="$2"
 	shift 2
 	while [ "$#" -gt 0 ]; do
-		set_bit_value number "$number" "$1" 0
+		set_bit_value __clear_bits_number "$__clear_bits_number" "$1" 0
 		shift
 	done
-	eval "$__res=\"\$number\""
+	eval "$__clear_bits_result=\"\$__clear_bits_number\""
 }
 
 ### Usage: toggle_bits result_var number bit1 bit2 ...
@@ -207,13 +207,13 @@ clear_bits()
 ###
 toggle_bits()
 {
-	local __res="$1" number="$2"
+	local __toggle_bits_result="$1" __toggle_bits_number="$2"
 	shift 2
 	while [ "$#" -gt 0 ]; do
-		toggle_bit number "$number" "$1"
+		toggle_bit __toggle_bits_number "$__toggle_bits_number" "$1"
 		shift
 	done
-	eval "$__res=\"\$number\""
+	eval "$__toggle_bits_result=\"\$__toggle_bits_number\""
 }
 
 integer_to_binary()
