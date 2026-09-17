@@ -14,6 +14,18 @@ __included_shell_json=1
 . shell-error
 . shell-string
 
+# Probe read once; its behavior is fixed for the current shell.
+__json_read_opt_n=''
+__json_read_newline=1
+# shellcheck disable=SC2169,SC3045
+if { printf 1 | (IFS= read -n 1 -r __json_probe); } 2>/dev/null; then
+	__json_read_opt_n=1
+	# bash stops at newlines with -n; ksh includes them in the chunk.
+	# shellcheck disable=SC2169,SC3045
+	printf 'a\nb' | (IFS= read -n 3 -r __json_probe; [ "$__json_probe" = a ]) ||
+		__json_read_newline=
+fi
+
 JSON_FOREACH_ABORT=100
 
 JSON_DEBUG=
@@ -110,24 +122,29 @@ json_foreach()
 {
 	local __json_l __json_c __json_escape __json_eof __json_buffer __json_state
 	local __json_name=0 __json_states=0
-	local __json_handle=1
+	local __json_handle=1 __json_unicode=0
+	local __json_controls __json_cr __json_lf='
+'
+	__json_controls="$(printf '\001-\037')"
+	__json_cr="$(printf '\r')"
 
 	local SAVE_IFS="$IFS"
-	local IFS='
-'
-
-	local __json_read_opt_n=
-	# shellcheck disable=SC2169,SC3045
-	! { echo -n 1 | read -n1 -r _; } 2>/dev/null ||
-		__json_read_opt_n=1
+	local IFS=''
 
 	__json_buffer='' __json_eof='' __json_escape=''
 
-	# Set incoming state of json.
+	# Accept exactly one top-level value.
+	__json_push_state 'done'
 	__json_push_state 'value'
 
 	while [ -z "$__json_eof" ]; do
 		read ${__json_read_opt_n:+-n 9} -r __json_l || __json_eof=1
+
+		# read removes the newline delimiter, but it still separates tokens.
+		if [ -z "$__json_eof" ] && [ -n "$__json_read_newline" ] &&
+		   { [ -z "$__json_read_opt_n" ] || [ "${#__json_l}" -lt 9 ]; }; then
+			__json_l="$__json_l$__json_lf"
+		fi
 
 		__shell_string_foreach_prepare __json_l
 
@@ -135,18 +152,14 @@ json_foreach()
 			__shell_string_foreach_char __json_c __json_l
 			__shell_string_foreach_iter __json_l
 
-			[ -n "${__json_c##
-}" ] ||
-				continue
-
 			__json_char || [ $? -ne $JSON_FOREACH_ABORT ] ||
 				return 0
 		done
 	done
-	__json_c='
-'
-	__json_char ||:
-	if [ "$__json_states" -gt 0 ]; then
+	__json_c=''
+	__json_char || [ $? -ne $JSON_FOREACH_ABORT ] ||
+		return 0
+	if [ "$__json_state" != 'done' ]; then
 		local stack
 		__json_get_stack
 		fatal "unfinished json: $stack"
@@ -159,8 +172,12 @@ __json_char()
 		case "$__json_state" in
 			'value')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr"|'')
+						break
 						;;
+				esac
+				__json_pop_state 'value'
+				case "$__json_c" in
 					'[')
 						__json_push_name 0
 						__json_push_state 'array'
@@ -194,19 +211,14 @@ __json_char()
 						__json_buffer=
 						continue
 						;;
-					'
-')
-						__json_pop_state 'value'
-						;;
 					*)
-						__json_pop_state 'value'
-						continue
+						fatal "expected value, got '$__json_c'"
 						;;
 				esac
 				;;
 			'array')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					']')
 						__json_pop_name
@@ -221,11 +233,11 @@ __json_char()
 				;;
 			'array-more')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					']')
 						__json_pop_name
-						__json_pop_state 'object-more'
+						__json_pop_state 'array-more'
 						__json_pop_state 'array'
 						;;
 					',')
@@ -237,9 +249,6 @@ __json_char()
 
 						__json_push_state 'value'
 						;;
-					'"')
-						continue
-						;;
 					*)
 						fatal "$__json_state unexpected '$__json_c'"
 						;;
@@ -247,13 +256,12 @@ __json_char()
 				;;
 			'object')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					'"')
 						__json_handle=
 						__json_push_state 'object-more'
 						__json_push_state 'object-name'
-						__json_push_state 'value'
 						continue
 						;;
 					'}')
@@ -266,17 +274,27 @@ __json_char()
 				;;
 			'object-name')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					'"')
-						__json_push_state 'value'
-						continue
+						__json_pop_state 'object-name'
+						__json_push_state 'object-colon'
+						__json_push_state 'string'
+						__json_buffer=
+						;;
+					*)
+						fatal "$__json_state unexpected '$__json_c'"
+						;;
+				esac
+				;;
+			'object-colon')
+				case "$__json_c" in
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					':')
 						__json_handle=1
 						__json_push_name "$__json_buffer"
-						#echo "object-name $__json_buffer"
-						__json_pop_state 'object-name'
+						__json_pop_state 'object-colon'
 						__json_push_state 'value'
 						;;
 					*)
@@ -286,7 +304,7 @@ __json_char()
 				;;
 			'object-more')
 				case "$__json_c" in
-					'	'|' '|'')
+					'	'|' '|"$__json_lf"|"$__json_cr")
 						;;
 					'}')
 						__json_pop_name
@@ -297,11 +315,6 @@ __json_char()
 						__json_pop_name
 						__json_handle=
 						__json_push_state 'object-name'
-						;;
-					'"')
-						__json_handle=
-						__json_push_state 'object-name'
-						continue
 						;;
 					*)
 						fatal "$__json_state unexpected '$__json_c'"
@@ -344,6 +357,9 @@ __json_char()
 				esac
 				;;
 			'string')
+				case "$__json_c" in
+					[$__json_controls]) fatal "unescaped control character in string" ;;
+				esac
 				# A consumed escape must not escape the next character,
 				# even when the escaped character is a backslash.
 				# shellcheck disable=SC1003
@@ -352,9 +368,18 @@ __json_char()
 						__json_buffer="$__json_buffer$__json_c"
 						__json_escape=
 						;;
-					'\b'|'\f'|'\n'|'\r'|'\t'|'\u')
+					'\b'|'\f'|'\n'|'\r'|'\t')
 						__json_buffer="$__json_buffer\\$__json_c"
 						__json_escape=
+						;;
+					'\u')
+						__json_buffer="$__json_buffer\\u"
+						__json_escape=
+						__json_unicode=4
+						__json_push_state 'string-unicode'
+						;;
+					'\'?*)
+						fatal "invalid string escape: '$__json_c'"
 						;;
 					*'"')
 						__json_pop_state 'string'
@@ -367,6 +392,18 @@ __json_char()
 					*)
 						__json_buffer="$__json_buffer$__json_c"
 						__json_escape=
+						;;
+				esac
+				;;
+			'string-unicode')
+				case "$__json_c" in
+					[0-9a-fA-F])
+						__json_buffer="$__json_buffer$__json_c"
+						__json_unicode=$(( __json_unicode - 1 ))
+						[ "$__json_unicode" -ne 0 ] || __json_pop_state 'string-unicode'
+						;;
+					*)
+						fatal "expected hexadecimal digit, got '$__json_c'"
 						;;
 				esac
 				;;
@@ -386,10 +423,7 @@ __json_char()
 						__json_buffer="$__json_buffer$__json_c"
 						;;
 					*)
-						__json_handle number "$__json_buffer" || [ $? -ne $JSON_FOREACH_ABORT ] ||
-							return $JSON_FOREACH_ABORT
-						__json_buffer=
-						continue
+						fatal "expected digit after minus, got '$__json_c'"
 						;;
 				esac
 				;;
@@ -402,7 +436,7 @@ __json_char()
 				__json_pop_state 'number-leading-zero'
 				case "$__json_c" in
 					'.')
-						__json_push_state 'number-float'
+						__json_push_state 'number-fraction'
 						__json_buffer="$__json_buffer$__json_c"
 						;;
 					[eE])
@@ -429,7 +463,7 @@ __json_char()
 				case "$__json_c" in
 					'.')
 						__json_pop_state 'number-leading-nonzero'
-						__json_push_state 'number-float'
+						__json_push_state 'number-fraction'
 						__json_buffer="$__json_buffer$__json_c"
 						;;
 					[eE])
@@ -446,6 +480,20 @@ __json_char()
 							return $JSON_FOREACH_ABORT
 						__json_buffer=
 						continue
+						;;
+				esac
+				;;
+			'number-fraction'|'number-sci-first')
+				case "$__json_c" in
+					[0-9])
+						local next='number-float'
+						[ "$__json_state" != number-sci-first ] || next='number-sci-digits'
+						__json_pop_state
+						__json_push_state "$next"
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					*)
+						fatal "$__json_state expected digit, got '$__json_c'"
 						;;
 				esac
 				;;
@@ -475,12 +523,16 @@ __json_char()
 				# Numbers that encounter an 'E' or 'e' become
 				# scientific-notation and consume digits, optionally prefixed
 				# by a '+' or '-', forever.  The actual consumption is
-				# delegated to the "number-sci-neg" and "number-sci-pos"
+				# delegated to the "number-sci-first" and "number-sci-digits"
 				# states.  Any other character immediately following the 'E'
 				# or 'e' is a syntax error.
 				__json_pop_state 'number-sci'
 				case "$__json_c" in
-					[0-9]|'+'|'-')
+					'+'|'-')
+						__json_push_state 'number-sci-first'
+						__json_buffer="$__json_buffer$__json_c"
+						;;
+					[0-9])
 						__json_push_state 'number-sci-digits'
 						__json_buffer="$__json_buffer$__json_c"
 						;;
@@ -502,6 +554,12 @@ __json_char()
 						__json_buffer=
 						continue
 						;;
+				esac
+				;;
+			'done')
+				case "$__json_c" in
+					'	'|' '|"$__json_lf"|"$__json_cr"|'') ;;
+					*) fatal "unexpected data after json: '$__json_c'" ;;
 				esac
 				;;
 		esac

@@ -210,3 +210,74 @@ json_test_022() { # UnitTest
 
 	assertEquals "backslash.json" "$expect" "$result"
 }
+
+json_test_023() { # UnitTest
+	. ../shell-json
+
+	local document
+	for document in \
+		'' ' ' garbage 'true false' '{}[]' '1x' \
+		'[' '[1' '[,1]' '[1,]' '[1,,2]' '[1 2]' '["a" "b"]' \
+		'[true false]' '[null null]' '[{} {}]' '[[] []]' \
+		'{' '{"a"}' '{"a":}' '{"a":1,}' '{"a":1 "b":2}' \
+		'{"a" "b":1}' '{"a":1,:2}' '{a:1}' '{"a":[1,]}' \
+		'-' '- 1' '01' '-01' '+1' '.1' '1.' '1.e2' \
+		'1e' '1e+' '1e-' '1e+ 2' '1e2.3' \
+		tru fals nul '"unterminated' '"\q"' '"\u123"' '"\u12xz"' \
+		'1
+2' '[1
+2]' 'tr
+ue' '"raw
+newline"'; do
+		if printf '%s' "$document" | (json_foreach) >/dev/null 2>&1; then
+			assertTrue "accepted invalid JSON: <$document>" 1
+		fi
+	done
+}
+
+json_test_024() { # UnitTest
+	. ../shell-json
+
+	local document result
+	for document in 0 -0 42 -42 0.0 -0.1 1e0 1E+2 -1.25e-3; do
+		result="$(printf '%s' "$document" | json_foreach 2>&1)" ||
+			assertTrue "$result" 1
+		assertEquals "$document" "/ number $document" "$result"
+	done
+}
+
+json_test_025() { # UnitTest
+	. ../shell-json
+
+	local document result prefix='' i=0
+	document="$(printf '\r\n{\r\n\t"a": [1,\r\ntrue,\r\n{},\r\n[],\r\nnull],\r\n"b": "x"\r\n}\r\n')"
+	while [ "$i" -lt 18 ]; do
+		result="$(printf '%s%s' "$prefix" "$document" | json_foreach 2>&1)" ||
+			assertTrue "$result" 1
+		assertEquals "CRLF at offset $i" '/a/0 number 1
+/a/1 boolean true
+/a/4 null null
+/b string x' "$result"
+		prefix="$prefix "
+		i=$(( i + 1 ))
+	done
+}
+
+json_test_026() { # UnitTest
+	. ../shell-json
+
+	local result document
+	json_foreach_handler()
+	{
+		printf '%s %s\n' "$1" "$2"
+		return "$JSON_FOREACH_ABORT"
+	}
+	for document in '[1' '[1,invalid]' '[true,invalid]'; do
+		result="$(printf '%s' "$document" | json_foreach 2>&1)" ||
+			assertTrue "$result" 1
+		case "$document" in
+			'[true,'*) assertEquals 'boolean true' "$result" ;;
+			*) assertEquals 'number 1' "$result" ;;
+		esac
+	done
+}
