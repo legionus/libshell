@@ -200,3 +200,13 @@ json_test_021() { # UnitTest
 	assertEquals "array-arrays.json" "$expect" "$result"
 }
 
+json_test_022() { # UnitTest
+	. ../shell-json
+
+	local expect result
+	expect="$(cat ./json-data/backslash.json.out)"
+	result="$(json_foreach <json-data/backslash.json 2>&1)" ||
+		assertTrue "$result" 1
+
+	assertEquals "backslash.json" "$expect" "$result"
+}

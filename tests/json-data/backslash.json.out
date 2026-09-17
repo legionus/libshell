@@ -1,0 +1,6 @@
+/p string abc\
+/pairs string \\
+/quote string \"
+/literal string \n
+/key\ string value
+/after boolean true
