@@ -191,12 +191,44 @@ ipv4_prefix2mask()
 	    "$(($mask       & 0xFF))"
 }
 
+### Sets __shell_hexbyteo to the two lowercase hex digits
+### of the byte (argument is in 0..255).
+__shell_hexbyte()
+{
+	__shell_hexbyteo=''
+
+	set -- $(( $1 / 16 )) $(( $1 % 16 ))
+
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			0)  __shell_hexnibo=0 ;;
+			1)  __shell_hexnibo=1 ;;
+			2)  __shell_hexnibo=2 ;;
+			3)  __shell_hexnibo=3 ;;
+			4)  __shell_hexnibo=4 ;;
+			5)  __shell_hexnibo=5 ;;
+			6)  __shell_hexnibo=6 ;;
+			7)  __shell_hexnibo=7 ;;
+			8)  __shell_hexnibo=8 ;;
+			9)  __shell_hexnibo=9 ;;
+			10) __shell_hexnibo=a ;;
+			11) __shell_hexnibo=b ;;
+			12) __shell_hexnibo=c ;;
+			13) __shell_hexnibo=d ;;
+			14) __shell_hexnibo=e ;;
+			15) __shell_hexnibo=f ;;
+		esac
+		__shell_hexbyteo="$__shell_hexbyteo$__shell_hexnibo"
+		shift
+	done
+}
+
 ### Outputs the serialized address in network byte order
 ### as 8 hexadecimal digits.
 ipv4_ptonx()
 {
 	local repr="$1"
-	local octets=
+	local octets=''
 
 	local i d
 	i=0
@@ -208,7 +240,10 @@ ipv4_ptonx()
 			return 1
 		[ "$d" -le 255 ] ||
 			return 1
-		octets="$octets$(printf %02x $d)"
+		# Convert the validated octet with the builtin-only lookup
+		# above, avoiding one external command per byte.
+		__shell_hexbyte "$d"
+		octets="$octets$__shell_hexbyteo"
 		repr="${repr#$d}"
 		[ -n "$repr" ] || [ "$i" -ne 3 ] ||
 			break
@@ -219,7 +254,7 @@ ipv4_ptonx()
 		[ "$i" -lt 4 ] ||
 			return 1
 	done
-	printf '%s\n' "$octets"
+	echo "$octets"
 	return 0
 }
 
@@ -231,7 +266,7 @@ ipv6_ptonx()
 {
 	local repr="$1"
 	local skip=''
-	local pref='' impz='' suff=''
+	local pref='' suff=''
 	[ -n "$repr" ] ||
 		return 1
 	[ -z "${repr##??*}" ] ||
@@ -239,7 +274,7 @@ ipv6_ptonx()
 	[ -n "${repr##:[!:]*}" ] ||
 		return 1
 
-	local i d
+	local i d v hex
 	i=0
 	while :; do
 		if [ -z "${repr##::*}" ]; then
@@ -276,12 +311,24 @@ ipv6_ptonx()
 		fi
 		[ -n "${d##*[!0-9a-fA-F]*}" ] ||
 			return 1
-		[ $(( 0x0$d <= 65535 )) -gt 0 ] ||
+
+		v=$(( 0x0$d ))
+		[ "$v" -le 65535 ] ||
 			return 1
+
+		# Emit the 16-bit group as four lowercase hex digits with the
+		# builtin-only lookup above, avoiding one external command
+		# per group.
+		__shell_hexbyte $((v / 256))
+		hex="$__shell_hexbyteo"
+
+		__shell_hexbyte $((v % 256))
+		hex="$hex$__shell_hexbyteo"
+
 		if [ -n "$skip" ]; then
-			suff="$suff$(printf %04x 0x0$d)"
+			suff="$suff$hex"
 		else
-			pref="$pref$(printf %04x 0x0$d)"
+			pref="$pref$hex"
 		fi
 		if [ -z "$repr" ]; then
 			[ "$i" -eq 7 ] || [ -n "$skip" ] &&
@@ -293,9 +340,14 @@ ipv6_ptonx()
 		[ "$i" -lt 8 ] ||
 			return 1
 	done
-	impz=$((32 - ${#pref} - ${#suff}))
-	[ "$impz" -ne 0 ] && impz="$(printf "%0${impz}x" 0)" || impz=
-	printf "%s%s\n" "$pref" "$impz$suff" | tr '[:upper:]' '[:lower:]'
+	# Expand the '::' skip block into zero 16-bit groups, in the middle.
+	local nz zero=''
+	nz=$(( (32 - ${#pref} - ${#suff}) / 4 ))
+	while [ "$nz" -gt 0 ]; do
+		zero="${zero}0000"
+		nz=$(($nz - 1))
+	done
+	echo "$pref$zero$suff"
 	return 0
 }
 
