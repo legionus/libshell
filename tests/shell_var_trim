@@ -70,3 +70,25 @@ shell_var_trim_test8() { # UnitTest
 	shell_var_trim result "$string"
 	assertEquals "$string" "$result" ''
 }
+
+### The caller's variable name must not shadow an internal one: the
+### final `eval` must reach the caller's variable, not a local slot.
+shell_var_trim_test9() { # UnitTest
+	. ../shell-var
+
+	local r='   r   '
+	shell_var_trim r "$r"
+	assertEquals 'r' "$r" 'r'
+
+	local lead='   lead   '
+	shell_var_trim lead "$lead"
+	assertEquals 'lead' "$lead" 'lead'
+
+	local trail='   trail   '
+	shell_var_trim trail "$trail"
+	assertEquals 'trail' "$trail" 'trail'
+
+	local space='   space   '
+	shell_var_trim space "$space"
+	assertEquals 'space' "$space" 'space'
+}

@@ -41,19 +41,37 @@ shell_var_trim()
 {
 	[ "$#" -eq 2 ] ||
 		fatal "Usage: shell_var_trim varname value"
+
+	local __shell_var_trimo=
+
+	__shell_var_trim "$2"
+
+	eval "$1=\"\$__shell_var_trimo\""
+}
+
 __shell_var_trim()
 {
-	unset -f __shell_var_trim
 	local r="$1" space=' 	
 '
-	while [ -n "$r" ] && [ -z "${r##[$space]*[$space]}" ]; do r="${r%?}"; r="${r#?}"; done
-	while [ -n "$r" ] && [ -z "${r##*[$space]}" ]; do r="${r%?}"; done
-	while [ -n "$r" ] && [ -z "${r%%[$space]*}" ]; do r="${r#?}"; done
+	local lead lead_pat trail trail_pat
+
+	lead_pat="[!$space]*"
+	trail_pat="*[!$space]"
+
+	# ${r%%$lead_pat} is the leading whitespace run: the longest suffix
+	# which starts with a non-space character is the rest of the string,
+	# so the difference is exactly the leading whitespace (empty when the
+	# string does not start with one, the whole string when it is all
+	# whitespace). Strip it all at once instead of character by character.
+	lead="${r%%$lead_pat}"
+	r="${r#"$lead"}"
+
+	# Symmetrically, cutting the longest prefix which ends with a
+	# non-space character leaves exactly the trailing whitespace run.
+	trail="${r##$trail_pat}"
+	r="${r%"$trail"}"
+
 	__shell_var_trimo="$r"
-}
-	local __shell_var_trimo=
-	__shell_var_trim "$2"
-	eval "$1=\"\$__shell_var_trimo\""
 }
 
 ### Remove quote symbol from string

@@ -1,0 +1,36 @@
+#!/bin/sh -efu
+
+get_trim_user_time()
+{
+	# user 0m0.099s
+
+	local user_time system_time
+	# shellcheck disable=SC2034  # system_time is only consumed
+	read -r user_time system_time ||:
+
+	user_time="${user_time%.*}"
+
+	echo "$user_time"
+}
+
+trim_performance_test1() { # UnitTest
+	local result seconds
+
+	result="$("$TEST_SHELL" -efu ./string-data/trim-string.sh | get_trim_user_time)"
+	seconds=$(( (${result%m*} * 60) + ${result#*m} ))
+
+	case "${TEST_SHELL##*/}" in
+		bash*|*ksh)
+			assertTrue "shell_var_trim is too slow: $result" \
+				"test $seconds -lt 12"
+			;;
+		dash*|*ash)
+			assertTrue "shell_var_trim is too slow: $result" \
+				"test $seconds -lt 4"
+			;;
+		*)
+			assertTrue "shell_var_trim is too slow: $result" \
+				"test $seconds -lt 12"
+			;;
+	esac
+}
