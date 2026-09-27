@@ -1,0 +1,51 @@
+#!/bin/sh
+
+### Removing an element compacts the elements that follow.
+shell_array_unset_test1() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a one
+	shell_array_append a two
+	shell_array_append a three
+	shell_array_append a four
+
+	shell_array_unset a 2
+	assertEquals 'length decreased' '3' "$a"
+
+	shell_array_get a 2 v
+	assertEquals 'tail moved forward' 'four' "$v"
+
+	assertFalse 'stale slot gone' '( shell_array_get a 3 v ) >/dev/null 2>&1'
+}
+
+### Removing from the head and the tail.
+shell_array_unset_test2() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a head
+	shell_array_append a mid
+	shell_array_append a tail
+	shell_array_unset a 0
+	assertEquals 'head removed' '2' "$a"
+	shell_array_get a 0 v
+	assertEquals 'first is mid' 'mid' "$v"
+	shell_array_unset a 1
+	assertEquals 'tail removed' '1' "$a"
+	shell_array_get a 0 v
+	assertEquals 'only one left' 'mid' "$v"
+}
+
+### Invalid arguments are fatal.
+shell_array_unset_test4() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a x
+	assertFalse 'empty array'   '( shell_array_unset noone ) >/dev/null 2>&1'
+	assertFalse 'index at size' '( shell_array_unset a 1 ) >/dev/null 2>&1'
+	assertFalse 'index beyond'  '( shell_array_unset a 9 ) >/dev/null 2>&1'
+	assertFalse 'bad index'     '( shell_array_unset a 1x ) >/dev/null 2>&1'
+	assertFalse 'bad name'      '( shell_array_unset 1a 0 ) >/dev/null 2>&1'
+}

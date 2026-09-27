@@ -47,6 +47,7 @@ for s in \
 	json \
 	integer_to_binary get_bit set_bit clear_bit toggle_bits \
 	shell_config_get shell_config_set shell_config_del shell_config_comment \
+	shell_array_append shell_array_set shell_array_get shell_array_pop shell_array_unset \
 	;
 do
 	[ -z "${TEST-}" -o "${TEST-}" = "$s" ] ||

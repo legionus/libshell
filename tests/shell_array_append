@@ -1,0 +1,86 @@
+#!/bin/sh
+
+shell_array_append_test1() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append arr one
+	shell_array_append arr "two words"
+	shell_array_append arr ''
+	shell_array_append arr "three's"
+
+	assertEquals 'length' '4' "$arr"
+	shell_array_get arr 0 v
+	assertEquals 'element 0' 'one' "$v"
+	shell_array_get arr 1 v
+	assertEquals 'element 1' 'two words' "$v"
+	shell_array_get arr 2 v
+	assertNull 'element 2 is empty' "$v"
+	shell_array_get arr 3 v
+	assertEquals 'element 3' "three's" "$v"
+}
+
+### Values with shell metasyntax are stored verbatim.
+shell_array_append_test2() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a '$HOME `id` "q"'
+	shell_array_append a 'a	tab'
+	shell_array_append a 'line1
+line2'
+
+	assertEquals 'length' '3' "$a"
+	shell_array_get a 0 v
+	assertEquals 'metasyntax verbatim' '$HOME `id` "q"' "$v"
+	shell_array_get a 1 v
+	assertEquals 'tab preserved' 'a	tab' "$v"
+	shell_array_get a 2 v
+	assertEquals 'newline preserved' 'line1
+line2' "$v"
+}
+
+### Appending to different arrays must not interfere.
+shell_array_append_test3() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append x one
+	shell_array_append y first
+	shell_array_append x two
+	shell_array_append y second
+	shell_array_append x three
+
+	assertEquals 'length of x' '3' "$x"
+	assertEquals 'length of y' '2' "$y"
+	shell_array_get y 1 v
+	assertEquals 'last of y' 'second' "$v"
+}
+
+### Old internal local names of the module must be usable as
+### array and out-variables.
+shell_array_append_test4() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append value first
+	shell_array_append value second
+	shell_array_append n one
+	shell_array_append n two
+
+	assertEquals 'length of value' '2' "$value"
+	shell_array_get value 1 v
+	assertEquals 'last of value' 'second' "$v"
+	shell_array_get n 1 v
+	assertEquals 'last of n' 'two' "$v"
+}
+
+### Arguments must be exactly two and the name must be valid.
+shell_array_append_test5() { # UnitTest
+	. ../shell-array
+
+	assertFalse 'three args'             '( shell_array_append a b c ) >/dev/null 2>&1'
+	assertFalse 'one arg'                '( shell_array_append a ) >/dev/null 2>&1'
+	assertFalse 'name starts with digit' '( shell_array_append 1a v ) >/dev/null 2>&1'
+	assertFalse 'name with dash'         '( shell_array_append a-b v ) >/dev/null 2>&1'
+}

@@ -1,0 +1,62 @@
+#!/bin/sh
+
+### Index out of bounds grows the array with empty elements.
+shell_array_set_test1() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_set arr value 5
+
+	assertEquals 'grew to six' '6' "$arr"
+	shell_array_get arr 5 v
+	assertEquals 'set slot' 'value' "$v"
+	shell_array_get arr 0 v
+	assertNull 'padding below' "$v"
+	shell_array_get arr 4 v
+	assertNull 'padding above' "$v"
+}
+
+### Setting an existing slot replaces the value, size unchanged.
+shell_array_set_test2() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_set a one
+	shell_array_set a two
+	shell_array_set a three
+	shell_array_set a NEW 1
+
+	assertEquals 'size unchanged' '3' "$a"
+	shell_array_get a 0 v
+	assertEquals 'slot 0 stable' 'one' "$v"
+	shell_array_get a 1 v
+	assertEquals 'slot 1 replaced' 'NEW' "$v"
+	shell_array_get a 2 v
+	assertEquals 'slot 2 stable' 'three' "$v"
+}
+
+### Without an index the value is appended, like shell_array_append.
+shell_array_set_test3() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_set a one
+	shell_array_set a two
+
+	assertEquals 'length' '2' "$a"
+	shell_array_get a 0 v
+	assertEquals 'element 0' 'one' "$v"
+	shell_array_get a 1 v
+	assertEquals 'element 1' 'two' "$v"
+}
+
+### Invalid names and indices are fatal.
+shell_array_set_test4() { # UnitTest
+	. ../shell-array
+
+	assertFalse 'leading zeros'     '( shell_array_set a v 02 ) >/dev/null 2>&1'
+	assertFalse 'negative index'    '( shell_array_set a v -1 ) >/dev/null 2>&1'
+	assertFalse 'non numeric index' '( shell_array_set a v 1x ) >/dev/null 2>&1'
+	assertFalse 'bad array name'    '( shell_array_set 1a v ) >/dev/null 2>&1'
+	assertFalse 'bad out arg count' '( shell_array_set a ) >/dev/null 2>&1'
+}

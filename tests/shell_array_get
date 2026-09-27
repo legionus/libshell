@@ -1,0 +1,38 @@
+#!/bin/sh
+
+shell_array_get_test1() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a 'first value'
+	shell_array_append a ''
+	shell_array_append a "it's here"
+
+	shell_array_get a 0 v
+	assertEquals 'element 0' 'first value' "$v"
+	shell_array_get a 1 v
+	assertNull 'empty element' "$v"
+	shell_array_get a 2 v
+	assertEquals 'quoted value' "it's here" "$v"
+}
+
+### A previously assigned variable must be fully overwritten.
+shell_array_get_test2() { # UnitTest
+	. ../shell-array
+
+	local v='stale content'
+	shell_array_append a ''
+	shell_array_get a 0 v
+	assertNull 'overwritten stale' "$v"
+}
+
+### Out of bounds and invalid arguments are fatal.
+shell_array_get_test3() { # UnitTest
+	. ../shell-array
+
+	shell_array_append a x
+	assertFalse 'index at size' '( shell_array_get a 1 x ) >/dev/null 2>&1'
+	assertFalse 'index beyond'  '( shell_array_get a 9 x ) >/dev/null 2>&1'
+	assertFalse 'unknown array' '( shell_array_get noarr 0 x ) >/dev/null 2>&1'
+	assertFalse 'bad outvar'    '( shell_array_get a 0 "x y" ) >/dev/null 2>&1'
+}

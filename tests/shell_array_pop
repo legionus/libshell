@@ -1,0 +1,39 @@
+#!/bin/sh
+
+shell_array_pop_test1() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a one
+	shell_array_append a two
+	shell_array_append a three
+	shell_array_pop a v
+	assertEquals 'popped value' 'three' "$v"
+	assertEquals 'length decreased' '2' "$a"
+	assertFalse 'popped slot gone' '( shell_array_get a 2 v ) >/dev/null 2>&1'
+}
+
+### Popping without a variable just removes the last element.
+shell_array_pop_test2() { # UnitTest
+	. ../shell-array
+
+	local v
+	shell_array_append a one
+	shell_array_append a two
+	shell_array_pop a
+	assertEquals 'one left' '1' "$a"
+	shell_array_pop a v
+	assertEquals 'remaining value' 'one' "$v"
+	assertEquals 'empty now' '0' "$a"
+}
+
+### Popping an empty array is fatal.
+shell_array_pop_test3() { # UnitTest
+	. ../shell-array
+
+	assertFalse 'empty array'   '( shell_array_pop a ) >/dev/null 2>&1'
+	assertFalse 'unknown array' '( shell_array_pop noarr ) >/dev/null 2>&1'
+	local v
+	shell_array_append a x
+	assertFalse 'bad outvar'    "( shell_array_pop a 'v v' ) >/dev/null 2>&1"
+}
