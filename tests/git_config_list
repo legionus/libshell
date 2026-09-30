@@ -55,3 +55,22 @@ quote.foo0= zzz "
 
 	assertEquals "List all values" "$result" "$expect"
 }
+
+git_config_list_test05() { # UnitTest
+	. ../shell-git-config
+	local result expect
+
+#	indented comments must not show up as variables
+	cat > git-config/result.ini <<EOF
+[aaa]
+	# indented comment
+	bbb = 1
+	; semicolon comment
+	ccc = 2
+EOF
+	result="$(git_config_list git-config/result.ini)"
+	expect="aaa.bbb=1
+aaa.ccc=2"
+
+	assertEquals "indented comments must not be listed: $result" "$result" "$expect"
+}

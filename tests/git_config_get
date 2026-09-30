@@ -186,3 +186,21 @@ git_config_get_test018() { # UnitTest
 	git_config_get result git-config/config5.ini "$key"
 	assertEquals "Check include.path (key '$key'): $result != $expect" "$result" "$expect"
 }
+
+git_config_get_test019() { # UnitTest
+	. ../shell-git-config
+	local result expect key
+
+#	indented sections must be recognized just like
+#	unindented ones, and comments inside them are ignored
+	cat > git-config/result.ini <<EOF
+	[indented]
+		# deep indented comment
+		deep = here
+EOF
+	key="indented.deep"
+	expect="here"
+
+	git_config_get result git-config/result.ini "$key"
+	assertEquals "Indented section get failed (key '$key'): $result != $expect" "$result" "$expect"
+}

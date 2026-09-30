@@ -235,3 +235,33 @@ EOF
 	assertTrue 'Check git-config bug' \
 		'cmp -s git-config/result.ini git-config/expect.ini'
 }
+
+git_config_set_test016() { # UnitTest
+	. ../shell-git-config
+
+#	indented comments must survive the rewrite and must not
+#	turn into `name = true' variables
+	cat > git-config/result.ini <<EOF
+# top comment
+[core]
+	penguin = little blue
+	# indented comment
+	Movie = BadPhysics
+[remote "origin"]
+	; indented semicolon comment
+	url = /x/y
+EOF
+	cat > git-config/expect.ini <<EOF
+# top comment
+[core]
+	penguin = little blue
+	# indented comment
+	Movie = Awesome
+[remote "origin"]
+	; indented semicolon comment
+	url = /x/y
+EOF
+	git_config_set git-config/result.ini core.Movie Awesome
+	assertTrue 'indented comments preserved' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}

@@ -117,7 +117,7 @@ __git_config_value()
 git_config_handler() { :; }
 git_config_parse_file()
 {
-	local fn="$1" name value section='' subsection='' section_lower='' name_lower='' location='' line oline nline=0 eof=''
+	local fn="$1" name value section='' subsection='' section_lower='' name_lower='' location='' line oline nline=0 eof='' lstripped
 
 	__git_config_parse_section()
 	{
@@ -237,7 +237,12 @@ git_config_parse_file()
 		line="$oline$line"
 		oline=
 
-		case "$line" in
+		# git treats any amount of leading whitespace as ignorable,
+		# so comments and sections may be indented.  They are
+		# recognized on the whitespace-stripped form ($lstripped),
+		# while the original line is still passed to the handlers.
+		lstripped="${line#"${line%%[! 	]*}"}"
+		case "$lstripped" in
 			'')
 				;;
 			*\\)
@@ -250,7 +255,7 @@ git_config_parse_file()
 				fatal "expression isn't supported at line $nline in $fn"
 				;;
 			'['*']')
-				line="${line#\[}"
+				line="${lstripped#\[}"
 				line="${line%\]}"
 				__git_config_parse_section "$line"
 				;;

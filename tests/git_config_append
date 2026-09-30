@@ -80,3 +80,24 @@ EOF
 	assertTrue 'append another duplicate value' \
 		'cmp -s git-config/result.ini git-config/expect.ini'
 }
+
+git_config_append_test006() { # UnitTest
+	. ../shell-git-config
+
+#	indented comments must survive an append rewrite and must
+#	not turn into `name = true' variables
+	cat > git-config/result.ini <<EOF
+[core]
+	# indented comment
+	penguin = little blue
+EOF
+	cat > git-config/expect.ini <<EOF
+[core]
+	# indented comment
+	penguin = little blue
+	penguin = big red
+EOF
+	git_config_append git-config/result.ini core.penguin "big red"
+	assertTrue 'indented comments preserved' \
+		'cmp -s git-config/result.ini git-config/expect.ini'
+}
